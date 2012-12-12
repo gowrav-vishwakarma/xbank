@@ -54,11 +54,11 @@ class xDeveloperToolBars extends JObject {
             if ($xc->getkey('transaction_toolbar'))
                     JToolBarHelper :: customX('transaction_cont.index', 'transactions', 'transactions', 'Transactions', false, false);
             if ($xc->getkey('report_toolbar'))
-                    JToolBarHelper :: customX('report_cont.dashboard', 'reports', 'reports', 'Reports', false, false);
+                    JToolBarHelper :: custom('report_cont.dashboard', 'reports', 'reports', 'Reports', false, false);
             if ($xc->getkey('setdate_toolbar'))
                     JToolBarHelper :: customX('setdate_cont.setDateTimeForm', 'setdate', 'setdate', 'SetDate', false, false);
                     
-            JToolBarHelper::addNewX('report_cont.new_reports', 'New Reports');
+            JToolBarHelper::addNew('report_cont.new_reports', 'New Reports');
             JToolBarHelper::addNewX('inventory_cont.dashboard', 'Inventory');
                     
              if ($u->username != 'admin')
@@ -151,22 +151,22 @@ class xDeveloperToolBars extends JObject {
 
     function getReportManagementToolBar() {
         JToolBarHelper::title('View Reports Here', 'generic.png');
-        JToolBarHelper::addNewX('report_cont.balanceSheetForm', 'Balance Sheet');
+        JToolBarHelper::addNewX('report_cont.balanceSheetForm', 'Balance<br/> Sheet');
         //JToolBarHelper::addNewX('report_cont.pandlForm', 'Profit & Loss A/c');
-        JToolBarHelper::addNewX('report_cont.accountstatementform', 'Account Statement');
+        JToolBarHelper::addNewX('report_cont.accountstatementform', 'Account<br/> Statement');
         //JToolBarHelper::addNewX('report_cont.AccountBook', 'Account Books');
-        JToolBarHelper::addNewX('report_cont.trialbalanceForm', 'Trial Balance');
-        JToolBarHelper::addNewX('report_cont.shareCertificateForm', 'Share Certificate');
-        JToolBarHelper::addNewX('report_cont.loan_report', 'Loan Report');
-        JToolBarHelper::addNewX('report_cont.allschemedetailsform', 'Periodic Account Details');
+        JToolBarHelper::addNewX('report_cont.trialbalanceForm', 'Trial<br/> Balance');
+        JToolBarHelper::addNewX('report_cont.shareCertificateForm', 'Share<br/> Certificate');
+        JToolBarHelper::addNewX('report_cont.loan_report', 'Loan<br/> Report');
+        JToolBarHelper::addNewX('report_cont.allschemedetailsform', 'Periodic<br/> Account Details');
         //JToolBarHelper::addNewX('report_cont.premiums_report', 'Premium Report');
-        JToolBarHelper::addNewX('report_cont.loanAccountReportForm', 'Loan Detailed/Premium Report');
-        JToolBarHelper::addNewX('report_cont.loan_insurrance_report_form', 'Loan Insurrance Report');
-        JToolBarHelper::addNewX('report_cont.rdPremiumReceivedListForm', 'RD Premium Received List');
-        JToolBarHelper::addNewX('report_cont.loanEMIReceivedListForm', 'Loan EMI Received List');
-        JToolBarHelper::addNewX('report_cont.tdsReportForm', 'TDS Report');
-        JToolBarHelper::addNewX('report_2_cont.agentWiseReportForm', 'AgentWise Report');
-        JToolBarHelper::addNewX('report_2_cont.agentReportDeadAccountForm', 'Agent Report Dead Account');
+        JToolBarHelper::addNewX('report_cont.loanAccountReportForm', 'Loan <br/>Detailed/Premium<br/> Report');
+        JToolBarHelper::addNewX('report_cont.loan_insurrance_report_form', 'Loan <br/>Insurrance<br/> Report');
+        JToolBarHelper::addNewX('report_cont.rdPremiumReceivedListForm', 'RD Premium <br/>Received List');
+        JToolBarHelper::addNewX('report_cont.loanEMIReceivedListForm', 'Loan EMI<br/> Received List');
+        JToolBarHelper::addNewX('report_cont.tdsReportForm', 'TDS<br/> Report');
+        JToolBarHelper::addNewX('report_2_cont.agentWiseReportForm', 'AgentWise<br/> Report');
+        JToolBarHelper::addNewX('report_2_cont.agentReportDeadAccountForm', 'Agent Report<br/> Dead Account');
 
 
         JToolBarHelper::cancel('com_xbank.index', 'cancel');
@@ -203,15 +203,15 @@ class xDeveloperToolBars extends JObject {
     
     function getNewReportManagementToolBar(){
         JToolBarHelper::title('View Reports Here', 'generic.png');
-        JToolBarHelper::addNewX('report_cont.loan_insurrance_due_report_form', 'Loan Insurrance Due List');
-        JToolBarHelper::addNewX('report_cont.deposit_insurrance_due_report_form', 'Deposit Insurance Due Account Details');
-        JToolBarHelper::addNewX('report_cont.loanEMIDueListForm', 'Loan EMI Due List');
-        JToolBarHelper::addNewX('report_cont.plEMIDueListForm', 'PL EMI Due List');
+        JToolBarHelper::addNewX('report_cont.loan_insurrance_due_report_form', 'Loan Insurrance <br/>Due List');
+        JToolBarHelper::addNewX('report_cont.deposit_insurrance_due_report_form', 'Deposit Insurance <br/>Due Account Details');
+        JToolBarHelper::addNewX('report_cont.loanEMIDueListForm', 'Loan EMI <br/>Due List');
+        JToolBarHelper::addNewX('report_cont.plEMIDueListForm', 'PL EMI <br/>Due List');
         JToolBarHelper::addNewX('report_cont.loanNPAListForm', 'NPA List');
-        JToolBarHelper::addNewX('report_cont.loanHardRecoveryListForm', 'Hard Recovery List');
-        JToolBarHelper::addNewX('report_cont.RDPremiumDueListForm', 'RD Premium Due List');
-        JToolBarHelper::addNewX('report_cont.loanReceiptReportForm', 'Loan Receipts');
-        JToolBarHelper::addNewX('report_2_cont.loanDocumentReportForm', 'Loan Document Report');
+        JToolBarHelper::addNewX('report_cont.loanHardRecoveryListForm', 'Hard <br/>Recovery List');
+        JToolBarHelper::addNewX('report_cont.RDPremiumDueListForm', 'RD Premium<br/> Due List');
+        JToolBarHelper::addNewX('report_cont.loanReceiptReportForm', 'Loan <br/>Receipts');
+        JToolBarHelper::addNewX('report_2_cont.loanDocumentReportForm', 'Loan Document<br/> Report');
         JToolBarHelper::cancel('report_cont.dashboard', 'cancel');
     }
     
@@ -222,6 +222,10 @@ class xDeveloperToolBars extends JObject {
         JToolBarHelper::addNewX('inventory_cont.addNewStockForm', 'Stock');
         JToolBarHelper::addNewX('inventory_cont.manageStockForm', 'Stock Management');
         JToolBarHelper::cancel('com_xbank.index', 'cancel');
+    }
+
+    function getNewReportSubMenus(){
+        JSubMenuHelper::addEntry("Dealer list", 'index.php?option=com_xbank&task=report_2_cont.dealerWiseReport', false);
     }
 
 

@@ -206,6 +206,49 @@ class report_2_cont extends CI_Controller {
 	
 	return;
      }
-     
+
+     function dealerWiseReport(){
+        xDeveloperToolBars::onlyCancel('report_cont.new_reports','cancel','Dealer Wise report');
+        $data['content']="hi there";
+
+        $d=new Dealer();
+        $d->get();
+
+        $data['report']=getReporttable($d,             //model
+                array("DealerName", "Address","Accounts Count"),       //heads
+                array('DealerName','Address','~#accounts->count()'),       //fields
+                array('~#accounts->count()'),        //totals_array
+                array(),        //headers
+                array('sno'=>true),     //options
+                "",     //headerTemplate
+                '',      //tableFooterTemplate
+                "",      //footerTemplate,
+                array('~#accounts->count()'=>array('task'=>'report_2_cont.dealerWiseAccountList','class'=>'alertinwindow', 'url_post'=>array('did'=>'#id','format'=>'"raw"')))//Links array('field'=>array('task'=>,'class'=>''))
+                );
+
+        JRequest::setVar("layout","generalreport");
+        $this->load->view('report.html', $data);
+        $this->jq->getHeader();
+     }
+    
+     function dealerWiseAccountList(){
+        $d=new Dealer(inp('did'));
+        $acc=$d->accounts->get();
+        $data['report']=getReporttable($acc,             //model
+                array("Account Number", "Branch"),       //heads
+                array('AccountNumber','~#branch->Name'),       //fields
+                array(),        //totals_array
+                array(),        //headers
+                array('sno'=>true),     //options
+                "<b>Dealer Accounts for $d->DealerName </b>",     //headerTemplate
+                '',      //tableFooterTemplate
+                "",      //footerTemplate,
+                array()
+                );
+
+        JRequest::setVar("layout","generalreport");
+        $this->load->view('report.html', $data);
+        $this->jq->getHeader();
+     }
 
 }

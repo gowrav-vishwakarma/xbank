@@ -11,7 +11,7 @@
 // no direct access
 defined('_JEXEC') or die('Restricted access');
 ?>
-<?php if (!defined("AdminForm")):
+<?php if (!defined("AdminForm") and inp('format')!='raw'):
     define("AdminForm", 1); ?>
     <form action="index.php" method="get" name="adminForm" id="adminForm">
         <input type="hidden" name="boxchecked" value="0">

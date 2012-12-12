@@ -253,7 +253,7 @@ function getNow($format="Y-m-d H:i:00"){
         }
         
         
-function getReportTable($model, $heads, $fields, $totals_array,$headers, $option,$headerTemplate="",$tableFooterTemplate="", $footerTemplate="") {
+function getReportTable($model, $heads, $fields, $totals_array,$headers, $option,$headerTemplate="",$tableFooterTemplate="", $footerTemplate="",$links=array()) {
     $html="";
     foreach ($totals_array as $tt)
         $sum[$tt] = 0;
@@ -285,16 +285,39 @@ function getReportTable($model, $heads, $fields, $totals_array,$headers, $option
         }
         foreach ($fields as $f) {
             if(strpos($f,"~") !==false){
-                $sf=$f;
-            	$f=str_replace("~","",$f);
-            	$f=str_replace("#",'$m->',$f);
-            	$f =' $tf = '. $f . ';';
-            	eval($f);
-            	$html.= "<td>". $tf . "</td>";
-            	if (in_array($sf, $totals_array))
-            	    $sum[$sf] += $tf;
+                $ft=$f;
+            	$ft=str_replace("~","",$ft);
+            	$ft=str_replace("#",'$m->',$ft);
+            	$ft =' $tf = '. $ft . ';';
+            	eval($ft);
+                if(array_key_exists($f, $links)){
+                    if(isset($links[$f]['url_post'])){
+                        $ft2="";
+                        foreach($links[$f]['url_post'] as $var=>$val){
+                            eval('$val_t = '.str_replace("#",'$m->',$val).';');
+                            $ft2.= "&".$var. "=". $val_t;
+                        }
+                    }else{
+                        $ft2="";
+                    }
+                    $a_s="<a href='index.php?option=com_xbank&task=".$links[$f]['task']."&".$ft2."' class='".(isset($links[$f]['class'])?$links[$f]['class'] : "" ) ."'>";
+                    $a_e = "</a>";
+                }else{
+                    $a_s="";
+                    $a_e = "";
+                }
+            	$html.= "<td>$a_s". $tf . "$a_e</td>";
+            	if (in_array($f, $totals_array))
+            	    $sum[$f] += $tf;
             }else{
-            $html .= "<td border='1'>" . $m->$f . "</td>";
+            if(array_key_exists($f, $links)){
+                $a_s="<a href='index.php?option=com_xbank&task=".$links[$f]['task']."' class='".(isset($links[$f]['class'])?$links[$f]['class'] : "" ) ."'>";
+                $a_e = "</a>";
+            }else{
+                $a_s="";
+                $a_e = "";
+            }
+            $html .= "<td border='1'>$a_s" . $m->$f . "$a_e</td>";
             if (in_array($f, $totals_array))
                 $sum[$f] += $m->$f;
             }
@@ -325,18 +348,22 @@ function getReportTable($model, $heads, $fields, $totals_array,$headers, $option
 
 
     if(isset($option['page'])){
-        $next=JRequest::getVar('page_start',0)+1;
-        $previous=JRequest::getVar('page_start',1)-1;
+        if(isset($option['page_var']))
+            $pagevar=$option['page_var'];
+        else
+            $pagevar='page_start';
+        $next=JRequest::getVar($pagevar,0)+1;
+        $previous=JRequest::getVar($pagevar,1)-1;
         if($previous < 0 ) $previous=0;
         $nextURL=JURI::getInstance()->toString();
         $prevURL=JURI::getInstance()->toString();
         
-        if(strpos($nextURL,"page_start")===false) $nextURL .= "&page_start=0";
-        if(strpos($prevURL,"page_start")===false) $prevURL .= "&page_start=0";
+        if(strpos($nextURL,$pagevar)===false) $nextURL .= "&$pagevar=0";
+        if(strpos($prevURL,$pagevar)===false) $prevURL .= "&$pagevar=0";
 
-        $nextURL=str_replace("page_start=".JRequest::getVar('page_start',0),"page_start=".$next,$nextURL);
+        $nextURL=str_replace("$pagevar=".JRequest::getVar('$pagevar',0),"$pagevar=".$next,$nextURL);
 
-        $prevURL=str_replace("page_start=".JRequest::getVar('page_start',0),"page_start=".$previous,$prevURL);
+        $prevURL=str_replace("$pagevar=".JRequest::getVar('$pagevar',0),"$pagevar=".$previous,$prevURL);
 
         $html .= "<table width='50%' align='center' style='font-size: 1.8em'><tr><td><a href='".$prevURL."'>Previous</a></td><td><a href='".$nextURL."'>Next</a></td></tr></table>";
     }

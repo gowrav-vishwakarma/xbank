@@ -1,3 +1,3 @@
 <?php
-echo $contents;
+if(isset($contents)) echo $contents;
 ?>

@@ -25,6 +25,7 @@ class com_xbank extends CI_Controller {
     function index() {
 
         xDeveloperToolBars::getDefaultToolBar();
+        $this->session->set_userdata('branch_name',Branch::getCurrentBranch()->Name);
 //            $document = JFactory::getDocument();
 //            $script  ="shortcut.add('Alt+g',function() {
 //	window.open('index.php?option=com_xbank&task=setdate_cont.setDateTimeForm', 'Set Date Window',
@@ -232,6 +233,7 @@ class com_xbank extends CI_Controller {
         $a->where_field_func('MONTH(DueDate)', "MONTH",getNow("Y-m-d"));
         $a->where_field_func('YEAR(DueDate)', "YEAR",getNow("Y-m-d"));
         $a->where_related('premiums',"Paid",0);
+        $a->limit(300,JRequest::getVar('page_start',0)*300);
         $a->get();
 
 
@@ -240,7 +242,7 @@ class com_xbank extends CI_Controller {
                 array('AccountNumber','member_Name','member_FatherName','member_CurrentAddress', 'member_PhoneNos','Amount','DueDate','agent_member_Name','dealer_DealerName'),       //fields
                 array('Amount'),        //totals_array
                 array(),        //headers
-                array('sno'=>true),     //options
+                array('sno'=>true,"sno_start"=>JRequest::getVar('page_start',0)*300+1,"page"=>true,'page_var'=>'page_start'),     //options
                 "",     //headerTemplate
                 '',      //tableFooterTemplate
                 ""      //footerTemplate
@@ -316,6 +318,46 @@ class com_xbank extends CI_Controller {
 
 
 //        $data['AccountsOpenedToday'] = $this->db->query("select * from jos_xaccounts a where a.created_at like '".  getNow("Y-m-d")." %' $where")->result();
+        
+        $a=new Account();
+        $a->where_related('scheme','Name',CASH_ACCOUNT_SCHEME);
+        $a->select('*, id as ActualCurrentBalance');
+        if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin"){
+            $b = Branch::getCurrentBranch();
+            $a->where("branch_id",$b->id);
+        }
+        $a->get();
+
+        $data['report_cash']=getReporttable($a,             //model
+                array("Account Number","Balance",),       //heads
+                array('AccountNumber','ActualCurrentBalance'),       //fields
+                array("ActualCurrentBalance"),        //totals_array
+                array(),        //headers
+                array('sno'=>true),     //options
+                "<h3>Cash Report</h3>",     //headerTemplate
+                '',      //tableFooterTemplate
+                ""      //footerTemplate
+                );
+        
+        $a=new Account();
+        $a->where_related('scheme','Name',BANK_ACCOUNTS_SCHEME);
+        $a->select('*, id as ActualCurrentBalance');
+        if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin"){
+            $b = Branch::getCurrentBranch();
+            $a->where("branch_id",$b->id);
+        }
+        $a->get();
+
+        $data['report_bank']=getReporttable($a,             //model
+                array("Account Number","Balance",),       //heads
+                array('AccountNumber','ActualCurrentBalance'),       //fields
+                array("ActualCurrentBalance"),        //totals_array
+                array(),        //headers
+                array('sno'=>true),     //options
+                "<h3>Bank Report</h3>",     //headerTemplate
+                '',      //tableFooterTemplate
+                ""      //footerTemplate
+                );
         
         $data['CashAsOnToday'] = $this->db->query("select sum(t.amountDr) as Dr, sum(t.amountCr) as Cr from jos_xtransactions t join jos_xaccounts a on a.id=t.accounts_id join jos_xschemes s on s.id = a.schemes_id where s.`Name` = '" . CASH_ACCOUNT_SCHEME . "' and t.created_at like '".  getNow("Y-m-d")." %' $where")->row();
         $data['BankAsOnToday'] = $this->db->query("select sum(t.amountDr) as Dr, sum(t.amountCr) as Cr from jos_xtransactions t join jos_xaccounts a on a.id=t.accounts_id join jos_xschemes s on s.id = a.schemes_id where s.`Name` = '" . BANK_ACCOUNTS_SCHEME . "' and t.created_at like '".  getNow("Y-m-d")." %' $where")->row();

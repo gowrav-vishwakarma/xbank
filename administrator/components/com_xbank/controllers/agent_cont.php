@@ -236,20 +236,55 @@ class agent_cont extends CI_Controller {
     }
 
     function commissionReport(){
-         xDeveloperToolBars::onlyCancel("agent_cont.commissionReportFrom", "cancel", "View Commission Payable to Agents");
-        $rep = new agentcommissionreport();
-        $rep->where("Commission >",0);
-        if(inp("Agents_Id"))
-            $rep->where("agents_id",inp("Agents_Id"));
-        if(inp("AccountNumber"))
-            $rep->where("accounts_id",inp("AccountNumber"));
-        if(inp("fromDate") and inp("toDate"))
-            $rep->where("CommissionPayableDate >=",inp("fromDate"))->where("CommissionPayableDate <",inp("toDate"));
-        
-        $data['agent'] = $rep->get();
-        JRequest::setVar("layout","commissionreport");
-        $this->load->view("agent.html", $data);
+        xDeveloperToolBars::onlyCancel("agent_cont.commissionReportFrom", "cancel", "View Commission Payable to Agents");
+        $msg = "";
+        $a=new Agent(inp('Agents_Id'));
+
+        $p=new Premium();
+        $p->include_related('account','AccountNumber');
+        $p->include_related('account/member','Name');
+        $p->where('AgentCommissionSend',1);
+        $p->where_related('account/agent','id',inp('Agents_Id'));
+        if(inp('fromDate')){
+            $p->where('PaidOn >=',inp('fromDate'));
+            $msg .= " from date " . inp('fromDate');
+        }
+        if(inp('toDate')){
+            $p->where('PaidOn <',inp('toDate'));
+            $msg .= " till date " . inp('toDate');
+        }
+
+        $p->get();
+
+        $msg .= " :: For Agent " . $a->Name;
+        $data['report'] = getReporttable($p,             //model
+                array("Account Number",        "Member Name",       "PaidOn","Commission", "Phone Number","Amount Due","Due Date","Agent","Dealer"),       //heads
+                array('account_AccountNumber','account_member_Name','PaidOn','~ (#Amount * #AgentCommissionPercentage / 100.0)', 'member_PhoneNos','Amount','DueDate','agent_member_Name','dealer_DealerName'),       //fields
+                array('Amount'),        //totals_array
+                array(),        //headers
+                array('sno'=>true),     //options
+                "<h3>". $msg . "</h3>",     //headerTemplate
+                '',      //tableFooterTemplate
+                ""      //footerTemplate
+                );
+        // $p->check_last_query();
+        JRequest::setVar("layout","generalreport");
+        $this->load->view('report.html', $data);
         $this->jq->getHeader();
+
+        // $rep = new agentcommissionreport();
+        // $rep->where("Commission >",0);
+        // if(inp("Agents_Id"))
+        //     $rep->where("agents_id",inp("Agents_Id"));
+        // if(inp("AccountNumber"))
+        //     $rep->where("accounts_id",inp("AccountNumber"));
+        // if(inp("fromDate") and inp("toDate"))
+        //     $rep->where("CommissionPayableDate >=",inp("fromDate"))->where("CommissionPayableDate <",inp("toDate"));
+        
+        // $data['agent'] = $rep->get();
+        // JRequest::setVar("layout","commissionreport");
+        // $this->load->view("agent.html", $data);
+        // $this->jq->getHeader();
     }
 }
 

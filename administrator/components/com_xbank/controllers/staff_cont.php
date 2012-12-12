@@ -30,6 +30,8 @@ class staff_cont extends CI_Controller {
         $id = JRequest::getVar("id");
         if ($id)
             $s = new Staff($id);
+        else
+            $s=new Staff();
         xDeveloperToolBars::onlyCancel("staff_cont.dashboard", "cancel", "Create Staff");
 
         $b = Branch::getCurrentBranch()->id;
@@ -148,7 +150,7 @@ class staff_cont extends CI_Controller {
                 $q = $this->db->query("update jos_users set name = '$sd->Name',username = '".inp("StaffID")."',password = md5('".inp('Password')."') where id = $s->jid");
             }
             else
-                $jsaved = $s->saveJoomlaUser(inp('StaffID'), md5(inp('Password')), $sd->Name, STAFF);
+                $jsaved = $s->saveJoomlaUser(inp('StaffID'), inp('Password'), $sd->Name, STAFF);
 
             if ($jsaved) {
                 $st = new staff($s->id);

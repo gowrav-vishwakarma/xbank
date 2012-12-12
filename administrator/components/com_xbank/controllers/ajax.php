@@ -129,11 +129,10 @@ class ajax extends CI_Controller{
                     join jos_xbranch b on b.id = m.branch_id
                     join jos_xagents ag on ag.member_id=m.id
                     where m.Name Like '%".$this->input->post("term")."%'
-                    and b.id=".Branch::getCurrentBranch()->id."
-                    or m.Name like '%".$this->input->post("term")."%' and m.branch_id=".Branch::getCurrentBranch()->id;
+                    and b.id=".Branch::getCurrentBranch()->id;
         $result = $this->db->query($q)->result();
         foreach ($result as $dd) {
-            $list[] = array("id"=> $dd->AgentID, "Name"=>$dd->Name,"Address" => $dd->Address, "AccountNumber" => $dd->AccountNumber);
+            $list[] = array("id"=> $dd->AgentID, "Name"=>$dd->Name,"Address" => $dd->Address);
         }
         echo '{"tags":' . json_encode($list) . '}';
         }

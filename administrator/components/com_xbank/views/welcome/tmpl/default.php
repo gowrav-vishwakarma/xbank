@@ -198,9 +198,8 @@ defined('_JEXEC') or die('Restricted access');
         echo $tabs->endPanel();
 
         echo $tabs->startPanel(JText::_('Cash/Bank Report'), "newtickets");
-        echo "<u><b>Cash</b></u><br>CR => " . $CashAsOnToday->Cr . "  DR => " . $CashAsOnToday->Dr . "  Balance => " . ($CashAsOnToday->Cr - $CashAsOnToday->Dr);
-        echo "<br>";
-        echo "<u><b>Bank</b></u><br>CR => " . $BankAsOnToday->Cr . "  DR => " . $BankAsOnToday->Dr . "  Balance => " . ($BankAsOnToday->Cr - $BankAsOnToday->Dr);
+        echo $report_cash;
+        echo $report_bank;
         echo $tabs->endPanel();
 
 

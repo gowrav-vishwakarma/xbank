@@ -10,6 +10,8 @@
  */
 // no direct access
 defined('_JEXEC') or die('Restricted access');
+
+define ('php','php');
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="<?php echo $this->language; ?>" lang="<?php echo $this->language; ?>" dir="<?php echo $this->direction; ?>" id="minwidth" >
@@ -174,7 +176,7 @@ defined('_JEXEC') or die('Restricted access');
                     <div>
                         <div>
                             <span class="version"><b><?php $session =& JFactory::getSession(); echo  ($session->get('currdate')? date("d M, Y", strtotime($session->get('currdate'))) : date("d M, Y"));  ?></b><?php// echo JText::_('Version') ?> <?php// echo JVERSION; ?></span>
-                            <span class="title"><?php echo ($this->params->get('showSiteName') ? $mainframe->getCfg('sitename') : JText::_('Administration')) . (JFactory::getUser() ? " - " . JFactory::getUser()->name . " (" . JFactory::getUser()->username . ")" : ""); ?></span>
+                            <span class="title"><?php echo ($this->params->get('showSiteName') ? $mainframe->getCfg('sitename') : JText::_('Administration')) . (JFactory::getUser() ? " - " . $session->get('branch_name') . " (" . JFactory::getUser()->username . ")" : ""); ?></span>
                         </div>
                     </div>
                 </div>

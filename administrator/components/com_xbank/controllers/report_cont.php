@@ -8,7 +8,7 @@ class report_cont extends CI_Controller {
 
     function dashboard() {
         xDeveloperToolBars::getReportManagementToolBar();
-        $this->load->view("report.html", $data);
+        $this->load->view("report.html");
         $this->jq->getHeader();
     }
 
@@ -1946,7 +1946,8 @@ a.branch_id = $b
     
      function new_reports() {
         xDeveloperToolBars::getNewReportManagementToolBar();
-        $this->load->view("report.html", $data);
+        xDeveloperToolBars::getNewReportSubMenus();
+        $this->load->view("report.html");
         $this->jq->getHeader();
     }
 
