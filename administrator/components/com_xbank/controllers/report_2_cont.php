@@ -251,4 +251,29 @@ class report_2_cont extends CI_Controller {
         $this->jq->getHeader();
      }
 
+     function noclist(){
+        xDeveloperToolBars::onlyCancel("report_cont.new_reports", "cancel", "NOC List");
+        $a=new Account();
+        $a->include_related('member','Name');
+        $a->where_related('scheme','SchemeType','Loan');
+        $a->where('branch_id',Branch::getCurrentBranch()->id);
+        $a->where('ActiveStatus',0);
+        $a->where('DefaultAC',0);
+        $a->get();
+        $data['report'] = "<br/><br/><br/>" . getReporttable($a,             //model
+                array("Account Number", "ActiveStatus",'Member'),       //heads
+                array('AccountNumber','ActiveStatus','member_Name'),       //fields
+                array(),        //totals_array
+                array(),        //headers
+                array('sno'=>true),     //options
+                "<b>All DeActivated Loan Accounts </b>",     //headerTemplate
+                '',      //tableFooterTemplate
+                "",      //footerTemplate,
+                array()
+                );
+
+        JRequest::setVar("layout","generalreport");
+        $this->load->view('report.html', $data);
+        $this->jq->getHeader();
+     }
 }

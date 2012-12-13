@@ -209,7 +209,7 @@ class report_cont extends CI_Controller {
         //function transactionDetails($voucher, $foraccount) {
         //Staff::accessibleTo(USER);
         $voucher = JRequest::getVar("vn");
-//        $foraccount = JRequest::getVar("id");
+       $foraccount = JRequest::getVar("id");
         $arr = array();
         $Transactions = new Transaction();
         $Transactions->where('voucher_no', $voucher);
@@ -1963,7 +1963,7 @@ a.branch_id = $b
                     ->_()
                     ->dateBox("Select Date From","name='fromDate' class='input'")
                     ->dateBox("Select Date till","name='toDate' class='input'")
-                    ->select("Select Branch","name='BranchId'",  Branch::getAllBranchNames())
+                    ->select("Select Branch","name='BranchId'", Branch::getAllBranchNames())
                     ->submit("Go");
             echo $this->form->get();
             $this->jq->getHeader();
@@ -1971,7 +1971,54 @@ a.branch_id = $b
 
         function loan_insurrance_due_report(){
             xDeveloperToolBars::onlyCancel("report_cont.loan_insurrance_due_report_form", "cancel", "Loan Insurrance Due Report for Dealer ".inp("DealerName")." ");
-            $q = "select a.id as aid,a.AccountNumber as accnum,a.LoanInsurranceDate as LoanInsurranceDate,m.*,d.DealerName as dname, d.Address as daddress from jos_xaccounts a  join jos_xschemes s on a.schemes_id = s.id  join jos_xmember m on a.member_id = m.id  join jos_xdealer d on d.id=a.dealer_id where a.LoanInsurranceDate between DATE_ADD('".inp("fromDate")."' , INTERVAL +365 DAY) and DATE_ADD('".inp("toDate")."', INTERVAL +365 DAY)  and d.DealerName like '%".inp('DealerName')."%' and (a.LoanInsurranceDate <> '0000-00-00 00:00:00' or a.LoanInsurranceDate is not null) ";
+            $q = "select a.id as aid,a.AccountNumber as accnum,
+            a.LoanInsurranceDate as LoanInsurranceDate,
+            m.*,
+            d.DealerName as dname, d.Address as daddress from 
+            jos_xaccounts a  
+            join jos_xschemes s on a.schemes_id = s.id  
+            join jos_xmember m on a.member_id = m.id  
+            join jos_xdealer d on d.id=a.dealer_id 
+            where 
+            a.LoanInsurranceDate between DATE_ADD('".inp("fromDate")."' , INTERVAL +365 DAY) 
+            and 
+            DATE_ADD('".inp("toDate")."', INTERVAL +365 DAY)  
+            and 
+            d.DealerName like '%".inp('DealerName')."%' 
+            and 
+            (a.LoanInsurranceDate <> '0000-00-00 00:00:00' or a.LoanInsurranceDate is not null) ";
+
+            $a= new Account();
+            $a->select('*');
+            $a->select_func("DATE_ADD","LoanInsurranceDate", "[INTERVAL +365 DAY]","EndInsuranceDate");
+            $a->include_related('dealer','DealerName');
+            $a->include_related('dealer','Address');
+            $a->include_related('scheme','Name');
+            $a->include_related('member','Name');
+            $a->include_related('member','FatherName');
+            $a->include_related('member','PermanentAddress');
+            $a->include_related('member','PhoneNos');
+            if(inp("BranchId") != '%') $a->where('branch_id',inp('BranchId'));
+            $a->where("LoanInsurranceDate between DATE_ADD('".inp("fromDate")."' , INTERVAL +365 DAY) and DATE_ADD('".inp("toDate")."', INTERVAL +365 DAY)");
+            $a->where_related('dealer','DealerName like \'%'.inp('DealerName').'%\'');
+            $a->get();
+            // echo $a->check_last_query();
+            $data['report']=getReporttable($a,             //model
+                array("Account Number","Member Name","Father Name","Address", "Mobile", "Loan Insurance Date","Loan Insurance End Date"),       //heads
+                array('AccountNumber','member_Name','member_FatherName','member_PermanentAddress','member_PhoneNos', 'LoanInsurranceDate','EndInsuranceDate'),       //fields
+                array(),        //totals_array
+                array("Dealer Name"=>'dealer_DealerName'),        //headers
+                array('sno'=>true),     //options
+                "<h3>Loan Insurance Due report for $a->dealer_DealerName </h3>",     //headerTemplate
+                '',      //tableFooterTemplate
+                "",      //footerTemplate,
+                array()
+                );
+
+        JRequest::setVar("layout","generalreport");
+        $this->load->view('report.html', $data);
+        $this->jq->getHeader();
+        return;
             if(inp("BranchId") != '%')
                 $q .= " and a.branch_id = ".inp("BranchId");
             $data['result'] = $this->db->query($q)->result();

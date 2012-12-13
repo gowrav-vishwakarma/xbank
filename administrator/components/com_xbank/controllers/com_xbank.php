@@ -56,6 +56,7 @@ class com_xbank extends CI_Controller {
         $a->include_related('dealer','DealerName');
         $a->include_related('scheme','Name');
         $a->where('DefaultAC',0);
+        $a->where('ActiveStatus',1);
         if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
             $a->where('branch_id',Branch::getCurrentBranch()->id);
         $a->where_related('premiums',"DueDate ", getNow("Y-m-d"));
@@ -362,7 +363,7 @@ class com_xbank extends CI_Controller {
         $data['CashAsOnToday'] = $this->db->query("select sum(t.amountDr) as Dr, sum(t.amountCr) as Cr from jos_xtransactions t join jos_xaccounts a on a.id=t.accounts_id join jos_xschemes s on s.id = a.schemes_id where s.`Name` = '" . CASH_ACCOUNT_SCHEME . "' and t.created_at like '".  getNow("Y-m-d")." %' $where")->row();
         $data['BankAsOnToday'] = $this->db->query("select sum(t.amountDr) as Dr, sum(t.amountCr) as Cr from jos_xtransactions t join jos_xaccounts a on a.id=t.accounts_id join jos_xschemes s on s.id = a.schemes_id where s.`Name` = '" . BANK_ACCOUNTS_SCHEME . "' and t.created_at like '".  getNow("Y-m-d")." %' $where")->row();
         
-        
+        $data['loan_insurance_due_report']="hi therer";
         $data['insuranceDueList'] = $this->db->query("select a.AccountNumber,m.Name,m.PermanentAddress,m.PhoneNos,a.LoanInsurranceDate,d.DealerName from jos_xaccounts a join jos_xmember m on a.member_id = m.id join jos_xdealer d on a.dealer_id=d.id  join jos_xschemes s on a.schemes_id = s.id where (a.LoanInsurranceDate <> '0000-00-00 00:00:00' or a.LoanInsurranceDate is not null) and s.SchemeType = '".ACCOUNT_TYPE_LOAN."' and DATE_ADD(a.LoanInsurranceDate, INTERVAL +365 DAY) >= DATE_ADD('".getNow("Y-m-d")."', INTERVAL -15 DAY) and  DATE_ADD(a.LoanInsurranceDate, INTERVAL +365 DAY) <= DATE_ADD('".getNow("Y-m-d")."', INTERVAL +1 DAY) $where")->result();
 
         $this->displayMenubar();
@@ -417,7 +418,7 @@ class com_xbank extends CI_Controller {
         }
         $q = "SELECT count(*) as Accounts, s.Name as scheme
         from jos_xaccounts a inner join jos_xschemes s on a.schemes_id=s.id
-        where a.DefaultAC = 0 and s.ActiveStatus = 1 $where
+        where a.DefaultAC = 0 and a.ActiveStatus = 1 $where
         group by s.Name order by s.id
             ";
         $r = $this->db->query($q)->result();
@@ -446,7 +447,7 @@ class com_xbank extends CI_Controller {
         }
         $q = "SELECT count(*) as Accounts, s.SchemeType as scheme
         from jos_xaccounts a inner join jos_xschemes s on a.schemes_id=s.id
-        where a.DefaultAC = 0 and s.ActiveStatus = 1 $where
+        where a.DefaultAC = 0 and a.ActiveStatus = 1 $where
         group by s.SchemeType
         having scheme <> 'Default'
             ";

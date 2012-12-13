@@ -323,6 +323,51 @@ $query = "UPDATE jos_xaccounts as a JOIN jos_xschemes as s on a.schemes_id=s.id 
         echo "done";
     }
 
+
+    function loanAccountsCount(){
+        $a=new Account();
+        $a->include_related('member','Name');
+        $a->where_related('scheme','SchemeType','Loan');
+        $a->where('branch_id',Branch::getCurrentBranch()->id);
+        $a->where('ActiveStatus',1);
+        $a->where('DefaultAC',0);
+        $a->get();
+        $data['report']=getReporttable($a,             //model
+                array("Account Number", "ActiveStatus","Member"),       //heads
+                array('AccountNumber','ActiveStatus','member_Name'),       //fields
+                array(),        //totals_array
+                array(),        //headers
+                array('sno'=>true),     //options
+                "<b>All Active Loan Accounts </b>",     //headerTemplate
+                '',      //tableFooterTemplate
+                "",      //footerTemplate,
+                array()
+                );
+
+        $a=new Account();
+        $a->include_related('member','Name');
+        $a->where_related('scheme','SchemeType','Loan');
+        $a->where('branch_id',Branch::getCurrentBranch()->id);
+        $a->where('ActiveStatus',0);
+        $a->where('DefaultAC',0);
+        $a->get();
+        $data['report'] .= "<br/><br/><br/>" . getReporttable($a,             //model
+                array("Account Number", "ActiveStatus",'Member'),       //heads
+                array('AccountNumber','ActiveStatus','member_Name'),       //fields
+                array(),        //totals_array
+                array(),        //headers
+                array('sno'=>true),     //options
+                "<b>All DeActivated Loan Accounts </b>",     //headerTemplate
+                '',      //tableFooterTemplate
+                "",      //footerTemplate,
+                array()
+                );
+
+        JRequest::setVar("layout","generalreport");
+        $this->load->view('report.html', $data);
+        $this->jq->getHeader();
+    }
+
 }
 
 ?>

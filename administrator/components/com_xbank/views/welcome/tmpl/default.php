@@ -204,46 +204,7 @@ defined('_JEXEC') or die('Restricted access');
 
 
         echo $tabs->startPanel(JText::_('Insurance Due List'), "newtickets");
-    ?>
-    <table width="100%">
-     <tr class="ui-widget-header">
-        <td>S.No.</td>
-        <td>Account Number</td>
-        <th>Member Name</th>
-        <th>Father Name</th>
-        <th>Address</th>
-        <th>Mobile Number</th>
-        <td>Dealer Name</td>
-        <td>Loan insurance Date</td>
-        <td>Loan insurance End Date</td>
-
-      </tr>
-        <?php
-        $i = 1;
-        foreach ($insuranceDueList as $r) {
-        ?>
-                   <tr  bgcolor="<?php if($i%2 != 0)
-                            echo '#D9E8E8';
-                        else
-                            echo 'white';?>">
-        <td><?php echo $i++; ?></td>
-        <td><?php echo $r->AccountNumber; ?></td>
-        <td><?php echo $r->Name ?></td>
-        <td><?php echo $r->FatherName ?></td>
-        <td><?php echo $r->PermanentAddress ?></td>
-        <td><?php echo $r->PhoneNos ?></td>
-        <td><?php echo $r->DealerName; ?></td>
-        <td><?php echo date("Y-m-d", strtotime(date("Y-m-d", strtotime($r->LoanInsurranceDate)))); ?></td>
-        <td><?php echo date("Y-m-d", strtotime(date("Y-m-d", strtotime($r->LoanInsurranceDate)) . " +365 DAYS")); ?></td>
-    </tr>
-
-
-        <?php
-           
-        }
-        ?>
-        </table>
-    <?php
+        echo $loan_insurance_due_report;
         echo $tabs->endPanel();
 
 

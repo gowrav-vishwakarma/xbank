@@ -74,9 +74,9 @@ class Account extends DataMapper {
 
     function _actualcurrentbalance($field) {
     	if($this->CurrentBalanceCr - $this->CurrentBalanceDr > 0 )
-	        $this->{$field} = ($this->CurrentBalanceCr - $this->CurrentBalanceDr);
+	        $this->{$field} = ($this->CurrentBalanceCr - $this->CurrentBalanceDr) . " CR";
 	else
-		$this->{$field} = ($this->CurrentBalanceDr - $this->CurrentBalanceCr);
+		$this->{$field} = ($this->CurrentBalanceDr - $this->CurrentBalanceCr) . " DR";
     }
 
     function _duePaneltyCalculate($field) {

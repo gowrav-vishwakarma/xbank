@@ -10,6 +10,8 @@
     <td><div align="center"><strong style="font-size: 16px">Difference Side</strong></div></td>
   </tr>
   <?php
+  $DRTotal=0;
+  $CRTotal=0;
   foreach($results as $r){
   ?>
   <tr class="ui-widget-content">
@@ -32,4 +34,4 @@
       <th><?php echo abs($CRTotal-$DRTotal); ?> </th>
   </tr>
 </table>
-<p><?php if(!isset($backURL) or $backURL <> "") {?><a href="<?php echo $backURL;?>">Back</a><?php }?></p>
+<p><?php if(isset($backURL) and $backURL <> "") {?><a href="<?php echo $backURL;?>">Back</a><?php }?></p>

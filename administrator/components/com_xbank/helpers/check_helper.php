@@ -252,9 +252,13 @@ function getNow($format="Y-m-d H:i:00"){
             return $newpath;
         }
         
-        
+$table_id=0;
+
 function getReportTable($model, $heads, $fields, $totals_array,$headers, $option,$headerTemplate="",$tableFooterTemplate="", $footerTemplate="",$links=array()) {
-    $html="";
+    global $table_id;
+    $table_id++;
+
+    $html='';
     foreach ($totals_array as $tt)
         $sum[$tt] = 0;
 
@@ -267,7 +271,7 @@ function getReportTable($model, $heads, $fields, $totals_array,$headers, $option
     }
 
     $html .= "<br/>
-        <table class='adminlist1' border='1' width='100%'><thead>";
+        <table class='adminlist1' border='1' width='100%' id='report_$table_id' class='report'><thead>";
     $html .="<tr>";
     if ($option['sno'] == true) {
         $html .=" <th>SNO</th>";

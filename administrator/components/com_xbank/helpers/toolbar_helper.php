@@ -226,6 +226,7 @@ class xDeveloperToolBars extends JObject {
 
     function getNewReportSubMenus(){
         JSubMenuHelper::addEntry("Dealer list", 'index.php?option=com_xbank&task=report_2_cont.dealerWiseReport', false);
+        JSubMenuHelper::addEntry("NOC list", 'index.php?option=com_xbank&task=report_2_cont.noclist', false);
     }
 
 
