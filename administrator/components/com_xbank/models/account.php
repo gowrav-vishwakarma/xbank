@@ -146,7 +146,12 @@ class Account extends DataMapper {
                     as t
                     GROUP  BY accounts_id
 ";
-        $this->{$field} =   $this->db->query($penaltyQ)->row()->Penalty;
+        $result=$this->db->query($penaltyQ);
+        if($result->num_rows() > 0)
+            $this->{$field} = $this->db->query($penaltyQ)->row()->Penalty;
+        else
+            $this->{$field} = 0;
+
 
 
     }

@@ -266,7 +266,7 @@ function getReportTable($model, $heads, $fields, $totals_array,$headers, $option
 
     if(count($headers)>0){
         foreach($headers as $title => $field){
-            $html .= "<b>".$title . "</b> : " . $model->$field . "<br/>";
+            $html .= "<b>".$title . "</b> : " . ((strpos($field,'~') === false ) ? $model->$field : str_replace("~","",$field) ) . "<br/>";
         }
     }
 
@@ -356,8 +356,10 @@ function getReportTable($model, $heads, $fields, $totals_array,$headers, $option
             $pagevar=$option['page_var'];
         else
             $pagevar='page_start';
+
         $next=JRequest::getVar($pagevar,0)+1;
         $previous=JRequest::getVar($pagevar,1)-1;
+
         if($previous < 0 ) $previous=0;
         $nextURL=JURI::getInstance()->toString();
         $prevURL=JURI::getInstance()->toString();
@@ -365,9 +367,9 @@ function getReportTable($model, $heads, $fields, $totals_array,$headers, $option
         if(strpos($nextURL,$pagevar)===false) $nextURL .= "&$pagevar=0";
         if(strpos($prevURL,$pagevar)===false) $prevURL .= "&$pagevar=0";
 
-        $nextURL=str_replace("$pagevar=".JRequest::getVar('$pagevar',0),"$pagevar=".$next,$nextURL);
+        $nextURL=str_replace("$pagevar=".JRequest::getVar($pagevar,0),"$pagevar=".$next,$nextURL);
 
-        $prevURL=str_replace("$pagevar=".JRequest::getVar('$pagevar',0),"$pagevar=".$previous,$prevURL);
+        $prevURL=str_replace("$pagevar=".JRequest::getVar($pagevar,0),"$pagevar=".$previous,$prevURL);
 
         $html .= "<table width='50%' align='center' style='font-size: 1.8em'><tr><td><a href='".$prevURL."'>Previous</a></td><td><a href='".$nextURL."'>Next</a></td></tr></table>";
     }

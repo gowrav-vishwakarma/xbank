@@ -8,7 +8,7 @@ class Documents_submitted extends DataMapper{
                 'join_table'=>'jos_xdocuments_submitted',
                 'other_field'=>'documents_submitted'
         ),
-        'account'=>array(        
+        'submited_in_accounts'=>array(        
                 'class'=>'account',
                 'join_other_as'=>'accounts',
                 'join_table'=>'jos_xdocuments_submitted',

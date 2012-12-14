@@ -1955,6 +1955,13 @@ a.branch_id = $b
     function loan_insurrance_due_report_form(){
             xDeveloperToolBars::onlyCancel("report_cont.dashboard", "cancel", "Loan Insurrance Due List");
             $this->load->library("form");
+            $docs= new Document();
+            $docs->where("LoanAccount",1)->get();
+            $docsarr=array();
+            if($docs) $docsarr +=array("None"=>"%");
+            foreach($docs as $h){
+              $docsarr +=array($h->Name => $h->id);
+            }
             $this->form->open("pSearch","index.php?option=com_xbank&task=report_cont.loan_insurrance_due_report")
                     ->setColumns(2)
                     ->lookupDB("Dealer Name","name='DealerName' class='input ui-autocomplete-input'","index.php?option=com_xbank&task=ajax.loan_report_dealer&format=raw",
@@ -1964,6 +1971,7 @@ a.branch_id = $b
                     ->dateBox("Select Date From","name='fromDate' class='input'")
                     ->dateBox("Select Date till","name='toDate' class='input'")
                     ->select("Select Branch","name='BranchId'", Branch::getAllBranchNames())
+                    ->select("Documents","name='Documents_Submitted'",$docsarr)
                     ->submit("Go");
             echo $this->form->get();
             $this->jq->getHeader();
@@ -1989,8 +1997,8 @@ a.branch_id = $b
             (a.LoanInsurranceDate <> '0000-00-00 00:00:00' or a.LoanInsurranceDate is not null) ";
 
             $a= new Account();
+            $a->select_func("DATE_ADD","[LoanInsurranceDate]", "[INTERVAL +365 DAY]","EndInsuranceDate");
             $a->select('*');
-            $a->select_func("DATE_ADD","LoanInsurranceDate", "[INTERVAL +365 DAY]","EndInsuranceDate");
             $a->include_related('dealer','DealerName');
             $a->include_related('dealer','Address');
             $a->include_related('scheme','Name');
@@ -1998,16 +2006,21 @@ a.branch_id = $b
             $a->include_related('member','FatherName');
             $a->include_related('member','PermanentAddress');
             $a->include_related('member','PhoneNos');
+            $a->select_subquery('(SELECT Description From jos_xdocuments_submitted doc WHERE doc.accounts_id=${parent}.id AND doc.documents_id='.inp('Documents_Submitted').')','Documents');
             if(inp("BranchId") != '%') $a->where('branch_id',inp('BranchId'));
-            $a->where("LoanInsurranceDate between DATE_ADD('".inp("fromDate")."' , INTERVAL +365 DAY) and DATE_ADD('".inp("toDate")."', INTERVAL +365 DAY)");
             $a->where_related('dealer','DealerName like \'%'.inp('DealerName').'%\'');
+            $a->having("EndInsuranceDate between '".inp("fromDate")."' and '".inp("toDate")."'");
             $a->get();
             // echo $a->check_last_query();
             $data['report']=getReporttable($a,             //model
-                array("Account Number","Member Name","Father Name","Address", "Mobile", "Loan Insurance Date","Loan Insurance End Date"),       //heads
-                array('AccountNumber','member_Name','member_FatherName','member_PermanentAddress','member_PhoneNos', 'LoanInsurranceDate','EndInsuranceDate'),       //fields
+                array("Account Number","Member Name","Father Name","Address", "Mobile", "Loan Insurance End Date",'Documents'),       //heads
+                array('AccountNumber','member_Name','member_FatherName','member_PermanentAddress','member_PhoneNos','EndInsuranceDate','Documents'),       //fields
                 array(),        //totals_array
-                array("Dealer Name"=>'dealer_DealerName'),        //headers
+                array(
+                  "Dealer Name"=>'dealer_DealerName',
+                  "From Date" => "~" . inp('fromDate'),
+                  "To Date" => "~".inp('toDate')
+                  ),        //headers
                 array('sno'=>true),     //options
                 "<h3>Loan Insurance Due report for $a->dealer_DealerName </h3>",     //headerTemplate
                 '',      //tableFooterTemplate
@@ -2299,7 +2312,7 @@ premiumcount >= 3 and premiumcount <= 4
         $a->having("DuePremiumCount >= 3 AND DuePremiumCount <= 4 ");
         $a->get();
 //        echo $a->check_last_query();
-        echo getReporttable($a,             //model
+        $data['report'] =  getReporttable($a,             //model
                 array("Account Number","Scheme","Member Name","Father Name", "Phone Number","Address",'Due Premium Count','EMI Amount',"Due Penalty","Total","Dealer Name","Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
                 array('AccountNumber', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress','DuePremiumCount','Amount','PaneltyDUE','~(#DuePremiumCount * #Amount) + #PaneltyDUE','dealer_DealerName','Nominee','MinorNomineeParentName','RelationWithNominee'),       //fields
                 array('PaneltyDUE','DuePremiumCount','~(#DuePremiumCount * #Amount) + #PaneltyDUE'),        //totals_array
@@ -2610,7 +2623,7 @@ GROUP BY p.accounts_id
 
 
          $data['report'] = getReporttable($a,             //model
-                array("Account Number",       "Name", "Fther Name", "Amount Deposited"),       //heads
+                array("Account Number",       "Name", "Father Name", "Amount Deposited"),       //heads
                 array('account_AccountNumber','account_member_Name',"account_member_FatherName", "TAmount"),       //fields
                 array("TAmount"),        //totals_array
                 array("Dealer Name" => "account_dealer_DealerName"),        //headers
