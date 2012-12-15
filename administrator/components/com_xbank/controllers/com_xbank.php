@@ -328,11 +328,12 @@ class com_xbank extends CI_Controller {
             $a->where("branch_id",$b->id);
         }
         $a->get();
-
+        $get_date=getNow('Y-m-d');
+        $next_date=date('Y-m-d',strtotime(date("Y-m-d", strtotime($get_date)) . " +1 day"));
         $data['report_cash']=getReporttable($a,             //model
-                array("Account Number","Balance",),       //heads
-                array('AccountNumber','ActualCurrentBalance'),       //fields
-                array("ActualCurrentBalance"),        //totals_array
+                array("Account Number","Openning Balance","Todays Receive","Todays Payment", "Balance",),       //heads
+                array('AccountNumber',"~(#getOpeningBalance('$get_date',null,'dr'))","~(#getTransactionSUM('$get_date','$get_date','dr'))","~(#getTransactionSUM('$get_date','$get_date','cr'))", "~(#getOpeningBalance('$next_date',null,'dr'))"),       //fields
+                array("~(#getOpeningBalance('$next_date',null,'dr'))"),        //totals_array
                 array(),        //headers
                 array('sno'=>true),     //options
                 "<h3>Cash Report</h3>",     //headerTemplate
@@ -350,9 +351,9 @@ class com_xbank extends CI_Controller {
         $a->get();
 
         $data['report_bank']=getReporttable($a,             //model
-                array("Account Number","Balance",),       //heads
-                array('AccountNumber','ActualCurrentBalance'),       //fields
-                array("ActualCurrentBalance"),        //totals_array
+                array("Account Number","Openning Balance","Todays Receive","Todays Payment", "Balance",),       //heads
+                array('AccountNumber',"~(#getOpeningBalance('$get_date',null,'dr'))","~(#getTransactionSUM('$get_date','$get_date','dr'))","~(#getTransactionSUM('$get_date','$get_date','cr'))", "~(#getOpeningBalance('$next_date',null,'dr'))"),       //fields
+                array("~(#getOpeningBalance('$next_date',null,'dr'))"),        //totals_array
                 array(),        //headers
                 array('sno'=>true),     //options
                 "<h3>Bank Report</h3>",     //headerTemplate

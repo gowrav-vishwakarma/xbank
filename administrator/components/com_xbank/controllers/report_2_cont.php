@@ -173,25 +173,29 @@ class report_2_cont extends CI_Controller {
      function loanDocumentReport(){
      	xDeveloperToolBars::onlyCancel("report_2_cont.loanDocumentReportForm", "cancel", "Loan Document Report");
 
-	$a=new Documents_submitted();
-	$a->select("Description as Description");
-	$a->where_related('account','AccountNumber', inp('Account_Number'));
-	$a->include_related('document','Name');
-	$a->include_related('account','AccountNumber');
+    	// $a=new Documents_submitted();
+    	// $a->select("Description as Description");
+    	// $a->where_related('account','AccountNumber', inp('Account_Number'));
+    	// $a->include_related('document','Name');
+    	// $a->include_related('submited_in_accounts','AccountNumber');
+
+        $a=new Account();
+        $a->where('AccountNumber',inp('Account_Number'));
+        $a->get();
+        $a->documents->include_join_fields();
+        $a->documents->get();
+        // $a=$a->documents;    	
+    
+    	// echo $a->check_last_query();
 	
-	$a->get();
-	
-	//echo $a->check_last_query();
-	
-	 $data['report'] = getReporttable($a,             //model
-                array("AccountNumber", "Document Name","Description"),       //heads
-                array('account_AccountNumber','document_Name','Description'),       //fields
+    	$data['report'] = getReporttable($a->documents,             //model
+                array("Document Name","Description"),       //heads
+                array('Name','join_Description'),       //fields
                 array(),        //totals_array
                 array(
-                	
-                	
-                	
-                	),        //headers
+                    "Account Number"=>'~'.$a->AccountNumber,
+                    "Member Name" => '~'.$a->member->Name,
+                    ),        //headers
                 array('sno'=>true),     //options
                 "",     //headerTemplate
                 '',      //tableFooterTemplate
@@ -204,7 +208,7 @@ class report_2_cont extends CI_Controller {
         $this->load->view('report.html', $data);
         $this->jq->getHeader();
 	
-	return;
+    	return;
      }
 
      function dealerWiseReport(){

@@ -125,9 +125,9 @@ class Transaction extends DataMapper {
             $remarks = str_replace("'", " ", $remarks);
             $query = $CI->db->query("insert into jos_xtransactions
                                 (accounts_id,transaction_type_id,staff_id,voucher_no,Narration,
-                                amountDr,updated_at,created_at,branch_id,reference_account,display_voucher_no)
+                                amountDr,updated_at,created_at,branch_id,reference_account,display_voucher_no,side,accounts_in_side)
                                 values($accid,$tT->id,$staff_id,$voucher_no,'$remarks',
-                                $DRAmount,'$updated_at','$created_at',$currentbranchid,$reference_account,$display_voucher_no)");
+                                $DRAmount,'$updated_at','$created_at',$currentbranchid,$reference_account,$display_voucher_no,'DR',1)");
 
             if (!$onlyTRansactionSaving) {
                 include(xBANKSCHEMEPATH . "/" . strtolower($DRAccount->SchemeType) . "/" . strtolower($DRAccount->SchemeType) . "accountbeforedebited.php");
@@ -163,11 +163,12 @@ class Transaction extends DataMapper {
                 }
                 $voucher_no = (is_array($voucherNo)) ? $voucherNo['voucherNo'] : $voucherNo;
                 $staff_id = Staff::getCurrentStaff()->id;
+                $accounts_in_side=count($CRs);
                 $query = $CI->db->query("insert into jos_xtransactions
                                 (accounts_id,transaction_type_id,staff_id,voucher_no,Narration,
-                                amountCr,updated_at,created_at,branch_id,reference_account,display_voucher_no)
+                                amountCr,updated_at,created_at,branch_id,reference_account,display_voucher_no,side,accounts_in_side)
                                 values($accid,$tT->id,$staff_id,$voucher_no,'$remarks',
-                                $amount,'$updated_at','$created_at',$currentbranchid,$reference_account,$display_voucher_no)");
+                                $amount,'$updated_at','$created_at',$currentbranchid,$reference_account,$display_voucher_no,'CR',$accounts_in_side)");
 
                 if (!$onlyTRansactionSaving) {
                     include(xBANKSCHEMEPATH . "/" . strtolower($CRAccount->SchemeType) . "/" . strtolower($CRAccount->SchemeType) . "accountbeforecredited.php");
@@ -225,9 +226,9 @@ class Transaction extends DataMapper {
             $remarks = str_replace("'", " ", $remarks);
             $query = "insert into jos_xtransactions
                                 (accounts_id,transaction_type_id,staff_id,voucher_no,Narration,
-                                amountCr,updated_at,created_at,branch_id,reference_account,display_voucher_no)
+                                amountCr,updated_at,created_at,branch_id,reference_account,display_voucher_no,side,'accounts_in_side')
                                 values($accid,$tT->id,$staff_id,$voucher_no,'$remarks',
-                                $CRAmount,'$updated_at','$created_at',$currentbranchid,$reference_account,$display_voucher_no)";
+                                $CRAmount,'$updated_at','$created_at',$currentbranchid,$reference_account,$display_voucher_no,'CR',1)";
 //            executeQuery($query);
 
             if (!$onlyTRansactionSaving) {
@@ -269,11 +270,12 @@ class Transaction extends DataMapper {
                 }
                 $voucher_no = (is_array($voucherNo)) ? $voucherNo['voucherNo'] : $voucherNo;
                 $staff_id = Staff::getCurrentStaff()->id;
+                $accounts_in_side=count($DRs);
                 $query = "insert into jos_xtransactions
                                 (accounts_id,transaction_type_id,staff_id,voucher_no,Narration,
-                                amountDr,updated_at,created_at,branch_id,reference_account,display_voucher_no)
+                                amountDr,updated_at,created_at,branch_id,reference_account,display_voucher_no,side,accounts_in_side)
                                 values($accid,$tT->id,$staff_id,$voucher_no,'$remarks',
-                                $amount,'$updated_at','$created_at',$currentbranchid,$reference_account,$display_voucher_no)";
+                                $amount,'$updated_at','$created_at',$currentbranchid,$reference_account,$display_voucher_no,'DR',$accounts_in_side)";
 //                executeQuery($query);
 
                 if (!$onlyTRansactionSaving) {

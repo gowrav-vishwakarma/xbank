@@ -7,7 +7,7 @@
 
 class test extends CI_Controller {
 
-    function index($xdate='2011-10-31') {
+    function index1($xdate='2011-10-31') {
         $date = $xdate;
         $day = date("d", strtotime(date("Y-m-d", strtotime($xdate))));
         for ($i = 1; $i <= 12; $i++) {
@@ -366,6 +366,10 @@ $query = "UPDATE jos_xaccounts as a JOIN jos_xschemes as s on a.schemes_id=s.id 
         JRequest::setVar("layout","generalreport");
         $this->load->view('report.html', $data);
         $this->jq->getHeader();
+    }
+
+    function setSideEntries(){
+        
     }
 
 }

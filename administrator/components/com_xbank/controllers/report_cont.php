@@ -1441,7 +1441,7 @@ a.branch_id = $b
            round((a.RdAmount * s.Interest * ((select COUNT(*) from jos_xpremiums where Paid=0 and accounts_id = a.id) + 1 ))/1200) as `Total Interest Due`,
            a.Nominee as `Gaurantor Name`, a.MinorNomineeParentName as `Gaurantor Address`, a.RelationWithNominee as `Gaurantor Numbers` ,
            docs.Name as `Documents Submitted`, ds.Description as `Document Info`,
-           d.DealerName as `DealerName`,
+           d.DealerName as `Dealer Name`,
            a.LoanInsurranceDate as `LoanInsurranceDate`
            from jos_xpremiums p
            left join jos_xaccounts a on p.accounts_id=a.id
@@ -1675,7 +1675,7 @@ a.branch_id = $b
                  ->lookupDB("Dealer Name","name='Dealer_Name' class='input ui-autocomplete-input'","index.php?option=com_xbank&task=ajax.loan_report_dealer&format=raw",
  			array("a" => "b"),
 			array("id","Name","Address"),"Name")
-                ->checkBox("","name='DealerName' class='input' value='Dealer Name' CHECKED")
+                ->checkBox("","name='DealerName' class='input' value='Dealer_NameName' CHECKED")
 
                 ->select("Documents","name='Documents_Submitted'",$docsarr)
 
@@ -2313,7 +2313,7 @@ premiumcount >= 3 and premiumcount <= 4
         $a->get();
 //        echo $a->check_last_query();
         $data['report'] =  getReporttable($a,             //model
-                array("Account Number","Scheme","Member Name","Father Name", "Phone Number","Address",'Due Premium Count','EMI Amount',"Due Penalty","Total","Dealer Name","Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
+                array("Account Number","Scheme","Member Name","Father Name", "Phone Number","Address",'Due Premium Count','EMI Amount',"Current Due Penalty","Total","Dealer Name","Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
                 array('AccountNumber', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress','DuePremiumCount','Amount','PaneltyDUE','~(#DuePremiumCount * #Amount) + #PaneltyDUE','dealer_DealerName','Nominee','MinorNomineeParentName','RelationWithNominee'),       //fields
                 array('PaneltyDUE','DuePremiumCount','~(#DuePremiumCount * #Amount) + #PaneltyDUE'),        //totals_array
                 array(),        //headers

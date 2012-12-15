@@ -80,14 +80,14 @@ class Account extends DataMapper {
     }
 
     function _duePaneltyCalculate($field) {
-        $loanPenalty = 10;
+        // $loanPenalty = 10;
         $thismonth = getNow("m");
         $lastmonth = date("m", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 MONTH"));
         $closingdate = getNow("Y-m-d");
         $lastmonthlastdate = date("Y-m-t", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 MONTH"));
         $firstdateofthismonth = getNow("Y-m-01");
         $penaltyQ = "
-                    select accounts_id, Penalty from (
+                    select accounts_id, SUM(Penalty) Penalty from (
 
                     
                     /* PREMIUM DUE IN THIS MONTH - NOT PAID */
@@ -180,17 +180,22 @@ class Account extends DataMapper {
         return $returnAccount;
     }
 
-    function getOpeningBalance($date, $ac='') {
-        if ($ac != '') {
+    function getOpeningBalance($date, $ac=null,$side='both') {
+        if ($ac != null) {
             $this->where("id", $ac)->get();
         }
         $CI = & get_instance();
         $trans = $CI->db->query("select sum(amountDr) as Dr,sum(amountCr) as Cr from jos_xtransactions where accounts_id = $this->id and created_at < '" . $date . "'")->row();
-        return array(
-        "DR" =>  $trans->Dr + ( $this->OpeningBalanceDr),
-        "CR" => ($this->OpeningBalanceCr) + $trans->Cr
-        );
+        // echo "select sum(amountDr) as Dr,sum(amountCr) as Cr from jos_xtransactions where accounts_id = $this->id and created_at < '" . $date . "'";
+        if($side=='both'){
+            return array(
+                        "DR" =>  $trans->Dr + ( $this->OpeningBalanceDr),
+                        "CR" => ($this->OpeningBalanceCr) + $trans->Cr
+                    );
+        }
 
+        if(strtolower($side)=='dr') return (($trans->Dr + ($this->OpeningBalanceDr))- (($this->OpeningBalanceCr) + $trans->Cr));
+        if(strtolower($side)=='cr') return (($this->OpeningBalanceCr + $trans->Cr) - $trans->Dr + ( $this->OpeningBalanceDr));
 //         return array(
 //        "DR" =>  $trans->Dr ,
 //        "CR" =>  $trans->Cr
@@ -205,6 +210,27 @@ class Account extends DataMapper {
         $trans = $CI->db->query("select sum(amountCr) as Cr, sum(amountDr)as Dr from jos_xtransactions where accounts_id = $this->id and created_at between '" . $dateFrom . "' and DATE_ADD('" . $dateTo . "',INTERVAL +1 DAY)")->row();
         $openingBalance = $this->getOpeningBalance($dateFrom, $ac);
         return (($openingBalance['DR'] - $openingBalance['CR'])+($trans->Dr - $trans->Cr));
+
+    }
+
+    function getTransactionSUM($from_date,$to_date,$side='both'){
+        $tr=$this->transactions;
+        $tr->where('created_at >=',$from_date);
+        $tr->where('created_at <',date('Y-m-d',strtotime(date("Y-m-d", strtotime($to_date)) . " +1 day")));
+        $tr->select_func('sum','[AmountCr]','CRSUM');
+        $tr->select_func('sum','[AmountDr]','DRSUM');
+        $tr->get();
+        // $tr->check_last_query();
+
+        if($side=='both'){
+            return array(
+                'DR'=>$tr->DRSUM,
+                'CR'=>$tr->CRSUM
+                );
+        }
+
+        if(strtolower($side)=='dr') return $tr->DRSUM;
+        if(strtolower($side)=='cr') return $tr->CRSUM;
 
     }
 
