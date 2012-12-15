@@ -591,7 +591,8 @@ class transaction_cont extends CI_Controller {
                 ->confirmButton("Confirm", "Do For Close", "index.php?option=com_xbank&task=transaction_cont.confirmForClose&format=raw", true)
                 ->submit('DO');
 
-        echo $this->form->get();
+        $data['contents'] =$this->form->get();
+        $this->load->view('utility.html',$data);
         $this->jq->getHeader();
     }
     

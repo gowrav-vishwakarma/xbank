@@ -1331,6 +1331,7 @@ a.branch_id = $b
 
 
     function loan_report(){
+        xDeveloperToolBars::onlyCancel("report_cont.dashboard", "Cancel", "Loan Report");
         $docs= new Document();
         $docs->where("LoanAccount",1)->get();
 	$docsarr=array();
@@ -1422,7 +1423,8 @@ a.branch_id = $b
                 ->checkBox("Grouped Results","name='GroupBy' class='input' value='1' CHECKED")
 
                 ->submit("Search");
-        echo $this->form->get();
+        $data['contents'] =$this->form->get();
+        $this->load->view('utility.html',$data);
         $this->jq->getHeader();
     }
 
@@ -1722,7 +1724,8 @@ a.branch_id = $b
             $form = $form->hidden("", "name='BranchId' value='$b'");
         }
         $form = $form->submit("Go");
-        echo $this->form->get();
+       $data['contents'] =$this->form->get();
+        $this->load->view('utility.html',$data);
         $this->jq->getHeader();
     }
 
@@ -1897,7 +1900,8 @@ a.branch_id = $b
 //        else
 //            $form = $form->lookupDB("Account Number", "name='Account' class='input req-string' ", "index.php?//ajax/lookupDBDQL", array("select" => "a.*", "from" => "Accounts a, a.Schemes s", "where" => "(a.AccountNumber Like '%\$term%' OR a.id Like '%\$term%') AND s.SchemeType = '" . ACCOUNT_TYPE_LOAN . "' AND a.branch_id = " . Branch::getCurrentBranch()->id, "limit" => "10"), array("id", "AccountNumber"), "id");
         $form = $form->submit("Submit");
-        echo $this->form->get();
+        $data['contents'] =$this->form->get();
+        $this->load->view('utility.html',$data);
         $this->jq->getHeader();
     }
 
@@ -1928,7 +1932,8 @@ a.branch_id = $b
                 ->dateBox("Select Date till","name='toDate' class='input'")
                 ->select("Select Branch","name='BranchId'",  Branch::getAllBranchNames())
                 ->submit("Go");
-        echo $this->form->get();
+       $data['contents'] =$this->form->get();
+        $this->load->view('utility.html',$data);
         $this->jq->getHeader();
     }
 
@@ -1945,6 +1950,7 @@ a.branch_id = $b
     
     
      function new_reports() {
+
         xDeveloperToolBars::getNewReportManagementToolBar();
         xDeveloperToolBars::getNewReportSubMenus();
         $this->load->view("report.html");
@@ -1973,8 +1979,9 @@ a.branch_id = $b
                     ->select("Select Branch","name='BranchId'", Branch::getAllBranchNames())
                     ->select("Documents","name='Documents_Submitted'",$docsarr)
                     ->submit("Go");
-            echo $this->form->get();
-            $this->jq->getHeader();
+           $data['contents'] =$this->form->get();
+        $this->load->view('utility.html',$data);
+        $this->jq->getHeader();
         }
 
         function loan_insurrance_due_report(){
@@ -2078,7 +2085,7 @@ a.branch_id = $b
     
     
     function loanEMIDueListForm(){
-        xDeveloperToolBars::onlyCancel("report_cont.dashboard", "cancel", "Loan EMI Due List");
+        xDeveloperToolBars::onlyCancel("report_cont.new_reports", "cancel", "Loan EMI Due List");
         $this->load->library("form");
         $this->form->open("pSearch","index.php?option=com_xbank&task=report_cont.loanEMIDueList")
                 ->setColumns(2)
@@ -2089,7 +2096,8 @@ a.branch_id = $b
                 ->dateBox("Select Date From","name='fromDate' class='input'")
                 ->dateBox("Select Date till","name='toDate' class='input'")
                 ->submit("Go");
-        echo $this->form->get();
+       $data['contents'] =$this->form->get();
+        $this->load->view('utility.html',$data);
         $this->jq->getHeader();
     }
 
@@ -2171,14 +2179,15 @@ premiumcount <= 2
 
 
     function plEMIDueListForm(){
-        xDeveloperToolBars::onlyCancel("report_cont.dashboard", "cancel", "PL EMI Due List");
+        xDeveloperToolBars::onlyCancel("report_cont.new_reports", "cancel", "PL EMI Due List");
         $this->load->library("form");
         $this->form->open("pSearch","index.php?option=com_xbank&task=report_cont.plEMIDueList")
                 ->setColumns(2)
                 ->dateBox("Select Date From","name='fromDate' class='input'")
                 ->dateBox("Select Date till","name='toDate' class='input'")
                 ->submit("Go");
-        echo $this->form->get();
+       $data['contents'] =$this->form->get();
+        $this->load->view('utility.html',$data);
         $this->jq->getHeader();
     }
 

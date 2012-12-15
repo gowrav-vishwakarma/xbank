@@ -11,14 +11,13 @@
 // no direct access
 defined('_JEXEC') or die('Restricted access');
 ?>
-<?php if (!defined("AdminForm")):
+<?php if (!defined("AdminForm") and inp('format')!='raw'):
     define("AdminForm", 1); ?>
     <form action="index.php" method="get" name="adminForm" id="adminForm">
         <input type="hidden" name="boxchecked" value="0">
-        <input type="hidden" name="task" value="<?php echo JRequest::getVar('task');?>" />
+        <input type="hidden" name="task">
         <input type="hidden" name="hidemainmenu">
         <input type="hidden" name="option" value="<?php echo JRequest::getVar('option') ?>">
-        <input type="hidden" name="limitstart" />
     </form>
 <?php endif; ?>
 <?php xCILoadTemplate(); ?>
