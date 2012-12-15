@@ -1959,7 +1959,7 @@ a.branch_id = $b
 
 
     function loan_insurrance_due_report_form(){
-            xDeveloperToolBars::onlyCancel("report_cont.dashboard", "cancel", "Loan Insurrance Due List");
+            xDeveloperToolBars::onlyCancel("report_cont.new_reports", "cancel", "Loan Insurrance Due List");
             $this->load->library("form");
             $docs= new Document();
             $docs->where("LoanAccount",1)->get();
@@ -2048,7 +2048,7 @@ a.branch_id = $b
         }
         
         function deposit_insurrance_due_report_form(){
-            xDeveloperToolBars::onlyCancel("report_cont.dashboard", "cancel", "Date Wise Account Details");
+            xDeveloperToolBars::onlyCancel("report_cont.new_reports", "cancel", "Date Wise Account Details");
         $this->load->library("form");
         $form = $this->form->open("1", "index.php?option=com_xbank&task=report_cont.deposit_insurrance_due_report")
                         ->setColumns(2)
@@ -2063,7 +2063,9 @@ a.branch_id = $b
             $form = $form->hidden("", "name='BranchId' value='$b'");
         }
         $form = $form->submit("Go");
-        echo $this->form->get();
+        
+        $data['contents'] =$this->form->get();
+        $this->load->view('utility.html',$data);
         $this->jq->getHeader();
         }
 
@@ -2080,6 +2082,8 @@ a.branch_id = $b
         $a['schemeTypes'] = explode(",", ACCOUNT_TYPES);
         JRequest::setVar("layout","allschemedetails_modified");
         $data['contents'] = $this->load->view('report.html', $a);
+        $data['contents'] =$this->form->get();
+        $this->load->view('utility.html',$data);
         $this->jq->getHeader();
     }
     
@@ -2247,7 +2251,7 @@ premiumcount <= 2
 
 
     function loanNPAListForm(){
-        xDeveloperToolBars::onlyCancel("report_cont.dashboard", "cancel", "Loan EMI Due List");
+        xDeveloperToolBars::onlyCancel("report_cont.new_reports", "cancel", "Loan EMI Due List");
         $this->load->library("form");
         $this->form->open("pSearch","index.php?option=com_xbank&task=report_cont.loanNPAList")
                 ->setColumns(2)
@@ -2258,7 +2262,9 @@ premiumcount <= 2
                 ->dateBox("Select Date From","name='fromDate' class='input'")
                 ->dateBox("Select Date till","name='toDate' class='input'")
                 ->submit("Go");
-        echo $this->form->get();
+       
+        $data['contents'] =$this->form->get();
+        $this->load->view('utility.html',$data);
         $this->jq->getHeader();
     }
 
@@ -2340,7 +2346,7 @@ premiumcount >= 3 and premiumcount <= 4
 
 
     function loanHardRecoveryListForm(){
-        xDeveloperToolBars::onlyCancel("report_cont.dashboard", "cancel", "Loan EMI Due List");
+        xDeveloperToolBars::onlyCancel("report_cont.new_reports", "cancel", "Loan EMI Due List");
         $this->load->library("form");
         $this->form->open("pSearch","index.php?option=com_xbank&task=report_cont.loanHardRecoveryList")
                 ->setColumns(2)
@@ -2351,7 +2357,9 @@ premiumcount >= 3 and premiumcount <= 4
                 ->dateBox("Select Date From","name='fromDate' class='input'")
                 ->dateBox("Select Date till","name='toDate' class='input'")
                 ->submit("Go");
-        echo $this->form->get();
+       
+        $data['contents'] =$this->form->get();
+        $this->load->view('utility.html',$data);
         $this->jq->getHeader();
     }
 
@@ -2432,14 +2440,16 @@ premiumcount >= 5
     }
 
 	    function RDPremiumDueListForm(){
-        xDeveloperToolBars::onlyCancel("report_cont.dashboard", "cancel", "RD Premium Due List");
+        xDeveloperToolBars::onlyCancel("report_cont.new_reports", "cancel", "RD Premium Due List");
         $this->load->library("form");
         $this->form->open("pSearch","index.php?option=com_xbank&task=report_cont.RDPremiumDueList")
                 ->setColumns(2)
                 ->dateBox("Select Date From","name='fromDate' class='input'")
                 ->dateBox("Select Date till","name='toDate' class='input'")
                 ->submit("Go");
-        echo $this->form->get();
+       
+        $data['contents'] =$this->form->get();
+        $this->load->view('utility.html',$data);
         $this->jq->getHeader();
     }
 
@@ -2467,14 +2477,16 @@ GROUP BY p.accounts_id
 
 
  function loanReceiptReportForm(){
-        xDeveloperToolBars::onlyCancel("report_cont.dashboard", "cancel", "Loan Dispatch Report");
+        xDeveloperToolBars::onlyCancel("report_cont.new_reports", "cancel", "Loan Dispatch Report");
         $this->load->library("form");
         $this->form->open("pSearch","index.php?option=com_xbank&task=report_cont.loanReceiptReport")
                 ->setColumns(2)
                 ->dateBox("Select Date From","name='fromDate' class='input'")
                 ->dateBox("Select Date till","name='toDate' class='input'")
                 ->submit("Go");
-        echo $this->form->get();
+        
+        $data['contents'] =$this->form->get();
+        $this->load->view('utility.html',$data);
         $this->jq->getHeader();
     }
 

@@ -158,7 +158,7 @@ class report_2_cont extends CI_Controller {
      }
      
      function loanDocumentReportForm(){
-     	xDeveloperToolBars::onlyCancel("report_cont.dashboard", "cancel", "Loan Document Report");
+     	xDeveloperToolBars::onlyCancel("report_cont.new_reports", "cancel", "Loan Document Report");
         $this->load->library("form");
         $this->form->open("pSearch","index.php?option=com_xbank&task=report_2_cont.loanDocumentReport")
                 ->setColumns(2)
