@@ -69,6 +69,9 @@ class Account extends DataMapper {
         ),
         'PaneltyDUE' => array(
             'get_rules' => array('duePaneltyCalculate')
+        ),
+        'OtherCharges' => array(
+            'get_rules' => array('otherCharges')
         )
     );
 
@@ -79,7 +82,21 @@ class Account extends DataMapper {
 		$this->{$field} = ($this->CurrentBalanceDr - $this->CurrentBalanceCr) . " DR";
     }
 
-    function _duePaneltyCalculate($field) {
+    function _otherCharges($field){
+        $t=$this->transactions->select_func("sum",'[amountDr]','othercharges')->where('transaction_type_id',13)->get(); //JV Transactions sum
+        if($this->transactions->othercharges == 0)
+            $this->{$field}=0;
+        else
+            $this->{$field}=$this->transactions->othercharges;
+        // $this->transactions->check_last_query();
+    }
+
+    function _duePaneltyCalculate($field){
+        $t=$this->transactions->select_func("sum",'[amountDr]','penaltysum')->where('transaction_type_id',31)->get(); //Penalty transactions
+        $this->{$field}=$this->transactions->penaltysum;
+    }
+
+    function _duePaneltyCalculate1($field) {
         // $loanPenalty = 10;
         $thismonth = getNow("m");
         $lastmonth = date("m", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 MONTH"));

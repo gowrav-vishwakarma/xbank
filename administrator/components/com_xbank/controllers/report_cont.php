@@ -674,6 +674,66 @@ class report_cont extends CI_Controller {
         //$this->load->view("template", $data);
     }
 
+    function accountStatementNew(){
+      xDeveloperToolBars::onlyCancel("report_cont.accountStatementForm", "cancel", "Account Statement");
+        $a=new Account();
+        $a->include_related('member','Name');
+        $a->where_related('scheme','SchemeType','Loan');
+        $a->where('branch_id',Branch::getCurrentBranch()->id);
+        $a->where('ActiveStatus',0);
+        $a->where('DefaultAC',0);
+        $a->get();
+
+        $q='
+          select 
+            SQL_CALC_FOUND_ROWS 
+            `l2`.`AccountNumber` `AccountNumber`,
+            IF(cv.accounts_in_side=1,IF(v2.amountDr <>0,v2.amountDR,0),IF(cv.amountDr <>0 , cv.amountDr,0)) AmountDR,
+            IF(cv.accounts_in_side>1,IF(cv.amountCr <>0,cv.amountCR,0),IF(v2.amountCr<>0, v2.amountCr,0)) AmountCR,
+            Concat( IF(cv.accounts_in_side <> 1,if(cv.amountDr=0,cv.amountCr,cv.amountDr),if(v2.amountDr=0,v2.amountCr,v2.amountDr)) , " ", cv.side) `Amount_Voucher`,
+            cv.side `Side`,
+            `cv`.`Narration`,
+            `cv`.`created_at`,
+            `cv`.`id`,
+            `cv`.`accounts_id`,
+            `cv`.`branch_id`,
+            `cv`.`voucher_no` voucher_no,
+            cv.display_voucher_no
+          from 
+            `jos_xtransactions` `cv` 
+            inner join `jos_xtransactions` as `v2` on v2.voucher_no=cv.voucher_no and v2.side != cv.side and v2.branch_id=cv.branch_id and v2.transaction_type_id=cv.transaction_type_id 
+            inner join `jos_xaccounts` as `l2` on v2.accounts_id=l2.id 
+          where 
+            `cv`.`branch_id` = '.Branch::getCurrentBranch()->id.' 
+            and `cv`.`accounts_id` = '. inp('AccountNumber') .' 
+
+            order by cv.created_at desc, id
+        ';
+        $lmt= " limit ". JRequest::getVar('page_start',0)*300 . ", 300 ";
+        $a=$this->db->query($q.$lmt)->result();
+
+        $data['report'] = "<br/><br/><br/>" . getReporttable($a,             //model
+                array('Transaction Date',"Account Number",'Voucher No', 'Debit','Credit', 'Narration'),       //heads
+                array('created_at', 'AccountNumber','display_voucher_no', 'AmountDR','AmountCR', 'Narration'),       //fields
+                array(),        //totals_array
+                array(),        //headers
+                array('sno'=>true,"sno_start"=>(JRequest::getVar('page_start',0)*300)+1,"page"=>true),     //options
+                "<b>Account Ledger </b>",     //headerTemplate
+                '',      //tableFooterTemplate
+                "",      //footerTemplate,
+                array('display_voucher_no'=>array(
+                                              'task'=>'report_cont.transactionDetails',
+                                              'class'=>'alertinwindow', 
+                                              'url_post'=>array('vn'=>'#voucher_no','format'=>'"raw"')
+                                              )
+                      )//Links array('field'=>array('task'=>,'class'=>''))
+                );
+
+        JRequest::setVar("layout","generalreport");
+        $this->load->view('report.html', $data);
+        $this->jq->getHeader();
+    }
+
     function accountStatement() {
 
         xDeveloperToolBars::onlyCancel("report_cont.accountstatementform", "cancel", "Account Statement for " . inp('AccountNumber'));
@@ -2141,14 +2201,14 @@ premiumcount <= 2
         $p->where_related('account', 'id', '${parent}.id');
 
 
-        $a->select('*, id as PaneltyDUE');
+        $a->select('*, id as PaneltyDUE, id as OtherCharges');
         $a->include_related('dealer','DealerName');
         $a->include_related('agent/member','Name');
         $a->include_related('agent/member','PhoneNos');
 
         $a->select_subquery($p,'DuePremiumCount');
         $a->select_subquery('(SELECT MAX(Amount) From jos_xpremiums p WHERE p.accounts_id=${parent}.id)','Amount');
-        $a->select_subquery('(SELECT count(*) * MAX(Amount) From jos_xpremiums p WHERE p.accounts_id=${parent}.id)','Total');
+        // $a->select_subquery('(SELECT count(*) * MAX(Amount) From jos_xpremiums p WHERE p.accounts_id=${parent}.id)','Total');
 
         $a->include_related('member','Name');
         $a->include_related('member','FatherName');
@@ -2158,14 +2218,15 @@ premiumcount <= 2
 
         $a->where_related('scheme','SchemeType like' ,'loan');
         $a->where_related('dealer',"DealerName like '%".inp('DealerName')."%'");
+        $a->where("ActiveStatus",1);
 
-        $a->having("DuePremiumCount <= 2 and DuePremiumCount>0");
+        $a->having("DuePremiumCount <= 2 and DuePremiumCount > 0");
         $a->get();
 //        echo $a->check_last_query();
-        echo getReporttable($a,             //model
-                array("Account Number","Scheme","Member Name","Father Name", "Phone Number","Address",'Due Premium Count','EMI Amount',"Due Penalty",'Total',"Dealer Name","Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
-                array('AccountNumber', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress','DuePremiumCount','Amount','PaneltyDUE',"Total",'dealer_DealerName','Nominee','MinorNomineeParentName','RelationWithNominee'),       //fields
-                array('member_PhoneNos','PaneltyDUE','DuePremiumCount'),        //totals_array
+        $data['report']= getReporttable($a,             //model
+                array("Account Number","Scheme","Member Name","Father Name", "Phone Number","Address",'Due Premium Count','EMI Amount',"Due Penalty","Legal/Conveyance/Insurance Charge",'Total',"Dealer Name","Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
+                array('AccountNumber', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress','DuePremiumCount','Amount','PaneltyDUE','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)",'dealer_DealerName','Nominee','MinorNomineeParentName','RelationWithNominee'),       //fields
+                array('PaneltyDUE','DuePremiumCount','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)"),        //totals_array
                 array(),        //headers
                 array('sno'=>true),     //options
                 "",     //headerTemplate
@@ -2210,29 +2271,30 @@ premiumcount <= 2
         $p->where_related('account', 'id', '${parent}.id');
 
 
-        $a->select('*, id as PaneltyDUE');
+        $a->select('*, id as PaneltyDUE, id as OtherCharges');
         
         $a->select_subquery($p,'DuePremiumCount');
         $a->select_subquery('(SELECT MAX(Amount) From jos_xpremiums p WHERE p.accounts_id=${parent}.id)','Amount');
-        $a->select_subquery('(SELECT count(*) * MAX(Amount) From jos_xpremiums p WHERE p.accounts_id=${parent}.id)','Total');
+        // $a->select_subquery('(SELECT count(*) * MAX(Amount) From jos_xpremiums p WHERE p.accounts_id=${parent}.id)','Total');
 
         $a->include_related('member','Name');
         $a->include_related('member','FatherName');
         $a->include_related('member','PhoneNos');
         $a->include_related('member','CurrentAddress');
         $a->include_related('scheme','Name');
-        $a->where('branch_id',Branch::getCurrentBranch()->id);
 
+        $a->where('ActiveStatus',1);
+        $a->where('branch_id',Branch::getCurrentBranch()->id);
         $a->where('AccountNumber like "pl%"');
         $a->or_where('AccountNumber like "sl%"');
 
         $a->having("DuePremiumCount > 0");
         $a->get();
 //        echo $a->check_last_query();
-        echo getReporttable($a,             //model
-                array("Account Number","Scheme","Member Name","Father Name", "Phone Number","Address",'Due Premium Count','EMI Amount',"Due Penalty",'Total',"Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
-                array('AccountNumber', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress','DuePremiumCount','Amount','PaneltyDUE',"~((#DuePremiumCount * #Amount) + # PaneltyDUE)",'Nominee','MinorNomineeParentName','RelationWithNominee'),       //fields
-                array('PaneltyDUE','~((#DuePremiumCount * #Amount) + # PaneltyDUE)'),        //totals_array
+        $data['report']= getReporttable($a,             //model
+                array("Account Number","Scheme","Member Name","Father Name", "Phone Number","Address",'Due Premium Count','EMI Amount',"Due Penalty","Legal/Conveyance/Insurance Charge",'Total',"Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
+                array('AccountNumber', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress','DuePremiumCount','Amount','PaneltyDUE','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)",'Nominee','MinorNomineeParentName','RelationWithNominee'),       //fields
+                array('PaneltyDUE','DuePremiumCount','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)"),        //totals_array
                 array(),        //headers
                 array('sno'=>true),     //options
                 "",     //headerTemplate
@@ -2305,14 +2367,14 @@ premiumcount >= 3 and premiumcount <= 4
         $p->where_related('account', 'id', '${parent}.id');
 
 
-        $a->select('*, id as PaneltyDUE');
+        $a->select('*, id as PaneltyDUE, id as OtherCharges');
         $a->include_related('dealer','DealerName');
         $a->include_related('agent/member','Name');
         $a->include_related('agent/member','PhoneNos');
 
         $a->select_subquery($p,'DuePremiumCount');
         $a->select_subquery('(SELECT MAX(Amount) From jos_xpremiums p WHERE p.accounts_id=${parent}.id)','Amount');
-        $a->select_subquery('(SELECT count(*) * MAX(Amount) From jos_xpremiums p WHERE p.accounts_id=${parent}.id AND DueDate between "'.inp('fromDate').'" and "'. inp('toDate'). '" and PaidOn is null)','Total');
+        // $a->select_subquery('(SELECT count(*) * MAX(Amount) From jos_xpremiums p WHERE p.accounts_id=${parent}.id AND DueDate between "'.inp('fromDate').'" and "'. inp('toDate'). '" and PaidOn is null)','Total');
         //$a->select('(DuePremiumCount * Amount) as Total');
 
         $a->include_related('member','Name');
@@ -2321,6 +2383,7 @@ premiumcount >= 3 and premiumcount <= 4
         $a->include_related('member','CurrentAddress');
         $a->include_related('scheme','Name');
 
+        $a->where('ActiveStatus',1);
         $a->where_related('scheme','SchemeType like' ,'loan');
         $a->where_related('dealer',"DealerName like '%".inp('DealerName')."%'");
 
@@ -2328,9 +2391,9 @@ premiumcount >= 3 and premiumcount <= 4
         $a->get();
 //        echo $a->check_last_query();
         $data['report'] =  getReporttable($a,             //model
-                array("Account Number","Scheme","Member Name","Father Name", "Phone Number","Address",'Due Premium Count','EMI Amount',"Current Due Penalty","Total","Dealer Name","Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
-                array('AccountNumber', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress','DuePremiumCount','Amount','PaneltyDUE','~(#DuePremiumCount * #Amount) + #PaneltyDUE','dealer_DealerName','Nominee','MinorNomineeParentName','RelationWithNominee'),       //fields
-                array('PaneltyDUE','DuePremiumCount','~(#DuePremiumCount * #Amount) + #PaneltyDUE'),        //totals_array
+                array("Account Number","Scheme","Member Name","Father Name", "Phone Number","Address",'Due Premium Count','EMI Amount',"Due Penalty","Legal/Conveyance/Insurance Charge","Total","Dealer Name","Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
+                array('AccountNumber', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress','DuePremiumCount','Amount','PaneltyDUE','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)",'dealer_DealerName','Nominee','MinorNomineeParentName','RelationWithNominee'),       //fields
+                array('PaneltyDUE','DuePremiumCount','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)"),        //totals_array
                 array(),        //headers
                 array('sno'=>true),     //options
                 "",     //headerTemplate
@@ -2399,7 +2462,7 @@ premiumcount >= 5
         $p->where_related('account', 'id', '${parent}.id');
 
         
-        $a->select('*, id as PaneltyDUE');
+        $a->select('*, id as PaneltyDUE, id as OtherCharges');
         //$a->select('*');
         $a->include_related('dealer','DealerName');
         $a->include_related('agent/member','Name');
@@ -2407,7 +2470,7 @@ premiumcount >= 5
 
         $a->select_subquery($p,'DuePremiumCount');
         $a->select_subquery('(SELECT MAX(Amount) From jos_xpremiums p WHERE p.accounts_id=${parent}.id)','Amount');
-        $a->select_subquery('(SELECT count(*) * MAX(Amount) From jos_xpremiums p WHERE p.accounts_id=${parent}.id)','Total');
+        // $a->select_subquery('(SELECT count(*) * MAX(Amount) From jos_xpremiums p WHERE p.accounts_id=${parent}.id)','Total');
 
         $a->include_related('member','Name');
         $a->include_related('member','FatherName');
@@ -2417,14 +2480,14 @@ premiumcount >= 5
 
         $a->where_related('scheme','SchemeType like' ,'loan');
         $a->where_related('dealer',"DealerName like '%".inp('DealerName')."%'");
-
+        $a->where("ActiveStatus",1);
         $a->having("DuePremiumCount >=",5);
         $a->get();
         //echo $a->check_last_query();
-        echo getReporttable($a,             //model
-                array("Account Number","Scheme","Member Name","Father Name", "Phone Number","Address",'Due Premium Count','EMI Amount',"Due Penalty",'Total',"Dealer Name","Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
-                array('AccountNumber', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress','DuePremiumCount','Amount','PaneltyDUE',"Total",'dealer_DealerName','Nominee','MinorNomineeParentName','RelationWithNominee'),       //fields
-                array('member_PhoneNos','PaneltyDUE','DuePremiumCount'),        //totals_array
+        $data['report']= getReporttable($a,             //model
+                array("Account Number","Scheme","Member Name","Father Name", "Phone Number","Address",'Due Premium Count','EMI Amount',"Due Penalty","Legal/Conveyance/Insurance Charge", 'Total',"Dealer Name","Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
+                array('AccountNumber', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress','DuePremiumCount','Amount','PaneltyDUE','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)",'dealer_DealerName','Nominee','MinorNomineeParentName','RelationWithNominee'),       //fields
+                array('PaneltyDUE','DuePremiumCount','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)"),        //totals_array
                 array(),        //headers
                 array('sno'=>true),     //options
                 "",     //headerTemplate
@@ -2481,6 +2544,10 @@ GROUP BY p.accounts_id
         $this->load->library("form");
         $this->form->open("pSearch","index.php?option=com_xbank&task=report_cont.loanReceiptReport")
                 ->setColumns(2)
+                ->lookupDB("Dealer Name","name='DealerName' class='input ui-autocomplete-input'","index.php?option=com_xbank&task=ajax.loan_report_dealer&format=raw",
+                    array("a" => "b"),
+                    array("id","Name","Address"),"id")
+                ->_()
                 ->dateBox("Select Date From","name='fromDate' class='input'")
                 ->dateBox("Select Date till","name='toDate' class='input'")
                 ->submit("Go");
@@ -2502,6 +2569,7 @@ GROUP BY p.accounts_id
         $a->include_related('member','CurrentAddress');
         $a->include_related('scheme','Name');
         $a->include_related('scheme','NumberOfPremiums');
+        $a->where_related('dealer','id',inp('DealerName'));
         $a->where('created_at >=',inp("fromDate"));
         $a->where('created_at <=',inp("toDate"));
         $a->where("DefaultAC",0);
@@ -2515,9 +2583,9 @@ GROUP BY p.accounts_id
 
 //        $a->check_last_query();
         $data['report'] = getReporttable($a,             //model
-                array("Account Number","Account Opeming Date","Dealer","Member Name","Father Name","Address", "Scheme","Phone Number","No Of EMI","Amount","Total"),       //heads
-                array('AccountNumber','created_at','dealer_DealerName','member_Name','member_FatherName','member_CurrentAddress', 'scheme_Name','member_PhoneNos','scheme_NumberOfPremiums','Amount','Total'),       //fields
-                array('Total'),        //totals_array
+                array("Account Number","Account Opening Date","Member Name","Father Name","Address", "Scheme","Phone Number",'Loan Amount',"No Of EMI","EMI", "Total"),       //heads
+                array('AccountNumber','created_at','member_Name','member_FatherName','member_CurrentAddress', 'scheme_Name','member_PhoneNos','RdAmount','scheme_NumberOfPremiums','Amount', 'Total'),       //fields
+                array('RdAmount','Total'),        //totals_array
                 array(),        //headers
                 array('sno'=>true),     //options
                 "",     //headerTemplate
@@ -2608,10 +2676,10 @@ GROUP BY p.accounts_id
 
 
 
-   function loanEMIReceivedListForm(){
-        xDeveloperToolBars::onlyCancel("report_cont.dashboard", "cancel", "Loan EMI Received List");
+   function vlEMIReceivedListForm(){
+        xDeveloperToolBars::onlyCancel("report_cont.dashboard", "cancel", "VL EMI Received List");
         $this->load->library("form");
-        $this->form->open("pSearch","index.php?option=com_xbank&task=report_cont.loanEMIReceivedList")
+        $this->form->open("pSearch","index.php?option=com_xbank&task=report_cont.vlEMIReceivedList")
                 ->setColumns(2)
                 ->lookupDB("Dealer Name","name='DealerName' class='input ui-autocomplete-input'","index.php?option=com_xbank&task=ajax.loan_report_dealer&format=raw",
                     array("a" => "b"),
@@ -2625,12 +2693,34 @@ GROUP BY p.accounts_id
         $this->jq->getHeader();
      }    
 
-     function loanEMIReceivedList(){
-         xDeveloperToolBars::onlyCancel("report_cont.loanEMIReceivedListForm", "cancel", "Loan EMI Received List");
+     function vlEMIReceivedList(){
+         xDeveloperToolBars::onlyCancel("report_cont.loanEMIReceivedListForm", "cancel", "VL EMI Received List");
+         $t=new Transaction();
+         $t->select('SUM(amountCr) as TAmount');
+         $t->where('created_at >=',inp('fromDate'));
+          $t->where('created_at <=', date('Y-m-d',strtotime(date("Y-m-d", strtotime(inp('toDate'))) . " +1 day")));
+         $t->include_related('account/member','Name');
+         $t->include_related('account','AccountNumber');
+         $t->include_related('account/dealer','DealerName');
+         $t->include_related('account/member','FatherName');
+         // $t->group_start();
+         $t->where_related('account/dealer','DealerName like "%'.inp('DealerName') . '%"');
+         // $t->or_where_related('account/dealer','DealerName is null');
+         // $t->group_end();
+         $t->where_related("account","branch_id",Branch::getCurrentBranch()->id);
+         $t->where_related('account/scheme','SchemeType','Loan');
+         $t->where('transaction_type_id',18);//LoanAccountAmountDeposit
+         // $t->limit(300,JRequest::getVar('page_start',0)*300);
+         $t->group_by('accounts_id');
+         $t->get();
+         // $t->check_last_query();
+
+         /*
          $a=new Premium();
+         // pl + amount received + date-date
          $a->select('SUM(Amount) as TAmount');
          $a->where('PaidOn >=',inp('fromDate'));
-         $a->where('PaidOn <=',inp('toDate'));
+         $a->where('PaidOn <=',inp('toDate'));//date('Y-m-d',strtotime(date("Y-m-d", strtotime(inp('toDate1'))) . " +1 day")));
          $a->include_related('account/member','Name');
          $a->include_related('account','AccountNumber');
          $a->include_related('account/dealer','DealerName');
@@ -2641,14 +2731,14 @@ GROUP BY p.accounts_id
          $a->limit(300,JRequest::getVar('page_start',0)*300);
          $a->group_by('accounts_id');
          $a->get();
+        */
 
-
-         $data['report'] = getReporttable($a,             //model
+         $data['report'] = getReporttable($t,             //model
                 array("Account Number",       "Name", "Father Name", "Amount Deposited"),       //heads
                 array('account_AccountNumber','account_member_Name',"account_member_FatherName", "TAmount"),       //fields
                 array("TAmount"),        //totals_array
                 array("Dealer Name" => "account_dealer_DealerName"),        //headers
-                array('sno'=>true,"sno_start"=>JRequest::getVar('page_start',0)*300,"page"=>true),     //options
+                array('sno'=>true,"sno_start"=>JRequest::getVar('page_start',0)*300,"page"=>false),     //options
                 "",     //headerTemplate
                 '',      //tableFooterTemplate
                 ""      //footerTemplate
@@ -2659,6 +2749,74 @@ GROUP BY p.accounts_id
         $this->jq->getHeader();
      }
 
+     function plAndOtherEMIReceivedListForm(){
+        xDeveloperToolBars::onlyCancel("report_cont.dashboard", "cancel", "PL And Other EMI Received List");
+        $this->load->library("form");
+        $this->form->open("pSearch","index.php?option=com_xbank&task=report_cont.plAndOtherEMIReceivedList")
+                ->setColumns(2)
+                ->dateBox("Select Date From","name='fromDate' class='input'")
+                ->dateBox("Select Date till","name='toDate' class='input'")
+                ->submit("Go");
+        $data['form']=$this->form->get();
+        $this->load->view("formonly.html",$data);
+        $this->jq->getHeader();
+     }    
+
+     function plAndOtherEMIReceivedList(){
+         xDeveloperToolBars::onlyCancel("report_cont.plAndOtherEMIReceivedListForm", "cancel", "PL AND Other EMI Received List");
+         $t=new Transaction();
+         $t->select('SUM(amountCr) as TAmount');
+         $t->where('created_at >=',inp('fromDate'));
+          $t->where('created_at <=', date('Y-m-d',strtotime(date("Y-m-d", strtotime(inp('toDate'))) . " +1 day")));
+         $t->include_related('account/member','Name');
+         $t->include_related('account','AccountNumber');
+         $t->include_related('account/dealer','DealerName');
+         $t->include_related('account/member','FatherName');
+         // $t->group_start();
+         $t->where_related('account','AccountNumber not like "vl%"');
+         // $t->or_where_related('account/dealer','DealerName is null');
+         // $t->group_end();
+         $t->where_related("account","branch_id",Branch::getCurrentBranch()->id);
+         $t->where_related('account/scheme','SchemeType','Loan');
+         $t->where('transaction_type_id',18);//LoanAccountAmountDeposit
+         // $t->limit(300,JRequest::getVar('page_start',0)*300);
+         $t->group_by('accounts_id');
+         $t->get();
+         // $t->check_last_query();
+
+         /*
+         $a=new Premium();
+         // pl + amount received + date-date
+         $a->select('SUM(Amount) as TAmount');
+         $a->where('PaidOn >=',inp('fromDate'));
+         $a->where('PaidOn <=',inp('toDate'));//date('Y-m-d',strtotime(date("Y-m-d", strtotime(inp('toDate1'))) . " +1 day")));
+         $a->include_related('account/member','Name');
+         $a->include_related('account','AccountNumber');
+         $a->include_related('account/dealer','DealerName');
+         $a->include_related('account/member','FatherName');
+         $a->where_related('account/dealer','DealerName like "%'.inp('DealerName') . '%"');
+         $a->where_related("account","branch_id",Branch::getCurrentBranch()->id);
+         $a->where_related('account/scheme','SchemeType','Loan');
+         $a->limit(300,JRequest::getVar('page_start',0)*300);
+         $a->group_by('accounts_id');
+         $a->get();
+        */
+
+         $data['report'] = getReporttable($t,             //model
+                array("Account Number",       "Name", "Father Name", "Amount Deposited"),       //heads
+                array('account_AccountNumber','account_member_Name',"account_member_FatherName", "TAmount"),       //fields
+                array("TAmount"),        //totals_array
+                array(),        //headers
+                array('sno'=>true,"sno_start"=>JRequest::getVar('page_start',0)*300,"page"=>false),     //options
+                "",     //headerTemplate
+                '',      //tableFooterTemplate
+                ""      //footerTemplate
+                );
+
+        JRequest::setVar("layout","generalreport");
+        $this->load->view('report.html', $data);
+        $this->jq->getHeader();
+     }
      
      function tdsReportForm(){
          xDeveloperToolBars::onlyCancel("report_cont.dashboard", "cancel", "TDS Report");

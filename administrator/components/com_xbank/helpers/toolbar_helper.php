@@ -163,7 +163,8 @@ class xDeveloperToolBars extends JObject {
         JToolBarHelper::addNewX('report_cont.loanAccountReportForm', 'Loan <br/>Detailed/Premium<br/> Report');
         JToolBarHelper::addNewX('report_cont.loan_insurrance_report_form', 'Loan <br/>Insurrance<br/> Report');
         JToolBarHelper::addNewX('report_cont.rdPremiumReceivedListForm', 'RD Premium <br/>Received List');
-        JToolBarHelper::addNewX('report_cont.loanEMIReceivedListForm', 'Loan EMI<br/> Received List');
+        JToolBarHelper::addNewX('report_cont.vlEMIReceivedListForm', 'VL EMI<br/> Received List');
+        JToolBarHelper::addNewX('report_cont.plAndOtherEMIReceivedListForm', 'PL & Other EMI<br/> Received List');
         JToolBarHelper::addNewX('report_cont.tdsReportForm', 'TDS<br/> Report');
         JToolBarHelper::addNewX('report_2_cont.agentWiseReportForm', 'AgentWise<br/> Report');
         JToolBarHelper::addNewX('report_2_cont.agentReportDeadAccountForm', 'Agent Report<br/> Dead Account');

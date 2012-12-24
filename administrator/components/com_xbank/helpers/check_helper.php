@@ -258,6 +258,10 @@ function getReportTable($model, $heads, $fields, $totals_array,$headers, $option
     global $table_id;
     $table_id++;
 
+    $tableScript='$("#report_'.$table_id.'").dataTable({"bPaginate" : false, "bSort": false, "sDom": \'ft\' });';
+    $CI =& get_instance();
+    $CI->jq->addDomReadyScript($tableScript);
+
     $html='';
     foreach ($totals_array as $tt)
         $sum[$tt] = 0;
@@ -275,13 +279,12 @@ function getReportTable($model, $heads, $fields, $totals_array,$headers, $option
     $html .="<tr>";
     if ($option['sno'] == true) {
         $html .=" <th>SNO</th>";
-        $sno = isset($option['sno_start'])?$option['sno_start']:1;
+        $sno = isset($option['sno_start'])? ($option['sno_start']%2==0?$option['sno_start']+1:$option['sno_start']):1;
     }
     foreach ($heads as $h) {
         $html .= "<th>$h</th>";
     }
     $html .="</tr></thead><tbody>";
-
     foreach ($model as $m):
         $html .="<tr >";
         if ($option['sno'] == true) {
@@ -315,7 +318,16 @@ function getReportTable($model, $heads, $fields, $totals_array,$headers, $option
             	    $sum[$f] += $tf;
             }else{
             if(array_key_exists($f, $links)){
-                $a_s="<a href='index.php?option=com_xbank&task=".$links[$f]['task']."' class='".(isset($links[$f]['class'])?$links[$f]['class'] : "" ) ."'>";
+                if(isset($links[$f]['url_post'])){
+                        $ft2="";
+                        foreach($links[$f]['url_post'] as $var=>$val){
+                            eval('$val_t = '.str_replace("#",'$m->',$val).';');
+                            $ft2.= "&".$var. "=". $val_t;
+                        }
+                    }else{
+                        $ft2="";
+                    }
+                $a_s="<a href='index.php?option=com_xbank&task=".$links[$f]['task']."&".$ft2."' class='".(isset($links[$f]['class'])?$links[$f]['class'] : "" ) ."'>";
                 $a_e = "</a>";
             }else{
                 $a_s="";
@@ -351,7 +363,7 @@ function getReportTable($model, $heads, $fields, $totals_array,$headers, $option
         $html .= $model->paginateHTML;
 
 
-    if(isset($option['page'])){
+    if(isset($option['page']) and $option['page']==true){
         if(isset($option['page_var']))
             $pagevar=$option['page_var'];
         else

@@ -638,26 +638,57 @@ class transaction_cont extends CI_Controller {
             return;
         }
 
-//        if(inp("Discount")){
-//            if(!inp("DiscountAccount")){
-//                echo "<h2>Please provide a discount account</h2>";
-//                return;
-//            }
-//            else{
-//                $discountAccount = Doctrine::getTable("Accounts")->findOneByAccountnumberAndBranch_id(inp("DiscountAccount"),  Branch::getCurrentBranch()->id);
-//                if(!$discountAccount){
-//                    echo "<h2>Please provide a correct discount account</h2>";
-//                    return;
-//                }
-//            }
-//        }
-        /**  For close
-          ForCloseAmount = (Cr + SUM(Unpaid Premiums till date)) - (DR + (Interest * Unpaid Premiums till date)) + CurrentInterest + (Interest * Unpaid Premiums after date * .25)
+        $a=new Account();
+        $a->select('*, id as PaneltyDUE, id as OtherCharges');
+        $a->where('AccountNumber',inp('AccountNumber'));
+        $a->get();
 
-         *
-         */
+        if($a->ActiveStatus==0){
+            echo "<h3>This account is not activated</h3>";
+            return;
+        }
+
+        $loanAmount=$ac->RdAmount;
+
+        $a->transactions->select_func('sum','[amountDr]','total_interest')->where('transaction_type_id',28)->get();
+
+        $interestGiven = $a->transactions->total_interest;
+
+        $no_of_emis=$a->premiums->count();
+        $emi_amount=$a->premiums->get()->Amount;
+
+        $forCloseCharge= (($no_of_emis * $emi_amount) - ($loanAmount + $interestGiven))*25.0/100;
+
+        
+        $a->premiums->select_func('max','[DueDate]','last_emi_date')->get();
+        $currentDr= $a->getOpeningBalance($a->premiums->last_emi_date,null,'DR');
+
+        $overcharge=0;
+        if(getNow('Y-m-d') > $a->premiums->last_emi_date){
+            // echo $currentDr . "<br/>";
+            $scheme_interest = $a->scheme->Interest;
+            // echo $scheme_interest . "<br/>";
+            $d=my_date_diff(getNow('Y-m-d'),$a->premiums->last_emi_date);
+            // print_r($d);
+            $overcharge = $currentDr * $scheme_interest / 36500 * $d['days_total'];
+            // return;
+        }
+
+        echo "<h3>Loan Amount :".$loanAmount . "</h3><br/>";
+        echo "<h3>Monthly Interest : + ".$interestGiven . "</h3><br/>";
+        echo "<h3>Total Panelty : + ".$a->PaneltyDUE . "</h3><br/>";
+        echo "<h3>Legal / Coveyance / Insurance : + ".$a->OtherCharges . "</h3><br/>";
+        echo "<h3>ForClose Charge : + ".$forCloseCharge . "</h3><br/>";
+        echo "<h3>Time OverCharge : + ".$overcharge."</h3><br/>";
+        echo "<h3>Toal Amount Deposited : - ".$a->CurrentBalanceCr . "</h3><br/>";
+        $forCloseAmount = ($loanAmount + $interestGiven + ($a->PaneltyDUE) + $a->OtherCharges + $overcharge+ $forCloseCharge - ($a->CurrentBalanceCr));
+        echo "<h3>ForClose Amount : = ".$forCloseAmount. "</h3><br/>";
+        return;
+
+
+
         $unpaid = new Premium();
-        $unpaid->where("accounts_id = $ac->id AND Paid = 0 AND DueDate <= '" . getNow() . "'")->get();
+        $unpaid->where("accounts_id = $ac->id AND (Paid = 0 or Paid is null) AND DueDate <= '" . getNow() . "'")->get();
         // Unpaid Premiums till date
         $unpaidTillDate = $unpaid->result_count();
 
@@ -744,6 +775,7 @@ class transaction_cont extends CI_Controller {
      */
     function doForClose() {
 //        Staff::accessibleTo(POWER_USER);
+        re("transaction_cont.forClose","For Closed not implemented...");
 
 //        $conn = Doctrine_Manager::connection();
         try {

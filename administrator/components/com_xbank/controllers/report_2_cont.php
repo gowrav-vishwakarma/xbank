@@ -220,14 +220,14 @@ class report_2_cont extends CI_Controller {
 
         $data['report']=getReporttable($d,             //model
                 array("DealerName", "Address","Accounts Count"),       //heads
-                array('DealerName','Address','~#accounts->count()'),       //fields
-                array('~#accounts->count()'),        //totals_array
+                array('DealerName','Address','~#accounts->where("branch_id",'.Branch::getCurrentBranch()->id.')->count()'),       //fields
+                array('~#accounts->where("branch_id",'.Branch::getCurrentBranch()->id.')->count()'),        //totals_array
                 array(),        //headers
                 array('sno'=>true),     //options
                 "",     //headerTemplate
                 '',      //tableFooterTemplate
                 "",      //footerTemplate,
-                array('~#accounts->count()'=>array('task'=>'report_2_cont.dealerWiseAccountList','class'=>'alertinwindow', 'url_post'=>array('did'=>'#id','format'=>'"raw"')))//Links array('field'=>array('task'=>,'class'=>''))
+                array('~#accounts->where("branch_id",'.Branch::getCurrentBranch()->id.')->count()'=>array('task'=>'report_2_cont.dealerWiseAccountList','class'=>'alertinwindow', 'url_post'=>array('did'=>'#id','format'=>'"raw"')))//Links array('field'=>array('task'=>,'class'=>''))
                 );
 
         JRequest::setVar("layout","generalreport");
@@ -237,7 +237,8 @@ class report_2_cont extends CI_Controller {
     
      function dealerWiseAccountList(){
         $d=new Dealer(inp('did'));
-        $acc=$d->accounts->get();
+        $acc=$d->accounts->where('branch_id',Branch::getCurrentBranch()->id)->get();
+        // $acc=$d->accounts->get();
         $data['report']=getReporttable($acc,             //model
                 array("Account Number", "Branch"),       //heads
                 array('AccountNumber','~#branch->Name'),       //fields
