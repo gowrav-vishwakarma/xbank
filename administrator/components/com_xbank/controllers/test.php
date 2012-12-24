@@ -369,7 +369,36 @@ $query = "UPDATE jos_xaccounts as a JOIN jos_xschemes as s on a.schemes_id=s.id 
     }
 
     function setSideEntries(){
-        
+        $this->db->query("
+                ALTER TABLE `jos_xtransactions` ADD `side` VARCHAR( 2 ) NOT NULL DEFAULT '--',
+                ADD `accounts_in_side` INT NOT NULL ,
+                ADD INDEX ( `side` ) 
+            ");
+        $this->db->query("
+                UPDATE jos_xtransactions tm join 
+                (
+                SELECT 
+                id,
+                IF(amountCr<>0, 'CR',IF(amountDr<> 0,'DR','--')) side
+                FROM
+                jos_xtransactions tr
+                ) tmp on tm.id=tmp.id
+
+                SET tm.side = tmp.side
+            ");
+
+        $this->db->query("
+                UPDATE jos_xtransactions tm join (
+                    SELECT 
+                    tr.voucher_no,tr.branch_id,  tr.side, tr.transaction_type_id, count(*) accounts_in_side
+                    FROM
+                    jos_xtransactions tr
+                    GROUP BY tr.voucher_no, tr.branch_id, tr.side, tr.transaction_type_id
+                    ) tmp on tm.voucher_no=tmp.voucher_no and tm.branch_id=tmp.branch_id  and tm.side=tmp.side and tm.transaction_type_id=tmp.transaction_type_id
+
+                    SET tm.accounts_in_side = tmp.accounts_in_side
+            ");
+
     }
 
 }
