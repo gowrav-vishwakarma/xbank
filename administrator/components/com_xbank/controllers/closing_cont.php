@@ -53,7 +53,8 @@ class closing_cont extends CI_Controller {
                 $dailyDate = $this->db->query("select daily as Daily from jos_xclosings where branch_id=" . $b->id)->row()->Daily;
 
                 if ($dailyDate == "" or $dailyDate == "0000-00-00 00:00:00") {
-                    $accounttypes = explode(",", $com_params->get('ACCOUNT_TYPES'));
+                    // $accounttypes = explode(",", $com_params->get('ACCOUNT_TYPES')); // FROM config
+                        $accounttypes = explode(",", ACCOUNT_TYPES); // From constants use it for debug only
                     foreach ($accounttypes as $acctype) {
                         include(xBANKSCHEMEPATH . "/" . strtolower($acctype) . "/" . strtolower($acctype) . "daily.php");
                     }
@@ -63,7 +64,8 @@ class closing_cont extends CI_Controller {
                 } elseif ($dailyDate < $dateToday) {
                     $dailyDate = date("Y-m-d", strtotime(date("Y-m-d", strtotime($dailyDate)) . " +1 day"));
                     for ($i = $dailyDate; $i <= $dateToday;) {
-                        $accounttypes = explode(",", $com_params->get('ACCOUNT_TYPES'));
+                        // $accounttypes = explode(",", $com_params->get('ACCOUNT_TYPES')); // FROM config
+                        $accounttypes = explode(",", ACCOUNT_TYPES); // From constants use it for debug only
                         foreach ($accounttypes as $acctype) {
                             include(xBANKSCHEMEPATH . "/" . strtolower($acctype) . "/" . strtolower($acctype) . "daily.php");
                         }
@@ -92,7 +94,8 @@ class closing_cont extends CI_Controller {
         global $com_params;
         if (date("j", strtotime($dateToday)) == 1) {
 //                   call all monthly
-            $accounttypes = explode(",", $com_params->get('ACCOUNT_TYPES'));
+            // $accounttypes = explode(",", $com_params->get('ACCOUNT_TYPES')); // FROM config
+            $accounttypes = explode(",", ACCOUNT_TYPES); // From constants use it for debug only
             foreach ($accounttypes as $acctype) {
                 include(xBANKSCHEMEPATH . "/" . strtolower($acctype) . "/" . strtolower($acctype) . "monthly.php");
             }
@@ -104,7 +107,8 @@ class closing_cont extends CI_Controller {
 //                    check for halfyearly to run or not
         if ((date("j", strtotime($dateToday)) == 1 and date("n", strtotime($dateToday)) == 10) || (date("j", strtotime($dateToday)) == 1 and date("n", strtotime($dateToday)) == 4)) {
 //                    call all halfyearly
-            $accounttypes = explode(",", $com_params->get('ACCOUNT_TYPES'));
+            // $accounttypes = explode(",", $com_params->get('ACCOUNT_TYPES')); // FROM config
+                        $accounttypes = explode(",", ACCOUNT_TYPES); // From constants use it for debug only
             foreach ($accounttypes as $acctype) {
                 include(xBANKSCHEMEPATH . "/" . strtolower($acctype) . "/" . strtolower($acctype) . "halfyearly.php");
             }
@@ -114,7 +118,8 @@ class closing_cont extends CI_Controller {
 //                    check for yearly to run or not
         if (date("j", strtotime($dateToday)) == 1 and date("n", strtotime($dateToday)) == 4) {
 //                    call or yearly
-            $accounttypes = explode(",", $com_params->get('ACCOUNT_TYPES'));
+            // $accounttypes = explode(",", $com_params->get('ACCOUNT_TYPES')); // FROM config
+                        $accounttypes = explode(",", ACCOUNT_TYPES); // From constants use it for debug only
             foreach ($accounttypes as $acctype) {
                 include(xBANKSCHEMEPATH . "/" . strtolower($acctype) . "/" . strtolower($acctype) . "yearly.php");
             }

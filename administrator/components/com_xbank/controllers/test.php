@@ -369,7 +369,7 @@ $query = "UPDATE jos_xaccounts as a JOIN jos_xschemes as s on a.schemes_id=s.id 
     }
 
     function setSideEntries(){
-        $this->db->query("ALTER TABLE `bhawani`.`jos_xtransactions` ADD INDEX `voucher_no` ( `voucher_no` ) ");
+        // $this->db->query("ALTER TABLE `bhawani`.`jos_xtransactions` ADD INDEX `voucher_no` ( `voucher_no` ) ");
         $this->db->query("
                 ALTER TABLE `jos_xtransactions` ADD `side` VARCHAR( 2 ) NOT NULL DEFAULT '--',
                 ADD `accounts_in_side` INT NOT NULL ,

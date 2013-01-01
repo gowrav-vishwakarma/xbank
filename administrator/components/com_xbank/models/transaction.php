@@ -226,7 +226,7 @@ class Transaction extends DataMapper {
             $remarks = str_replace("'", " ", $remarks);
             $query = "insert into jos_xtransactions
                                 (accounts_id,transaction_type_id,staff_id,voucher_no,Narration,
-                                amountCr,updated_at,created_at,branch_id,reference_account,display_voucher_no,side,'accounts_in_side')
+                                amountCr,updated_at,created_at,branch_id,reference_account,display_voucher_no,side,accounts_in_side)
                                 values($accid,$tT->id,$staff_id,$voucher_no,'$remarks',
                                 $CRAmount,'$updated_at','$created_at',$currentbranchid,$reference_account,$display_voucher_no,'CR',1)";
 //            executeQuery($query);
