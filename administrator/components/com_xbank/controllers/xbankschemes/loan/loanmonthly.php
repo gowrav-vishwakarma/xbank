@@ -31,80 +31,161 @@ $loanPenalty = 10;
   `a`.`branch_id` =" . $b->id;
  *
  */
+//
+//$q = "update jos_xaccounts as a join (
+//
+//SELECT temp2.id,temp2.AccountNumber, IF(penaltyLastMonth + penaltyPreviousMonth > 300, 300, penaltyLastMonth + penaltyPreviousMonth) as Penalty
+//FROM
+//
+//(
+//select temp1.id,temp1.AccountNumber, temp1.lastmonthpaidon,temp1.lastmonthDueDate,
+//
+//IF(DATEDIFF(temp1.lastmonthpaidon,temp1.lastmonthDueDate) < 0,
+//		0,
+//		IF(temp1.lastmonthpaidon is NULL,
+//				if((DATEDIFF('" . getNow("Y-m-d") . "',temp1.lastmonthDueDate) > 30),
+//						30 * $loanPenalty,
+//						DATEDIFF('" . getNow("Y-m-d") . "',temp1.lastmonthDueDate) * $loanPenalty ),
+//			if(DATEDIFF(temp1.lastmonthpaidon,temp1.lastmonthDueDate) > 30,
+//				30 * $loanPenalty,
+//				DATEDIFF(temp1.lastmonthpaidon,temp1.lastmonthDueDate) * $loanPenalty )
+//		))  as penaltyLastMonth,
+//
+//
+//
+//temp1.previoustolastpaidon,temp1.previoustolastDueDate,
+//IF((temp1.previoustolastpaidon IS NULL AND temp1.previoustolastDueDate IS NULL)
+//                                    OR
+//		(MONTH(temp1.previoustolastpaidon) = MONTH(temp1.previoustolastDueDate)),
+//		0,
+//		IF(	MONTH(temp1.previoustolastpaidon)= MONTH(DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH)),
+//				IF(temp1.previoustolastpaidon > DATE_ADD(temp1.previoustolastDueDate,INTERVAL +1 MONTH),IF(DATEDIFF(DATE_ADD(temp1.previoustolastDueDate,INTERVAL +1 MONTH),temp1.previoustolastDueDate) > 30,
+//                                    (IF(DATEDIFF(DATE_ADD(temp1.previoustolastDueDate,INTERVAL +1 MONTH ),DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH)) > 0,DATEDIFF(DATE_ADD(temp1.previoustolastDueDate,INTERVAL +1 MONTH ),DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH)) ,0) * 10),
+//                                    DATEDIFF(DATE_ADD(temp1.previoustolastDueDate,INTERVAL +1 MONTH ),DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH)) * 10
+//                                    ),
+//				DATEDIFF(temp1.previoustolastpaidon, DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH)) * $loanPenalty),
+//					IF((temp1.previoustolastpaidon IS NULL AND temp1.previoustolastDueDate IS NOT NULL),
+//							IF(DATEDIFF(DATE_ADD(temp1.previoustolastDueDate,INTERVAL +1 MONTH),temp1.previoustolastDueDate) > 30,
+//									(IF(DATEDIFF(DATE_ADD(temp1.previoustolastDueDate,INTERVAL +1 MONTH ),DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH))  > 0,DATEDIFF(DATE_ADD(temp1.previoustolastDueDate,INTERVAL +1 MONTH ),DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH)) ,0)) * $loanPenalty,
+//									DATEDIFF(DATE_ADD(temp1.previoustolastDueDate,INTERVAL +1 MONTH ),DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH)) * $loanPenalty
+//									),
+//						0)
+//
+//			)
+//
+//
+//	)  as penaltyPreviousMonth
+//
+//from
+//(
+//		select a.id,a.AccountNumber,
+//		(select DueDate from jos_xpremiums where Month(DueDate) = MONTH(DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH)) and YEAR(DueDate) = Year(DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH)) and accounts_id = a.id) lastmonthDueDate,
+//		(select PaidOn from jos_xpremiums where Month(DueDate) = MONTH(DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH)) and YEAR(DueDate) = Year(DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH)) and accounts_id = a.id) lastmonthpaidon,
+//		(select DueDate from jos_xpremiums where Month(DueDate) = MONTH(DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -2 MONTH)) and YEAR(DueDate) = Year(DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -2 MONTH)) and accounts_id = a.id) previoustolastDueDate,
+//		(select PaidOn from jos_xpremiums where Month(DueDate) = MONTH(DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -2 MONTH)) and YEAR(DueDate) = Year(DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -2 MONTH)) and accounts_id = a.id) previoustolastpaidon
+//
+//		from `jos_xaccounts` as `a`
+//		join `jos_xpremiums` as `p` on `p`.`accounts_id`=`a`.`id`
+//		join `jos_xschemes` as `s` on `a`.`schemes_id`=`s`.`id`
+//
+//		where `s`.`SchemeType`= 'Loan' and
+//		`a`.`ActiveStatus` = 1 and
+//		`a`.`branch_id` =". $b->id ." and
+//		Month(p.DueDate) = MONTH(DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH)) AND
+//		YEAR(DueDate) = Year(DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH))
+//
+//) as temp1
+//
+//) as temp2 )
+//
+//
+// as t on a.id = t.id
+//set a.CurrentInterest = t.Penalty";
+//
+//executeQuery($q);
 
-$q = "update jos_xaccounts as a join (
+//*********************************************************************
 
-SELECT temp2.id,temp2.AccountNumber, IF(penaltyLastMonth + penaltyPreviousMonth > 300, 300, penaltyLastMonth + penaltyPreviousMonth) as Penalty
-FROM
-
-(
-select temp1.id,temp1.AccountNumber, temp1.lastmonthpaidon,temp1.lastmonthDueDate,
-
-IF(DATEDIFF(temp1.lastmonthpaidon,temp1.lastmonthDueDate) < 0,
-		0,
-		IF(temp1.lastmonthpaidon is NULL,
-				if((DATEDIFF('" . getNow("Y-m-d") . "',temp1.lastmonthDueDate) > 30),
-						30 * $loanPenalty,
-						DATEDIFF('" . getNow("Y-m-d") . "',temp1.lastmonthDueDate) * $loanPenalty ),
-			if(DATEDIFF(temp1.lastmonthpaidon,temp1.lastmonthDueDate) > 30,
-				30 * $loanPenalty,
-				DATEDIFF(temp1.lastmonthpaidon,temp1.lastmonthDueDate) * $loanPenalty )
-		))  as penaltyLastMonth,
+$loanPenalty = 10;
+        $thismonth = date("m", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 MONTH")); //getNow("m");
+        $lastmonth = date("m", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -2 MONTH"));
+        $closingdate = getNow("Y-m-d");
+        $lastmonthlastdate = date("Y-m-t", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -2 MONTH"));
+        $firstdateofthismonth = date("Y-m-01", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 MONTH")); //getNow("Y-m-01");
+        $penaltyQ = "update jos_xaccounts as a join (
+                    select accounts_id, IF(SUM(Penalty) > 300 , 300 , SUM(Penalty)) as Penalty from (
 
 
+                    /* PREMIUM DUE IN THIS MONTH - NOT PAID */
+                    select
+                    'A' as nm,p.id,(DATEDIFF('$closingdate',p.DueDate)) * 10 as Penalty, p.accounts_id,MONTH(p.DueDate), $thismonth, p.PaidOn, p.DueDate
+                    from jos_xpremiums p
+                    where
+                    MONTH(p.DueDate) = $thismonth AND
+                    p.PaidOn is NULL and
 
-temp1.previoustolastpaidon,temp1.previoustolastDueDate,
-IF((temp1.previoustolastpaidon IS NULL AND temp1.previoustolastDueDate IS NULL)
-                                    OR
-		(MONTH(temp1.previoustolastpaidon) = MONTH(temp1.previoustolastDueDate)),
-		0,
-		IF(	MONTH(temp1.previoustolastpaidon)= MONTH(DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH)),
-				IF(temp1.previoustolastpaidon > DATE_ADD(temp1.previoustolastDueDate,INTERVAL +1 MONTH),IF(DATEDIFF(DATE_ADD(temp1.previoustolastDueDate,INTERVAL +1 MONTH),temp1.previoustolastDueDate) > 30,
-                                    (IF(DATEDIFF(DATE_ADD(temp1.previoustolastDueDate,INTERVAL +1 MONTH ),DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH)) > 0,DATEDIFF(DATE_ADD(temp1.previoustolastDueDate,INTERVAL +1 MONTH ),DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH)) ,0) * 10),
-                                    DATEDIFF(DATE_ADD(temp1.previoustolastDueDate,INTERVAL +1 MONTH ),DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH)) * 10
-                                    ),
-				DATEDIFF(temp1.previoustolastpaidon, DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH)) * $loanPenalty),
-					IF((temp1.previoustolastpaidon IS NULL AND temp1.previoustolastDueDate IS NOT NULL),
-							IF(DATEDIFF(DATE_ADD(temp1.previoustolastDueDate,INTERVAL +1 MONTH),temp1.previoustolastDueDate) > 30,
-									(IF(DATEDIFF(DATE_ADD(temp1.previoustolastDueDate,INTERVAL +1 MONTH ),DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH))  > 0,DATEDIFF(DATE_ADD(temp1.previoustolastDueDate,INTERVAL +1 MONTH ),DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH)) ,0)) * $loanPenalty,
-									DATEDIFF(DATE_ADD(temp1.previoustolastDueDate,INTERVAL +1 MONTH ),DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH)) * $loanPenalty
-									),
-						0)
+                    DATEDIFF('$closingdate',p.DueDate) <= 31 AND
+                    DATEDIFF('$closingdate',p.DueDate) >=0
+                    /* AND p.accounts_id = $this->id */
 
-			)
+                    UNION
 
 
-	)  as penaltyPreviousMonth
 
-from
-(
-		select a.id,a.AccountNumber,
-		(select DueDate from jos_xpremiums where Month(DueDate) = MONTH(DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH)) and YEAR(DueDate) = Year(DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH)) and accounts_id = a.id) lastmonthDueDate,
-		(select PaidOn from jos_xpremiums where Month(DueDate) = MONTH(DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH)) and YEAR(DueDate) = Year(DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH)) and accounts_id = a.id) lastmonthpaidon,
-		(select DueDate from jos_xpremiums where Month(DueDate) = MONTH(DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -2 MONTH)) and YEAR(DueDate) = Year(DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -2 MONTH)) and accounts_id = a.id) previoustolastDueDate,
-		(select PaidOn from jos_xpremiums where Month(DueDate) = MONTH(DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -2 MONTH)) and YEAR(DueDate) = Year(DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -2 MONTH)) and accounts_id = a.id) previoustolastpaidon
+                    /* PREMIUM DUE IN THIS MONTH - LATE PAID IN THIS MONTH */
+                    select
+                    'B' as nm,p.id,IF((DATEDIFF(p.PaidOn,p.DueDate)) * 10 > 300,300,(DATEDIFF(p.PaidOn,p.DueDate)) * 10) as Penalty, p.accounts_id,MONTH(p.DueDate), $thismonth, p.PaidOn, p.DueDate
+                    from jos_xpremiums p
+                    where
+                    MONTH(p.DueDate) = $thismonth AND
+                    p.PaidOn > p.DueDate AND
+                    DATEDIFF('$closingdate',p.DueDate) <= 31 AND
+                    DATEDIFF('$closingdate',p.DueDate) >=0
+                    /* AND p.accounts_id = $this->id */
 
-		from `jos_xaccounts` as `a`
-		join `jos_xpremiums` as `p` on `p`.`accounts_id`=`a`.`id`
-		join `jos_xschemes` as `s` on `a`.`schemes_id`=`s`.`id`
+                    UNION
 
-		where `s`.`SchemeType`= 'Loan' and
-		`a`.`ActiveStatus` = 1 and
-		`a`.`branch_id` =". $b->id ." and
-		Month(p.DueDate) = MONTH(DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH)) AND
-		YEAR(DueDate) = Year(DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH))
+                    /* PREMIUM DUE IN LAST MONTH - STILL NOT PAID */
+                    select
+                    'C' as nm,p.id,if(DATEDIFF('$closingdate',p.Duedate)>=30,300,(DATEDIFF('$closingdate',p.DueDate)+1)*10) as Penalty, p.accounts_id,MONTH(p.DueDate), $thismonth, p.PaidOn, p.DueDate
+                    from jos_xpremiums p
+                    where
+                    MONTH(p.DueDate) = $lastmonth AND
+                    p.PaidOn is NULL AND
+                    DATEDIFF('$closingdate',p.DueDate) <= 62 AND
+                    DATEDIFF('$closingdate',p.DueDate) >=0
+                    /* AND p.accounts_id = $this->id */
 
-) as temp1
+                    UNION
 
-) as temp2 )
+                    /* PREMIUM DUE IN LAST MONTH - PAID IN THIS(NEXT) MONTH */
+                    select
+                    'D' as nm,p.id, IF(DAY(p.PaidOn) >= DAY(p.DueDate), (300 - (DATEDIFF('$lastmonthlastdate',p.DueDate) * 10)), (DATEDIFF(p.PaidOn,'$firstdateofthismonth')) * 10) as Penalty, p.accounts_id,MONTH(p.DueDate), $thismonth, p.PaidOn, p.DueDate
+                    from jos_xpremiums p
+                    where
+                    MONTH(p.DueDate) = $lastmonth AND
+                    MONTH(p.PaidOn) = $thismonth AND
+                    DATEDIFF('$closingdate',p.DueDate) <= 62 AND
+                    DATEDIFF('$closingdate',p.DueDate) >=0
+                    /* AND p.accounts_id = $this->id */
+                    )
+                    as t
+                    GROUP  BY accounts_id)
 
 
- as t on a.id = t.id
-set a.CurrentInterest = t.Penalty";
+                     as temp on a.id = temp.accounts_id
+                     join `jos_xschemes` as `s` on `a`.`schemes_id`=`s`.`id`
+                     set a.CurrentInterest = temp.Penalty
+                     where `s`.`SchemeType`= 'Loan' and
+                    `a`.`ActiveStatus` = 1 and
+                    `a`.`branch_id` =". $b->id ."
+";
 
-executeQuery($q);
+        executeQuery($penaltyQ);
 
 
+
+//*********************************************************************
 
 $schemes = new Scheme();
 $schemes->where("SchemeType",ACCOUNT_TYPE_LOAN)->get();
