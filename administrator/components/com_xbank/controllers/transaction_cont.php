@@ -685,7 +685,7 @@ class transaction_cont extends CI_Controller {
         echo "<h3>ForClose Amount : = ".$forCloseAmount. "</h3><br/>";
         return;
 
-
+        // ---------------------------------------
 
         $unpaid = new Premium();
         $unpaid->where("accounts_id = $ac->id AND (Paid = 0 or Paid is null) AND DueDate <= '" . getNow() . "'")->get();

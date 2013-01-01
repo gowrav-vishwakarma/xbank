@@ -2694,7 +2694,7 @@ GROUP BY p.accounts_id
      }    
 
      function vlEMIReceivedList(){
-         xDeveloperToolBars::onlyCancel("report_cont.loanEMIReceivedListForm", "cancel", "VL EMI Received List");
+         xDeveloperToolBars::onlyCancel("report_cont.vlEMIReceivedListForm", "cancel", "VL EMI Received List");
          $t=new Transaction();
          $t->select('SUM(amountCr) as TAmount');
          $t->where('created_at >=',inp('fromDate'));
