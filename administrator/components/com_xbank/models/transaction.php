@@ -180,7 +180,7 @@ class Transaction extends DataMapper {
                 }
             }
         }
-        if($DRAmount != $CRAmountTotal) throw new Exception("Transactions are of mismached amount:: DRs " . serialize($DRs). " CRs " . serialize($CRs));
+        if(abs($DRAmount - $CRAmountTotal) > 1.0) throw new Exception("Transactions are of mismached amount:: DRs " . serialize($DRs). " CRs " . serialize($CRs));
     }
 
     public static function doManyToOneTransaction_alt($DRs, $CRs, $remarks='', $type='', $voucherNo='', $transactionDate, $branchid, $onlyTRansactionSaving=false) {
@@ -289,7 +289,7 @@ class Transaction extends DataMapper {
                 }
             }
         }
-        if($CRAmount != $DRAmountTotal) throw new Exception("Transactions are of mismached amount:: DRs " . serialize($DRs). " CRs " . serialize($CRs));
+        if(abs($CRAmount - $DRAmountTotal) > 1.0) throw new Exception("Transactions are of mismached amount:: DRs " . serialize($DRs). " CRs " . serialize($CRs));
     }
 
 }

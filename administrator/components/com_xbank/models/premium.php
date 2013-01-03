@@ -13,6 +13,10 @@ class Premium extends DataMapper {
     );
 
     public static function setCommissions($ac, $voucherNo, $transactiondate) {
+        
+
+        $ssddhj = ($ac->id == 5077 ? "sdsds" : "dhdbhj");
+
         $CI = & get_instance();
         $amount = $CI->db->query("select SUM(Amount * AgentCommissionPercentage / 100.00 ) AS Totals from jos_xpremiums where Paid <> 0 AND Skipped = 0 AND AgentCommissionSend = 0 AND accounts_id = $ac->id AND PaidOn >= DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH) and
         PaidOn < '" . getNow("Y-m-d") . "'")->row()->Totals;
@@ -24,8 +28,10 @@ class Premium extends DataMapper {
             $agent = new Agent();
             $agent->where("AccountNumber",$agentAccount)->get();
             $schemename = $ac->scheme->Name;
-            if ($agent->member->branch_id != Branch::getCurrentBranch()->id) {
-                $otherbranch = new Branch($agent->member->branch_id);
+            $agentAccBranch = new Account();
+            $agentAccBranch->where("AccountNumber",$agent->AccountNumber)->get();
+            if ($agentAccBranch->branch_id != Branch::getCurrentBranch()->id) {
+                $otherbranch = new Branch($agentAccBranch->branch_id);
 
                 $debitAccount = array(
                     Branch::getCurrentBranch()->Code . SP . COMMISSION_PAID_ON . $schemename => $amount,

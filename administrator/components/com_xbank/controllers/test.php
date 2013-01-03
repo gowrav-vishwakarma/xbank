@@ -402,6 +402,84 @@ $query = "UPDATE jos_xaccounts as a JOIN jos_xschemes as s on a.schemes_id=s.id 
 
     }
 
+    function interestProvision(){
+         try {
+                $this->db->trans_begin();
+                $b= Branch::getCurrentBranch();
+        $schemes = new Scheme();
+        $schemes->where("SchemeType",ACCOUNT_TYPE_FIXED);
+        $schemes->where("InterestToAnotherAccount",0);
+        $schemes->where("InterestToAnotherAccountPercent",0)->get();
+        //$q = Doctrine_Query::create()
+        //                ->select("*")
+        //                ->from("Schemes")
+        //                ->where("SchemeType='" . ACCOUNT_TYPE_FIXED . "' and InterestToAnotherAccount=0 and InterestToAnotherAccountPercent=0");
+        //$schemes = $q->execute();
+        //$schemes = Doctrine::getTable("Schemes")->findBySchemetype(ACCOUNT_TYPE_FIXED);
+        foreach ($schemes as $sc) {
+
+        //    $q = Doctrine_Query::create()
+        //                    ->select("a.AccountNumber, a.CurrentInterest")
+        //                    ->from("Accounts a")
+        //                    ->where("a.schemes_id = $sc->id AND a.CurrentInterest > 0 and a.ActiveStatus =1 and a.MaturedStatus=0 and a.created_at < '" . getNow("Y-m-d") . "' and a.branch_id = " . $b->id);
+        //    $accounts = $q->execute();
+
+            $accounts = $this->db->query("select a.* from jos_xaccounts a where a.schemes_id = $sc->id AND a.CurrentInterest > 0 and a.ActiveStatus =1 and a.MaturedStatus=0 and a.created_at < '" . getNow("Y-m-d") . "' and a.branch_id = " . $b->id);
+
+            if ($accounts->num_rows() == 0)
+                continue;
+
+
+        //    $t = Doctrine_Query::create()
+        //                    ->select("a.CurrentInterest")
+        //                    ->from("Accounts a")
+        //                    ->where("a.schemes_id = " . $sc->id . " and a.ActiveStatus = 1 and a.MaturedStatus=0 and a.created_at < '" . getNow("Y-m-d") . "' and a.branch_id = " . $b->id);
+        //    $tot = $t->execute();
+        //    $totals = 0;
+        //    foreach ($tot as $total)
+        //        $totals +=$total->CurrentInterest;
+
+            $totals = 0;
+            $totals = $this->db->query("select sum(a.CurrentInterest) as CurrentInterest from jos_xaccounts a where a.schemes_id = " . $sc->id . " and a.ActiveStatus = 1 and a.MaturedStatus=0 and a.created_at < '" . getNow("Y-m-d") . "' and a.branch_id = " . $b->id)->row()->CurrentInterest;
+
+
+
+        //                 $this->db->select("SUM(accounts.CurrentInterest) As Totals");
+        //                 $this->db->from("accounts");
+        //                 $this->db->where("schemes_id = ".$sc->id." and ActiveStatus = 1 and LockingStatus = 0 and branch_id = ".$b->id);
+        //                 $totals=$this->db->get()->row()->Totals;
+
+            $schemeName = $sc->Name;
+
+        //                 echo "<pre>";
+        //                 print_r($accounts->result_array());
+        //                 echo "</pre>";
+
+            $creditAccount = array(
+                $b->Code . SP . INTEREST_PROVISION_ON . $schemeName => round($totals)
+            );
+
+            $debitAccount = array(
+                $b->Code . SP . INTEREST_PAID_ON . $schemeName => round($totals)
+            );
+
+        //                foreach($accounts as $acc){
+        //                    $creditAccount += array($acc->AccountNumber => $acc->CurrentInterest);
+        //                }
+
+            Transaction::doTransaction($debitAccount, $creditAccount, "FD monthly Interest Deposited in $schemeName", TRA_INTEREST_POSTING_IN_FIXED_ACCOUNT, Transaction::getNewVoucherNumber(), date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 day")));
+        }
+
+            $this->db->trans_commit();
+            log_message('error', "Closing done on $dateToday");
+            echo "<br/>Done";
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            echo $e->getMessage();
+            return;
+        }
+    }
+
 }
 
 ?>
