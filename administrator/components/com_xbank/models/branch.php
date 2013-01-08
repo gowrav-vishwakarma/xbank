@@ -99,11 +99,17 @@ class Branch extends DataMapper {
         return $b;
     }
 
-    public static function getAllSchemesForCurrentBranch($asArray=true, $forSelect=true) {
+    public static function getAllSchemesForCurrentBranch($asArray=true, $forSelect=true,  $leaveDeActivated=true) {
 //        $Acct = Doctrine::getTable('Schemes')->findByBranch_idOrBranch_id(Branch::getCurrentBranch()->id, Branch::getDefaultBranch()->id);
         $Acct = new Scheme();
+        if($leaveDeActivated){
+            $Acct->where('published',1);
+        }
+        $Acct->group_start();
         $Acct->where("branch_id", Branch::getCurrentBranch()->id);
-        $Acct->or_where("branch_id", Branch::getDefaultBranch()->id)->get();
+        $Acct->or_where("branch_id", Branch::getDefaultBranch()->id);
+        $Acct->group_end();
+        $Acct->get();
         $arr = array();
         if ($forSelect)
             $arr += array("Select_Account_Type" => '-1');
@@ -114,12 +120,18 @@ class Branch extends DataMapper {
         return $arr;
     }
 
-    public static function getAllSchemesForCurrentBranchOfType($type, $asArray=true, $forSelect=true) {
+    public static function getAllSchemesForCurrentBranchOfType($type, $asArray=true, $forSelect=true, $leaveDeActivated=true) {
 //        $Acct = Doctrine::getTable('Schemes')->findBySchemetypeAndBranch_idOrBranch_id($type, Branch::getCurrentBranch()->id, Branch::getDefaultBranch()->id);
         $Acct = new Scheme();
         $Acct->where("SchemeType", $type);
+        if($leaveDeActivated){
+            $Acct->where('published',1);
+        }
+        $Acct->group_start();
         $Acct->where("branch_id", Branch::getCurrentBranch()->id);
-        $Acct->or_where("branch_id", Branch::getDefaultBranch()->id)->get();
+        $Acct->or_where("branch_id", Branch::getDefaultBranch()->id);
+        $Acct->group_end();
+        $Acct->get();
         $arr = array();
         if ($forSelect)
             $arr += array("Select_Account_Type" => '-1');

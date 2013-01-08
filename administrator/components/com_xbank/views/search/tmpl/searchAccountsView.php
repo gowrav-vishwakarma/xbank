@@ -9,6 +9,7 @@
     <td>Credit Balance</td>
     <td>Balance(CR - DR)</td>
     <td>Under Scheme</td>
+    <td>Member ID</td>
     <td>Member Name</td>
     <td>Active Status</td>
     <td>Edit</td>
@@ -42,6 +43,7 @@
     <td><?php echo $cr;?></td>
     <td><?php echo ($cr - $dr > 0 ? $cr - $dr ." CR" : ($dr - $cr > 0 ? $dr - $cr." DR" : 0 ) );?></td>
     <td><?php echo $a->SchemeName; ?></td>
+    <td><?php echo $a->MemberID; ?></td>
     <td><?php echo $a->MemberName; ?></td>
     <td><a href="index.php?option=com_xbank&task=accounts_cont.statuschange&id=<?php echo $a->id; ?>"><?php echo ($a->ActiveStatus== 1)? 'Active': 'DeActive'; ?></a></td>
     <td><a title="Edit Account <?php echo $a->AccountNumber;?>" href="index.php?option=com_xbank&task=accounts_cont.editAccountsForm&id=<?php echo $a->id ?>">Edit</a></td>

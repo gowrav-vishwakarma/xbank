@@ -1032,6 +1032,9 @@ class report_cont extends CI_Controller {
     //function confirmTransactionEdit($voucherno, $foraccount=0) {
     function confirmTransactionEdit() {
 
+        //re("com_xbank.index","Transaction Editing has been STOPPED","error");
+
+
         $voucherno = JRequest::getVar("vn");
         $foraccount = JRequest::getVar("id");
         $transaction = new Transaction();

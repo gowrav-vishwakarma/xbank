@@ -111,8 +111,10 @@ class xDeveloperToolBars extends JObject {
     function getAccountsManagementToolBar() {
         JToolBarHelper::title('Manage Your Accounts Here', 'generic.png');
          $u = JFactory::getUser();
-        if ($u->gid < 24)
+        if ($u->gid < 24){
             JToolBarHelper::addNewX('accounts_cont.NewAccountForm', 'New Account');
+            JToolBarHelper::addNewX('accounts_cont.changeLockingStatus', 'Unlock Accounts');
+         }
         JToolBarHelper::cancel('com_xbank.index', 'cancel');
     }
 

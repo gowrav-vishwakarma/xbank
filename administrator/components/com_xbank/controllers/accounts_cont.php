@@ -1731,6 +1731,31 @@ class accounts_cont extends CI_Controller {
         echo '{"tags":' . json_encode($list) . '}';
     }
 
+
+     function changeLockingStatus(){
+        xDeveloperToolBars::onlyCancel("accounts_cont.index", "cancel", "Change Locking status of accounts here");
+        $data['acc'] = new Account();
+        $data['acc']->where("LoanAgainstAccount is not null");
+        $data['acc']->where("branch_id",  Branch::getCurrentBranch()->id)->get();
+        JRequest::setVar("layout","lockedaccounts");
+        $this->load->view('accounts.html', $data);
+        $this->jq->getHeader();
+    }
+
+    function swaplockedstatus(){
+        $id = JRequest::getVar("id");
+        $ac = new Account($id);
+//        $ac->where('id', $id)->get();
+        //$ac = Doctrine::getTable("Accounts")->findOneById($id);
+        $ac->LockingStatus = ($ac->LockingStatus == 0) ? 1 : 0;
+        $ac->save();
+        log::write(__FILE__ . " " . __FUNCTION__ . " Locking Status of $ac->AccountNumber with id $ac->id changed to $ac->LockingStatus from " . $this->input->ip_address());
+        re("accounts_cont.changeLockingStatus");
+    }
+
+
+
+
     function test() {
 
 //        $xc = new Scheme(40);

@@ -55,7 +55,7 @@ class search_cont extends CI_Controller {
      */
     function searchAccount() {
         xDeveloperToolBars::onlyCancel("search_cont.dashboard", "cancel", "Search Accounts");
-        $query = "select a.*, m.Name as MemberName, s.Name as SchemeName from jos_xaccounts a join jos_xmember m on a.member_id=m.id join jos_xschemes s on s.id=a.schemes_id ";
+        $query = "select a.*,m.id as MemberID, m.Name as MemberName, s.Name as SchemeName from jos_xaccounts a join jos_xmember m on a.member_id=m.id join jos_xschemes s on s.id=a.schemes_id ";
 //                $join=" join documents_submitted ds on a.id=ds.accounts_id join documents d on d.id=ds.documents_id";
         $where = " where ";
         $where1 = "";
@@ -120,7 +120,7 @@ class search_cont extends CI_Controller {
         $this->load->library('form');
         $this->form->open(1, 'index.php?option=com_xbank&task=search_cont.searchMember')
                 ->setColumns(2)
-                ->text("Name", "name='Name' class='input'")
+                ->text("Name or ID", "name='Name' class='input'")
                 ->textArea("Permanent Address", "name='PermanentAddress' ")
                 ->text("Age", "name='Age' class='input'")
                 ->text("Phone Nos", "name='PhoneNos' class='input'")
@@ -141,7 +141,7 @@ class search_cont extends CI_Controller {
         $where = " where";
         $where1 = "";
         if (inp("Name") != "") {
-            $where1 .=" m.Name like '%" . inp("Name") . "%' AND";
+            $where1 .=" (m.Name like '%" . inp("Name") . "%' OR m.id = '".inp('Name') ."') AND";
             $flag = 1;
         }
         if (inp("PermanentAddress") != "") {
@@ -172,7 +172,7 @@ class search_cont extends CI_Controller {
         $this->load->library('form');
         $this->form->open(1, 'index.php?option=com_xbank&task=search_cont.searchMember')
                 ->setColumns(2)
-                ->text("Name", "name='Name' class='input'")
+                ->text("Name Or ID", "name='Name' class='input'")
                 ->textArea("Permanent Address", "name='PermanentAddress' ")
                 ->text("Age", "name='Age' class='input'")
                 ->text("Phone Nos", "name='PhoneNos' class='input'")
