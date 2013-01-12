@@ -480,6 +480,19 @@ $query = "UPDATE jos_xaccounts as a JOIN jos_xschemes as s on a.schemes_id=s.id 
         }
     }
 
+    function BalanceCorrections(){
+        // TODO- add SchemeGroup in schemes table
+        // TODO- add positiveside in balancesheet head
+        $this->db->query("ALTER TABLE `jos_xbalance_sheet` ADD `positive_side` VARCHAR( 2 ) NOT NULL ");
+        $this->db->query("ALTER TABLE `jos_xbalance_sheet` ADD `is_pandl` TINYINT NOT NULL , ADD `show_sub` VARCHAR( 20 ) NOT NULL ");
+        $this->db->query("ALTER TABLE `jos_xbalance_sheet` ADD `subtract_from` VARCHAR( 2 ) NOT NULL ");
+        $this->db->query("ALTER TABLE `jos_xschemes` ADD COLUMN `SchemeGroup`  varchar(45) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL AFTER `SchemeType`;");
+        $this->db->query("UPDATE jos_xschemes SET SchemeGroup=SchemeType");
+        $this->db->query("UPDATE jos_xschemes SET SchemeGroup=Name WHERE SchemeGroup='Default'");
+
+        
+    }
+
 }
 
 ?>

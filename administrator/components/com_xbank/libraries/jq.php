@@ -31,10 +31,10 @@ class JQ {
      */
     function __construct() {
         $this->ci = & get_instance();
-        $this->_js += array('js/jquery-1.4.2.js', 'js/ui/jquery-ui-1.8.12.custom.min.js', 'js/shortkeys.js', 'js/jquery.tooltip.js', 'js/jquery.datepick.js', 'js/formvalidator/jquery.ufvalidator.js', 'js/shortcut.js', 'js/common.js','js/jquery.dataTables.js');
+        $this->_js += array('js/jquery-1.4.2.js', 'js/ui/jquery-ui-1.8.12.custom.min.js', 'js/shortkeys.js', 'js/jquery.tooltip.js', 'js/jquery.datepick.js', 'js/formvalidator/jquery.ufvalidator.js', 'js/shortcut.js', 'js/common.js','js/jquery.dataTables.js','js/TableTools.js','js/ZeroClipboard.js');
 //        $this->_js += array('js/jquery-1.4.2.js');
 //        $this->_css += array('css/jquery.css', 'css/greenstyle/jquery-ui-1.8.12.custom.css', 'css/jquery.tooltip.css', 'css/jquery.datepick.css', 'js/formvalidator/assets/reset.css', 'js/formvalidator/assets/styles.css');
-         $this->_css += array('css/jquery.css', 'css/hot-sneaks/jquery-ui-1.8.5.custom.css', 'css/jquery.tooltip.css', 'css/jquery.datepick.css', 'js/formvalidator/assets/reset.css', 'js/formvalidator/assets/styles.css');
+         $this->_css += array('css/jquery.css', 'css/hot-sneaks/jquery-ui-1.8.5.custom.css', 'css/jquery.tooltip.css', 'css/jquery.datepick.css', 'js/formvalidator/assets/reset.css', 'js/formvalidator/assets/styles.css','css/TableTools.css');
 //         $this->_css += array('css/jquery.css', 'css/star/jquery-ui-1.8.5.custom.css', 'css/jquery.tooltip.css', 'css/jquery.datepick.css', 'js/formvalidator/assets/reset.css', 'js/formvalidator/assets/styles.css');
 
     }
@@ -52,13 +52,14 @@ class JQ {
     }
 
     public function getHeader($forajax=false) {
+        if(JRequest::getVar('format')=='raw') $forajax=true;
         $document = JFactory::getDocument();
         $admin = "administrator/";
         if (strpos(JPATH_BASE, "administrator"))
             $admin = "";
+        $this->setCodeForAlertBox(".alertinwindow");
         if (!$forajax) {
             $this->setCodeForConfirmBox(".confirminwindow");
-            $this->setCodeForAlertBox(".alertinwindow");
             foreach ($this->_js as $s) {
                 $document->addScript("${admin}components/".JRequest::getVar('option')."/libraries/jq/$s");
 //                echo "<script src=" . base_url() . "system/application/libraries/jq/" . $s .
@@ -288,25 +289,28 @@ jQuery(function($) {
     }
 
     function setCodeForAlertBox($id) {
-        $script = '$("' . $id . '").each(function() {
-			var $link = $(this);
-			$link.click(function() {
-                                
-                                var dialogDiv=$("<div></div>");
-				var $dialog = $(dialogDiv)
-				.load($link.attr("href"))
-				.dialog({
-					autoOpen: false,
-					title: $link.attr("title"),
-					width: 600,
-                                        modal: true
-				});
+        $script = '
+            $("' . $id . '").each(function() {
+    			var $link = $(this);
+                $link.unbind("click");
+    			$link.click(function() {
+                                    
+                    var dialogDiv=$("<div></div>");
+    				var $dialog = $(dialogDiv)
+    				.load($link.attr("href"))
+    				.dialog({
+    					autoOpen: false,
+    					title: $link.attr("title"),
+    					width: 600,
+                                            modal: true
+    				});
 
-				$dialog.dialog("open");
+    				$dialog.dialog("open");
 
-				return false;
-			});
-		});';
+    				return false;
+    			});
+    		});
+        ';
         $this->ci->jq->addDomReadyScript($script);
     }
 

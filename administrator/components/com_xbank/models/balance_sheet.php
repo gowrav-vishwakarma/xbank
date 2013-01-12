@@ -1,5 +1,5 @@
 <?php
-class Balance_sheet extends DataMapper {
+class Balance_sheet_ extends DataMapper {
     var $table='xbalance_sheet';
     var $has_many=array(
     'schemes'=>array(

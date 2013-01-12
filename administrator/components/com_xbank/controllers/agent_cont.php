@@ -224,7 +224,7 @@ class agent_cont extends CI_Controller {
         $this->load->library("form");
         $form = $this->form->open("accountdetails", "index.php?option=com_xbank&task=agent_cont.commissionReport")
                         ->setColumns(2)
-                        ->lookupDB("Account number : $b->Code - ", "name='AccountNumber' class='input'", "index.php?option=com_xbank&task=report_cont.AccountNumber&format=raw", array("a"=>"b"), array("id", "AccountNumber","MName"), "AccountNumber")
+                        // ->lookupDB("Account number : $b->Code - ", "name='AccountNumber' class='input'", "index.php?option=com_xbank&task=report_cont.AccountNumber&format=raw", array("a"=>"b"), array("id", "AccountNumber","MName"), "AccountNumber")
                         ->lookupDB("Agent's ID", "name='Agents_Id' class='input' ", "index.php?option=com_xbank&task=accounts_cont.AgentMemberID&format=raw", array("a" => "b"), array("id", "Name", "PanNo"), "id")
                         ->dateBox("Commission Transferred from", "name='fromDate' class='input'")
                         ->dateBox("Commission Transferred till", "name='toDate' class='input'");
@@ -253,7 +253,7 @@ class agent_cont extends CI_Controller {
             $p->where('PaidOn <',inp('toDate'));
             $msg .= " till date " . inp('toDate');
         }
-
+        
         $p->get();
 
         $msg .= " :: For Agent " . $a->Name;

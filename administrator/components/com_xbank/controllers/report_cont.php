@@ -635,7 +635,7 @@ class report_cont extends CI_Controller {
                     $openingBalanceDr += $a->OpeningBalanceDr;
                     $q = "select sum(t.amountDr) as Debit from jos_xtransactions t where t.accounts_id = $a->id and t.created_at between '" . $dateFrom . "' and DATE_ADD('" . $dateTo . "',INTERVAL +1 DAY) ";
                     $Debit = $this->db->query($q)->row()->Debit;
-                    $q = "select  sum(t.amountCr) as Credit from jos_xtransactions t where t.accounts_id = $a->id and t.created_at between '" . $dateFrom . "' and DATE_ADD('" . $dateTo . "',INTERVAL +1 DAY) ";
+                    $q = "select sum(t.amountCr) as Credit from jos_xtransactions t where t.accounts_id = $a->id and t.created_at between '" . $dateFrom . "' and DATE_ADD('" . $dateTo . "',INTERVAL +1 DAY) ";
                     $Credit = $this->db->query($q)->row()->Credit;
                     if (($Debit + $openingBalanceDr) == 0 and ($Credit + $openingBalanceCr) == 0)
                         continue;
@@ -2520,17 +2520,18 @@ premiumcount >= 5
         xDeveloperToolBars::onlyCancel("report_cont.RDPremiumDueListForm", "cancel", "RD Premium Due List");
         $q ="select a.AccountNumber,m.Name, m.PermanentAddress, m.FatherName, m.PhoneNos,p.Amount,a.agents_id,a.created_at,
 
-(select count(*) as cnt from jos_xpremiums where accounts_id = a.id and DueDate BETWEEN '".inp('fromDate')."' AND '".inp('toDate')."' AND PaidOn is NULL) as premiumcount
+            (select count(*) as cnt from jos_xpremiums where accounts_id = a.id and DueDate BETWEEN '".inp('fromDate')."' AND '".inp('toDate')."' AND PaidOn is NULL) as premiumcount
 
-from jos_xaccounts a join jos_xmember m on a.member_id=m.id
-join jos_xpremiums p on a.id=p.accounts_id
-join jos_xschemes s on s.id=a.schemes_id
-where
-s.SchemeType = 'recurring' AND
-p.DueDate BETWEEN '".inp('fromDate')."' AND '".inp('toDate')."' AND
-p.PaidOn is NULL AND
-a.branch_id=".Branch::getCurrentBranch()->id."
-GROUP BY p.accounts_id
+            from jos_xaccounts a join jos_xmember m on a.member_id=m.id
+            join jos_xpremiums p on a.id=p.accounts_id
+            join jos_xschemes s on s.id=a.schemes_id
+            where
+            s.SchemeType = 'recurring' AND
+            p.DueDate BETWEEN '".inp('fromDate')."' AND '".inp('toDate')."' AND
+            p.PaidOn is NULL AND
+            a.branch_id=".Branch::getCurrentBranch()->id." AND
+            a.ActiveStatus = 1
+            GROUP BY p.accounts_id
 ";
         $data['result'] = $this->db->query($q)->result();
         JRequest::setVar("layout","rdpremiumduelist");
