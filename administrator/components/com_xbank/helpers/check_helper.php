@@ -343,7 +343,7 @@ function getReportTable($model, $heads, $fields, $totals_array,$headers, $option
                         $ft2="";
                         foreach($links[$f]['url_post'] as $var=>$val){
                             eval('$val_t = '.str_replace("#",'$m->',$val).';');
-                            $ft2.= "&".$var. "=". $val_t;
+                            $ft2.= "&".$var. "=". urlencode($val_t);
                         }
                     }else{
                         $ft2="";

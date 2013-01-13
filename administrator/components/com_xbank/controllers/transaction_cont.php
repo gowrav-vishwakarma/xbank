@@ -193,7 +193,7 @@ class transaction_cont extends CI_Controller {
 	$ac = new Account();
         $ac->where("AccountNumber",inp('AccountNumber'))->get();
         $msg = "you may proceed";
-        if ($ac->count() == 0 || inp("Amount") == "" || !is_numeric(inp("Amount")) || $ac->ActiveStatus == 0) 
+        if (!$ac->exists() || inp("Amount") == "" || !is_numeric(inp("Amount")) || $ac->ActiveStatus == 0) 
             {
             $msg = "<h1>No Account found .. proceeding may generate error </h1><br>falsefalse";
             echo $msg;

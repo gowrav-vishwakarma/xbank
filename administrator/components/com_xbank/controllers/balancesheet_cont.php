@@ -24,7 +24,12 @@ class balancesheet_cont extends CI_Controller {
         }
 
 	function getBalanceSheet($fromDate=null,$toDate=null,$branch=null){
+                if(inp('BranchId') !='' and inp('BranchId') !='%')
+                    $branch=inp('BranchId');
                 if($branch == null) $branch= Branch::getCurrentBranch()->id;    
+                
+                if(inp('BranchId')=='%') $branch=null;
+
                 $toDate = getNow('Y-m-d');
                 $fromDate = '1970-01-01';
                 if(inp('fromDate'))
@@ -34,7 +39,9 @@ class balancesheet_cont extends CI_Controller {
 
                 $this->session->set_userdata("fromdate", $fromDate);
                 $this->session->set_userdata("todate", $toDate);
+                $this->session->set_userdata("branch", $branch);
         
+                xDeveloperToolBars::onlyCancel("report_cont.balanceSheetForm", "cancel", "BalanceSheet " . date('d-M-Y',strtotime($fromDate)) . " To " . date('d-M-Y',strtotime($toDate)));
 
                 $data['balancesteet']=array();
                 $heads=new BalanceSheet();
@@ -111,7 +118,7 @@ class balancesheet_cont extends CI_Controller {
                         $data['RT'] .= $this->load->view('balancesheet.html',$viewdata,true);
                 }
 
-                $data['form']=$this->balanceSheetForm();
+                $data['form']="";//$this->balanceSheetForm();
 
                 JRequest::setVar("layout","balancesheet");
                 $this->load->view('balancesheet.html',$data);
@@ -210,7 +217,7 @@ class balancesheet_cont extends CI_Controller {
 
         function digin(){
             $func="digin".inp('digtype');
-            $branch=Branch::getCurrentBranch()->id;
+            $branch=$this->session->userdata('branch');
             $this->$func($branch);
             
         }
@@ -327,10 +334,8 @@ class balancesheet_cont extends CI_Controller {
             $t->select("SUM(amountDr) as amountDr, SUM(amountCr) as amountCr");
             $t->include_related('account/scheme/balancesheet','subtract_from');
             $t->include_related('account','AccountNumber');
-            $t->include_related('account','OpeningBalanceDr');
-            $t->include_related('account','OpeningBalanceCr');
             $t->where("created_at <",$dateOn);
-            $t->where_related("account/scheme","Name",urldecode(inp('digid')));
+            $t->where_related("account/scheme","Name like '%".str_replace(" ", "%", urldecode(inp('digid'))). "%'");
             if($branch!=null)
                 $t->where("branch_id",$branch);
             $t->group_start();
@@ -346,43 +351,34 @@ class balancesheet_cont extends CI_Controller {
             $arr=array();
 
             $a=new Account();
+            // $a->select('SUM(OpeningBalanceDr) as OpeningBalanceDr');
+            // $a->select('SUM(OpeningBalanceCr) as OpeningBalanceCr');
+            // $a->select('AccountNumber');
             $a->include_related('scheme/balancesheet','Head');
             $a->include_related('scheme/balancesheet','subtract_from');
-            $a->include_related_count('transactions','trans_count');
             if($branch!=null)
                 $a->where("branch_id",$branch);
             $a->group_start();
             $a->where("ActiveStatus","1");
             $a->or_where("affectsBalanceSheet","1");
             $a->group_end();
-            $a->where('created_at <',$dateOn);
-            $a->having('trans_count',0);
+            $a->where_related('scheme','Name',urldecode(inp('digid')));
+            // $a->group_by('scheme_Name');
             $a->get();
-            
-            foreach($a as $aa){
-                $Dr=$Cr=0;
-                $Dr = $aa->OpeningBalanceDr;
-                $Cr = $aa->OpeningBalanceCr;
-                $amount= ${$aa->scheme_balancesheet_subtract_from} - ${($aa->scheme_balancesheet_subtract_from == 'Dr' ? 'Cr':'Dr')};
-                if($amount!=0){
-                    $arr[] = array(
-                        'AccountNumber' => $aa->AccountNumber,
-                        'AccountNumberURL' => urlencode($aa->AccountNumber),
-                        'Title' => 'AccountNumber',
-                        'amountDr' => $Dr,
-                        'amountCr' => $Cr,
-                        'amount' => $amount,
-                        'side' => ($amount > 0 ? $aa->scheme_balancesheet_subtract_from : ($aa->scheme_balancesheet_subtract_from == 'Dr' ? 'Cr':'Dr') ),
-                        'Head' => $aa->scheme_balancesheet_Head,
-                        'SubtractFrom' => $aa->scheme_balancesheet_subtract_from
-                    );
-                }
-            }
-            
+
+            $account_found_in_tr = array();
             foreach($t as $tt){
-                $Dr=$Cr=0;
-                $Dr = $tt->amountDr + $tt->account_OpeningBalanceDr;
-                $Cr = $tt->amountCr + $tt->account_OpeningBalanceCr;
+                $Dr=$tt->amountDr;
+                $Cr=$tt->amountCr;
+                foreach($a as $aa){
+                    if($aa->AccountNumber == $tt->account_AccountNumber){
+                        $Dr= $tt->amountDr + $aa->OpeningBalanceDr;
+                        $Cr= $tt->amountCr + $aa->OpeningBalanceCr;
+                        $account_found_in_tr[] = $aa->AccountNumber;
+                    }
+                }
+                // $Dr = $tt->amountDr + $tt->account_OpeningBalanceDr;
+                // $Cr = $tt->amountCr + $tt->account_OpeningBalanceCr;
                 $amount= ${$tt->account_scheme_balancesheet_subtract_from} - ${($tt->account_scheme_balancesheet_subtract_from == 'Dr' ? 'Cr':'Dr')};
                 if($amount!=0){
                     $arr[] = array(
@@ -398,6 +394,28 @@ class balancesheet_cont extends CI_Controller {
                     );
                 }
             }
+
+        foreach($a as $aa){
+            if(array_search($aa->AccountNumber, $account_found_in_tr) === false){
+                    $Dr=$aa->OpeningBalanceDr;
+                    $Cr=$aa->OpeningBalanceCr;
+                    $amount= ${$aa->scheme_balancesheet_subtract_from} - ${($aa->scheme_balancesheet_subtract_from == 'Dr' ? 'Cr':'Dr')};
+                    if($amount !=0){
+                        $arr[] = array(
+                            'AccountNumber' => $aa->AccountNumber,
+                            'AccountNumberURL' => urlencode($aa->AccountNumber),
+                            'Title' => 'AccountNumber',
+                            'amountDr' => $Dr,
+                            'amountCr' => $Cr,
+                            'amount' => $amount,
+                            'side' => ($amount > 0 ? $aa->scheme_balancesheet_subtract_from : ($aa->scheme_balancesheet_subtract_from == 'Dr' ? 'Cr':'Dr') ),
+                            'Head' => $aa->scheme_balancesheet_Head,
+                            'SubtractFrom' => $aa->scheme_balancesheet_subtract_from
+                        );
+                    }
+                
+            }
+        }
 
         $data['report'] = getReporttable(arrayToObject($arr),             //model
                 array("Account Number", 'amount','side'),       //heads
@@ -543,6 +561,7 @@ class balancesheet_cont extends CI_Controller {
             $a = new Account();
             $a->where('AccountNumber',urldecode(inp('digid')));
             $a->get();
+            // echo $a->check_last_query();
 
             $opb=$a->getOpeningBalance($this->session->userdata('fromdate'));
             $clb=$a->getOpeningBalance($dateOn);
@@ -560,14 +579,14 @@ class balancesheet_cont extends CI_Controller {
                 array('amountDr','amountCr'),        //totals_array
                 array(),        //headers
                 array('sno'=>true),     //options
-                "<h3 align='center'> Statement for Account $a->AccountNumber from $fromDate to $toDate ... </h3><h4 align='right'>Opening Balance - $opb_val $opb_side ... </h4><h4 align='right'>Closing Balance - $clb_val $clb_side</h4>",     //headerTemplate
+                "<h3 align='center'> Statement for Account $a->AccountNumber from $fromDate to $toDate ... </h3><h4 align='right'>Opening Balance : $opb_val $opb_side ... </h4><h4 align='right'>Closing Balance : $clb_val $clb_side</h4>",     //headerTemplate
                 '',      //tableFooterTemplate
                 "<h4 align='right'>Closing Balance : $clb_val $clb_side</h4>",      //footerTemplate,
                 array('~date("d-M-Y",strtotime(#created_at))'=>array(
                                               'task'=>'report_cont.transactionDetails',
                                               'class'=>'alertinwindow',
                                               'title'=>'_blank',
-                                              'url_post'=>array('vn'=>'#voucher_no','format'=>'"raw"','digid'=>'#SchemeNameURL')
+                                              'url_post'=>array('vn'=>'#voucher_no','format'=>'"raw"')
                                               )
                       )//Links array('field'=>array('task'=>,'class'=>''))
                 );

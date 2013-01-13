@@ -72,6 +72,14 @@ class Account extends DataMapper {
         ),
         'OtherCharges' => array(
             'get_rules' => array('otherCharges')
+        ),
+        'AccountNumber' => array(
+            'label'=> 'Account Number',
+            'rules' => array('required','unique','always_valildate','alpha_dash_dot')
+        ),
+        'member' => array(
+            'label' => 'Member',
+            'rules' => array('required','always_valildate')
         )
     );
 

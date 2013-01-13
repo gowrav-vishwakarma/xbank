@@ -31,7 +31,7 @@ class JQ {
      */
     function __construct() {
         $this->ci = & get_instance();
-        $this->_js += array('js/jquery-1.4.2.js', 'js/ui/jquery-ui-1.8.12.custom.min.js', 'js/shortkeys.js', 'js/jquery.tooltip.js', 'js/jquery.datepick.js', 'js/formvalidator/jquery.ufvalidator.js', 'js/shortcut.js', 'js/common.js','js/jquery.dataTables.js','js/TableTools.js','js/ZeroClipboard.js');
+        $this->_js += array('js/jquery-1.4.2.js', 'js/ui/jquery-ui-1.8.12.custom.min.js', 'js/shortkeys.js', 'js/jquery.tooltip.js', 'js/jquery.datepick.js', 'js/formvalidator/jquery.ufvalidator.js', 'js/shortcut.js', 'js/common.js','js/jquery.dataTables.js','js/TableTools.js','js/ZeroClipboard.js','js/jQuery.printElement.js');
 //        $this->_js += array('js/jquery-1.4.2.js');
 //        $this->_css += array('css/jquery.css', 'css/greenstyle/jquery-ui-1.8.12.custom.css', 'css/jquery.tooltip.css', 'css/jquery.datepick.css', 'js/formvalidator/assets/reset.css', 'js/formvalidator/assets/styles.css');
          $this->_css += array('css/jquery.css', 'css/hot-sneaks/jquery-ui-1.8.5.custom.css', 'css/jquery.tooltip.css', 'css/jquery.datepick.css', 'js/formvalidator/assets/reset.css', 'js/formvalidator/assets/styles.css','css/TableTools.css');
@@ -73,12 +73,24 @@ class JQ {
         }
         // DOM READY SCRIPTS
         $domReady = "";
+
+        $printContentScript="
+            $('<button>Print</button>')
+                .appendTo('#element-box')
+                .css({'position':'absolute','top':'0px','right':'0px'})
+                .click(function(){
+                    $('#element-box').printElement();
+                })
+                ;
+        ";
+        $this->addDomReadyScript($printContentScript);
+
         $domReady .="
-if (typeof jQuery !== 'undefined') {
-	jQuery.noConflict();
-}
-jQuery(function($) {
-";
+                if (typeof jQuery !== 'undefined') {
+                	jQuery.noConflict();
+                }
+                jQuery(function($) {
+                ";
         if ($this->_domReady != '') {
             $domReady .= "$(document).ready(function() {\n";
             foreach ($this->_domReady as $d) {

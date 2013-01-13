@@ -490,8 +490,11 @@ $query = "UPDATE jos_xaccounts as a JOIN jos_xschemes as s on a.schemes_id=s.id 
         $this->db->query("UPDATE jos_xschemes SET SchemeGroup=SchemeType");
         $this->db->query("UPDATE jos_xschemes SET SchemeGroup=Name WHERE SchemeGroup='Default'");
 
-        
+        $this->db->query("UPDATE jos_xaccounts SET AccountNumber = REPLACE(AccountNumber,' ','')");
+        $this->ad->query('DELETE FROM jos_xpremiums WHERE accounts_id in (0,5461,5968)');
+
     }
+
 
 }
 

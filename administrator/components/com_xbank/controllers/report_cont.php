@@ -209,11 +209,11 @@ class report_cont extends CI_Controller {
         //function transactionDetails($voucher, $foraccount) {
         //Staff::accessibleTo(USER);
         $voucher = JRequest::getVar("vn");
-       $foraccount = JRequest::getVar("id");
+        $foraccount = JRequest::getVar("id");
         $arr = array();
         $Transactions = new Transaction();
         $Transactions->where('voucher_no', $voucher);
-        $Transactions->where('branch_id', Branch::getCurrentBranch()->id)->get();
+        $Transactions->where('branch_id', (JRequest::getVar('branch_id',false) == false ? Branch::getCurrentBranch()->id : inp('branch_id')))->get();
         //$Transactions = Doctrine::getTable("Transactions")->findByVoucher_noAndBranch_id($voucher, Branch::getCurrentBranch()->id);
         $i = 1;
         foreach ($Transactions as $t) {
@@ -248,7 +248,7 @@ class report_cont extends CI_Controller {
             $account = new Account($t->accounts_id);
 //            $account->where('id',$t->accounts_id)->get();
             $data['accountID'] = $account->id;
-            $arr[] = array("Sno" => $i++, "Voucher" => $t->voucher_no, "Account" => $account->AccountNumber, "DR" => $t->amountDr, "CR" => $t->amountCr);
+            $arr[] = array("Sno" => $i++, "Voucher" => ($t->display_voucher_no==0 ? $t->voucher_no: $t->display_voucher_no), "Account" => $account->AccountNumber, "DR" => $t->amountDr, "CR" => $t->amountCr);
         }
         $data['foraccount'] = $foraccount;
         $data['results'] = $arr;
@@ -374,11 +374,11 @@ class report_cont extends CI_Controller {
         xDeveloperToolBars::onlyCancel("report_cont.dashboard", "cancel", "View BalanceSheets");
 
         $this->load->library("form");
-        $form = $this->form->open("balanceSheet", "index.php?option=com_xbank&task=report_cont.getBalanceSheet")
+        $form = $this->form->open("balanceSheet", "index.php?option=com_xbank&task=balancesheet_cont.getBalanceSheet")
                         ->setColumns(2)
                         ->dateBox("Balance Sheet From", "name='fromDate' class='input'")
-                        ->dateBox("Balance Sheet till", "name='toDate' class='input'")
-                        ->checkbox("Print To PDF", "name='printToPDF' value=1");
+                        ->dateBox("Balance Sheet till", "name='toDate' class='input'");
+                        // ->checkbox("Print To PDF", "name='printToPDF' value=1");
         if (Branch::getCurrentBranch()->Code == "DFL") {
             //                    $branchNames=$this->db->query("select Name from branch")->result();
             $form = $form->select("Select Branch", "name='BranchId'", Branch::getAllBranchNames())

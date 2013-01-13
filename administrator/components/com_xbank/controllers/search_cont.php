@@ -55,7 +55,7 @@ class search_cont extends CI_Controller {
      */
     function searchAccount() {
         xDeveloperToolBars::onlyCancel("search_cont.dashboard", "cancel", "Search Accounts");
-        $query = "select a.*,m.id as MemberID, m.Name as MemberName, s.Name as SchemeName from jos_xaccounts a join jos_xmember m on a.member_id=m.id join jos_xschemes s on s.id=a.schemes_id ";
+        $query = "select a.*,m.id as MemberID, m.Name as MemberName, s.Name as SchemeName from jos_xaccounts a left join jos_xmember m on a.member_id=m.id join jos_xschemes s on s.id=a.schemes_id ";
 //                $join=" join documents_submitted ds on a.id=ds.accounts_id join documents d on d.id=ds.documents_id";
         $where = " where ";
         $where1 = "";
@@ -77,7 +77,7 @@ class search_cont extends CI_Controller {
             $flag = 1;
         }
         if (inp("BranchId") != "%") {
-            $where1 .=" m.branch_id =" . inp("BranchId") . " AND";
+            $where1 .=" a.branch_id =" . inp("BranchId") . " AND";
             $flag = 1;
         }
         if ($flag == 1)
@@ -110,6 +110,7 @@ class search_cont extends CI_Controller {
 
 
         $data['contents'] = $this->form->get();
+//        echo $query;
         JRequest::setVar("layout", "searchAccountsView");
         $this->load->view('search.html', $data);
         $this->jq->getHeader();

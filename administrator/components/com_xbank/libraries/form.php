@@ -33,7 +33,7 @@
 		$enterScript='$("#'.$id.'").keypress(function (e) {
 					    if (e.which == 13) {
 					        var $targ = $(e.target);
-					        if (/*!$targ.is("textarea") && */ !e.shiftKey && !$targ.is(":button,:submit")) {
+					        if (/*!$targ.is("textarea") && */ !$targ.is(":button,:submit")) {
 					            $targ.blur();
 					            var focusNext = false;
 					            $(this).find(":input:visible:not([disabled],[readonly]), a").each(function(){

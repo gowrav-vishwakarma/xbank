@@ -199,6 +199,7 @@ class xDeveloperToolBars extends JObject {
         	JToolBarHelper::addNewX('report_cont.premiumCrudForm', 'Premiums CRUD');
 //             JToolBarHelper::addNewX('utility_cont.selectRdAccount', 'Adjust RD Premiums');
         JToolBarHelper::addNewX('utility_cont.loanEmiChangeForm', 'Change Loan Account EMI');
+        JToolBarHelper::addNew('utility_cont.errorReport', 'Bug Finder');
         JToolBarHelper::cancel('com_xbank.index', 'cancel');
     }
     
