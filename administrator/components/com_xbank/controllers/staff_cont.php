@@ -32,7 +32,7 @@ class staff_cont extends CI_Controller {
             $s = new Staff($id);
         else
             $s=new Staff();
-        xDeveloperToolBars::onlyCancel("staff_cont.dashboard", "cancel", "Create Staff");
+        xDeveloperToolBars::onlyCancel("staff_cont.dashboard", "cancel", "Create Staff In Current Branch");
 
         $b = Branch::getCurrentBranch()->id;
         //$this->jq->addInfo("Staff Member Account Details");

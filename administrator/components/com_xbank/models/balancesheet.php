@@ -42,6 +42,7 @@ class BalanceSheet extends DataMapper {
         $a->or_where("affectsBalanceSheet","1");
         $a->group_end();
         $a->get();
+        // if($head==3) echo $a->check_last_query();
 
         return arrayToObject(array(
                 array(
@@ -116,6 +117,7 @@ class BalanceSheet extends DataMapper {
         $t->group_end();
         $t->group_by('account_scheme_SchemeGroup');
         $t->get();
+        // if($head==3) echo $t->check_last_query();
 
         $a=new Account();
         $a->select('SUM(OpeningBalanceDr) as OpeningBalanceDr');
@@ -132,7 +134,7 @@ class BalanceSheet extends DataMapper {
         $a->where_related('scheme/balancesheet','id',$head);
         $a->group_by('scheme_SchemeGroup');
         $a->get();
-        // $a->check_last_query();
+        // if($head==3) echo $a->check_last_query();
 
         $arr=array();
             
@@ -148,7 +150,7 @@ class BalanceSheet extends DataMapper {
                 }
             }
 
-
+            if($dr-$cr != 0)
             $arr[] = array(
                     'SchemeGroup' => ($tt->account_scheme_SchemeGroup),
                     'Title' => 'SchemeGroup',
@@ -162,14 +164,15 @@ class BalanceSheet extends DataMapper {
 
         foreach($a as $aa){
             if(array_search($aa->scheme_SchemeGroup, $schemegroup_found_in_tr)===false){
-                $arr[] = array(
-                    'SchemeGroup' => ($aa->scheme_SchemeGroup),
-                    'Title' => 'SchemeGroup',
-                    'amountDr' => $aa->OpeningBalanceDr,
-                    'amountCr' => $aa->OpeningBalanceCr,
-                    'Head' => $aa->scheme_balancesheet_Head,
-                    'SubtractFrom' => $aa->scheme_balancesheet_subtract_from
-                );
+                if($aa->OpeningBalanceDr !=0 or $aa->OpeningBalanceCr!=0)
+                    $arr[] = array(
+                        'SchemeGroup' => ($aa->scheme_SchemeGroup),
+                        'Title' => 'SchemeGroup',
+                        'amountDr' => $aa->OpeningBalanceDr,
+                        'amountCr' => $aa->OpeningBalanceCr,
+                        'Head' => $aa->scheme_balancesheet_Head,
+                        'SubtractFrom' => $aa->scheme_balancesheet_subtract_from
+                    );
             }
         }
 
@@ -226,6 +229,7 @@ class BalanceSheet extends DataMapper {
                     $schemetype_found_in_tr[] = $aa->scheme_SchemeType;
                 }
 
+            if($dr-$cr != 0)
             $arr[] = array(
                     'SchemeType' => $tt->account_scheme_SchemeType,
                     'Title' => 'SchemeType',
@@ -238,14 +242,15 @@ class BalanceSheet extends DataMapper {
 
         foreach($a as $aa){
             if(array_search($aa->scheme_SchemeType, $schemetype_found_in_tr)===false){
-                $arr[] = array(
-                    'SchemeType' => ($aa->scheme_SchemeType),
-                    'Title' => 'SchemeType',
-                    'amountDr' => $aa->OpeningBalanceDr,
-                    'amountCr' => $aa->OpeningBalanceCr,
-                    'Head' => $aa->scheme_balancesheet_Head,
-                    'SubtractFrom' => $aa->scheme_balancesheet_subtract_from
-                );
+                if($aa->OpeningBalanceDr !=0 and $aa->OpeningBalanceCr!=0)
+                    $arr[] = array(
+                        'SchemeType' => ($aa->scheme_SchemeType),
+                        'Title' => 'SchemeType',
+                        'amountDr' => $aa->OpeningBalanceDr,
+                        'amountCr' => $aa->OpeningBalanceCr,
+                        'Head' => $aa->scheme_balancesheet_Head,
+                        'SubtractFrom' => $aa->scheme_balancesheet_subtract_from
+                    );
             }
         }
 
@@ -301,7 +306,7 @@ class BalanceSheet extends DataMapper {
                     $cr=$tt->amountCr + $aa->OpeningBalanceCr;
                     $schemename_found_in_tr[] = $aa->scheme_Name;
                 }
-
+            if($dr-$cr != 0)
             $arr[] = array(
                     'SchemeName' => $tt->account_scheme_Name,
                     'Title' => 'SchemeName',
@@ -315,14 +320,15 @@ class BalanceSheet extends DataMapper {
 
         foreach($a as $aa){
             if(array_search($aa->scheme_Name, $schemename_found_in_tr)===false){
-                $arr[] = array(
-                    'SchemeName' => ($aa->scheme_Name),
-                    'Title' => 'SchemeName',
-                    'amountDr' => $aa->OpeningBalanceDr,
-                    'amountCr' => $aa->OpeningBalanceCr,
-                    'Head' => $aa->scheme_balancesheet_Head,
-                    'SubtractFrom' => $aa->scheme_balancesheet_subtract_from
-                );
+                if($aa->OpeningBalanceDr !=0 and $aa->OpeningBalanceCr!=0)
+                    $arr[] = array(
+                        'SchemeName' => ($aa->scheme_Name),
+                        'Title' => 'SchemeName',
+                        'amountDr' => $aa->OpeningBalanceDr,
+                        'amountCr' => $aa->OpeningBalanceCr,
+                        'Head' => $aa->scheme_balancesheet_Head,
+                        'SubtractFrom' => $aa->scheme_balancesheet_subtract_from
+                    );
             }
         }
 
@@ -379,7 +385,7 @@ class BalanceSheet extends DataMapper {
                     $cr=$tt->amountCr + $aa->OpeningBalanceCr;
                     $accounts_found_in_tr[] = $aa->AccountNumber;
                 }
-
+            if($dr-$cr != 0)
             $arr[] = array(
                     'AccountNumber' => $tt->account_AccountNumber,
                     'Title' => 'AccountNumber',
@@ -393,14 +399,15 @@ class BalanceSheet extends DataMapper {
 
         foreach($a as $aa){
             if(array_search($aa->AccountNumber, $accounts_found_in_tr)===false){
-                $arr[] = array(
-                    'AccountNumber' => ($aa->AccountNumber),
-                    'Title' => 'AccountNumber',
-                    'amountDr' => $aa->OpeningBalanceDr,
-                    'amountCr' => $aa->OpeningBalanceCr,
-                    'Head' => $aa->scheme_balancesheet_Head,
-                    'SubtractFrom' => $aa->scheme_balancesheet_subtract_from
-                );
+                if($aa->OpeningBalanceDr !=0 and $aa->OpeningBalanceCr!=0)
+                    $arr[] = array(
+                        'AccountNumber' => ($aa->AccountNumber),
+                        'Title' => 'AccountNumber',
+                        'amountDr' => $aa->OpeningBalanceDr,
+                        'amountCr' => $aa->OpeningBalanceCr,
+                        'Head' => $aa->scheme_balancesheet_Head,
+                        'SubtractFrom' => $aa->scheme_balancesheet_subtract_from
+                    );
             }
         }
 

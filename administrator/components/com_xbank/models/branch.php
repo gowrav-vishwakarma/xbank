@@ -102,8 +102,14 @@ class Branch extends DataMapper {
     public static function getAllSchemesForCurrentBranch($asArray=true, $forSelect=true) {
 //        $Acct = Doctrine::getTable('Schemes')->findByBranch_idOrBranch_id(Branch::getCurrentBranch()->id, Branch::getDefaultBranch()->id);
         $Acct = new Scheme();
+        // if(inp('type'))
+        $Acct->where("SchemeType", $type);
+        $Acct->group_start();
         $Acct->where("branch_id", Branch::getCurrentBranch()->id);
-        $Acct->or_where("branch_id", Branch::getDefaultBranch()->id)->get();
+        $Acct->or_where("branch_id", Branch::getDefaultBranch()->id);
+        $Acct->group_end();
+        $Acct->get();
+
         $arr = array();
         if ($forSelect)
             $arr += array("Select_Account_Type" => '-1');
@@ -117,9 +123,14 @@ class Branch extends DataMapper {
     public static function getAllSchemesForCurrentBranchOfType($type, $asArray=true, $forSelect=true) {
 //        $Acct = Doctrine::getTable('Schemes')->findBySchemetypeAndBranch_idOrBranch_id($type, Branch::getCurrentBranch()->id, Branch::getDefaultBranch()->id);
         $Acct = new Scheme();
+        $Acct->where('published',1);
         $Acct->where("SchemeType", $type);
+        $Acct->group_start();
         $Acct->where("branch_id", Branch::getCurrentBranch()->id);
-        $Acct->or_where("branch_id", Branch::getDefaultBranch()->id)->get();
+        $Acct->or_where("branch_id", Branch::getDefaultBranch()->id);
+        $Acct->group_end();
+        $Acct->get();
+        // $Acct->check_last_query();
         $arr = array();
         if ($forSelect)
             $arr += array("Select_Account_Type" => '-1');
@@ -136,8 +147,13 @@ class Branch extends DataMapper {
 //        $Acct = Doctrine::getTable('Schemes')->findByNameAndBranch_idOrBranch_id($Name, Branch::getCurrentBranch()->id, Branch::getDefaultBranch()->id);
         $Acct = new Scheme();
         $Acct->where("Name", $Name);
+        $Acct->where('published',1);
+        $Acct->group_start();
         $Acct->where("branch_id", Branch::getCurrentBranch()->id)->get();
-        $Acct->or_where("branch_id", Branch::getDefaultBranch()->id)->get();
+         $Acct->or_where("branch_id", Branch::getDefaultBranch()->id);
+        $Acct->group_end();
+        $Acct->get();
+        
         $arr = array();
         if ($forSelect)
             $arr += array("Select_Account_Type" => '-1');

@@ -2,7 +2,7 @@
 <table width="100%" class="adminlist">
     <thead>
         <tr>
-            <th class="title" width="10">#</th>
+            <th class="title" width="10">S. No.</th>
             <th class="title" width="15">Running Mode</th>
             <th class="title">Branch Name</th>
             <th class="title">Balance Sheet</th>
@@ -20,7 +20,7 @@
             $published = JHTML::_('grid.published', $b, $i);
         ?>
             <tr class="row<?php echo $i % 2 ?>">
-                <td><?php echo $b->id; ?></td>
+                <td><?php echo $i; ?></td>
                 <td align="center"><?php echo $published ?>
                 <?php if (Branch::getCurrentBranch()->Code != 'DFL') {
                 ?>

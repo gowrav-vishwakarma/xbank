@@ -54,15 +54,15 @@ class xDeveloperToolBars extends JObject {
             if ($xc->getkey('transaction_toolbar'))
                     JToolBarHelper :: customX('transaction_cont.index', 'transactions', 'transactions', 'Transactions', false, false);
             if ($xc->getkey('report_toolbar'))
-                    JToolBarHelper :: custom('report_cont.dashboard', 'reports', 'reports', 'Reports', false, false);
+                    JToolBarHelper :: custom('report_cont.dashboard', 'reports', 'reports', 'Deposit Reports', false, false);
             if ($xc->getkey('setdate_toolbar'))
                     JToolBarHelper :: customX('setdate_cont.setDateTimeForm', 'setdate', 'setdate', 'SetDate', false, false);
                     
-            JToolBarHelper::addNew('report_cont.new_reports', 'New Reports');
+            JToolBarHelper::addNew('report_cont.new_reports', 'Loan Reports');
             JToolBarHelper::addNewX('inventory_cont.dashboard', 'Inventory');
                     
              if ($u->username != 'admin')
-                     JToolBarHelper :: customX('customreport_cont.index', 'config', 'config', 'Custom Report', false, false);
+                     JToolBarHelper :: customX('customreport_cont.index', 'config', 'config', 'General Report', false, false);
             if($u->gid >= 24)
                      JToolBarHelper :: customX('documents_cont.documentForm', 'config', 'config', 'Documents', false, false);
 
@@ -99,6 +99,8 @@ class xDeveloperToolBars extends JObject {
         JToolBarHelper::title('Manage Branch Agent Here', 'generic.png');
         JToolBarHelper::addNewX('agent_cont.commissionReportFrom', 'Agent Commission Report');
         JToolBarHelper::addNewX('agent_cont.createAgentform', 'New Agent');
+        JToolBarHelper::addNewX('report_2_cont.agentWiseReportForm', 'AgentWise<br/> Report');
+        JToolBarHelper::addNewX('report_2_cont.agentReportDeadAccountForm', 'Agent Report<br/> Dead Account');
         JToolBarHelper::cancel('com_xbank.index', 'cancel');
     }
 
@@ -151,23 +153,27 @@ class xDeveloperToolBars extends JObject {
 
     function getReportManagementToolBar() {
         JToolBarHelper::title('View Reports Here', 'generic.png');
-        JToolBarHelper::addNewX('report_cont.balanceSheetForm', 'Balance<br/> Sheet');
+        $report = new report();
+        $report->where("published",1);
+        $report->where_in('id',array(12,16,17));
+        $report->get();
+        // echo $report->check_last_query();
+
+        JToolBarHelper::title('View other Reports Here', 'generic.png');
+        foreach($report as $r){
+            JToolBarHelper::addNewX("customreport_cont.showTestForm_$r->id", str_replace(" ", "<br/>", "$r->ReportTitle"));
+        }
+        
         //JToolBarHelper::addNewX('report_cont.pandlForm', 'Profit & Loss A/c');
-        JToolBarHelper::addNewX('report_cont.accountstatementform', 'Account<br/> Statement');
         //JToolBarHelper::addNewX('report_cont.AccountBook', 'Account Books');
-        JToolBarHelper::addNewX('report_cont.trialbalanceForm', 'Trial<br/> Balance');
-        JToolBarHelper::addNewX('report_cont.shareCertificateForm', 'Share<br/> Certificate');
-        JToolBarHelper::addNewX('report_cont.loan_report', 'Loan<br/> Report');
+        // JToolBarHelper::addNewX('report_cont.loan_report', 'Loan<br/> Report');
+        JToolBarHelper::addNewX('report_cont.deposit_insurrance_due_report_form', 'Deposit Insurance <br/>Due Account Details');
+        JToolBarHelper::addNewX('report_cont.RDPremiumDueListForm', 'RD Premium<br/> Due List');
+       
         JToolBarHelper::addNewX('report_cont.allschemedetailsform', 'Periodic<br/> Account Details');
         //JToolBarHelper::addNewX('report_cont.premiums_report', 'Premium Report');
-        JToolBarHelper::addNewX('report_cont.loanAccountReportForm', 'Loan <br/>Detailed/Premium<br/> Report');
-        JToolBarHelper::addNewX('report_cont.loan_insurrance_report_form', 'Loan <br/>Insurrance<br/> Report');
         JToolBarHelper::addNewX('report_cont.rdPremiumReceivedListForm', 'RD Premium <br/>Received List');
-        JToolBarHelper::addNewX('report_cont.vlEMIReceivedListForm', 'VL EMI<br/> Received List');
-        JToolBarHelper::addNewX('report_cont.plAndOtherEMIReceivedListForm', 'PL & Other EMI<br/> Received List');
-        JToolBarHelper::addNewX('report_cont.tdsReportForm', 'TDS<br/> Report');
-        JToolBarHelper::addNewX('report_2_cont.agentWiseReportForm', 'AgentWise<br/> Report');
-        JToolBarHelper::addNewX('report_2_cont.agentReportDeadAccountForm', 'Agent Report<br/> Dead Account');
+         JToolBarHelper::addNewX('report_cont.tdsReportForm', 'TDS<br/> Report');
 
 
         JToolBarHelper::cancel('com_xbank.index', 'cancel');
@@ -182,11 +188,20 @@ class xDeveloperToolBars extends JObject {
 
     function getCustomReportsToolBar(){
         $report = new report();
-        $report->where("published",1)->get();
+        $report->where("published",1);
+        $report->where_not_in('id',array(12,13,16,17));
+        $report->get();
+        // echo $report->check_last_query();
+
         JToolBarHelper::title('View other Reports Here', 'generic.png');
         foreach($report as $r){
-            JToolBarHelper::addNewX("customreport_cont.showTestForm_$r->id", "$r->ReportTitle");
+            JToolBarHelper::addNewX("customreport_cont.showTestForm_$r->id", str_replace(" ", "<br/>", "$r->ReportTitle"));
         }
+
+        JToolBarHelper::addNewX('report_cont.balanceSheetForm', 'Balance<br/> Sheet');
+        JToolBarHelper::addNewX('report_cont.accountstatementform', 'Account<br/> Statement');
+        JToolBarHelper::addNewX('report_cont.trialbalanceForm', 'Trial<br/> Balance');
+        JToolBarHelper::addNewX('report_cont.shareCertificateForm', 'Share<br/> Certificate');
         JToolBarHelper::cancel("com_xbank.index", 'cancel');
 
     }
@@ -205,15 +220,29 @@ class xDeveloperToolBars extends JObject {
     
     function getNewReportManagementToolBar(){
         JToolBarHelper::title('View Reports Here', 'generic.png');
+        $report = new report();
+        $report->where("published",1);
+        $report->where_in('id',array(13));
+        $report->get();
+        // echo $report->check_last_query();
+
+        JToolBarHelper::title('View other Reports Here', 'generic.png');
+        foreach($report as $r){
+            JToolBarHelper::addNewX("customreport_cont.showTestForm_$r->id", str_replace(" ", "<br/>", "$r->ReportTitle"));
+        }
+        
         JToolBarHelper::addNewX('report_cont.loan_insurrance_due_report_form', 'Loan Insurrance <br/>Due List');
-        JToolBarHelper::addNewX('report_cont.deposit_insurrance_due_report_form', 'Deposit Insurance <br/>Due Account Details');
         JToolBarHelper::addNewX('report_cont.loanEMIDueListForm', 'Loan EMI <br/>Due List');
         JToolBarHelper::addNewX('report_cont.plEMIDueListForm', 'PL EMI <br/>Due List');
         JToolBarHelper::addNewX('report_cont.loanNPAListForm', 'NPA List');
         JToolBarHelper::addNewX('report_cont.loanHardRecoveryListForm', 'Hard <br/>Recovery List');
-        JToolBarHelper::addNewX('report_cont.RDPremiumDueListForm', 'RD Premium<br/> Due List');
         JToolBarHelper::addNewX('report_cont.loanReceiptReportForm', 'Loan <br/>Dispatch');
         JToolBarHelper::addNewX('report_2_cont.loanDocumentReportForm', 'Loan Document<br/> Report');
+        JToolBarHelper::addNewX('report_cont.loanAccountReportForm', 'Loan <br/>Detailed/Premium<br/> Report');
+        JToolBarHelper::addNewX('report_cont.loan_insurrance_report_form', 'Loan <br/>Insurrance<br/> Report');
+        JToolBarHelper::addNewX('report_cont.vlEMIReceivedListForm', 'VL EMI<br/> Received List');
+        JToolBarHelper::addNewX('report_cont.plAndOtherEMIReceivedListForm', 'PL & Other EMI<br/> Received List');
+       
         JToolBarHelper::cancel('com_xbank.index', 'cancel');
     }
     

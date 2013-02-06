@@ -23,8 +23,8 @@ class search_cont extends CI_Controller {
      * sends the link to {@link searchAccount}
      * - generate form
      */
-    function searchAccountForm() {
-
+    function searchAccountForm($return=false) {
+        if(!$return)
         xDeveloperToolBars::onlyCancel("search_cont.dashboard", "cancel", "Search Accounts");
         global $com_params;
         $accountTypeArray = explode(",", $com_params->get('ACCOUNT_TYPES'));
@@ -36,17 +36,23 @@ class search_cont extends CI_Controller {
         $this->load->library('form');
         $form = $this->form->open("one", 'index.php?option=com_xbank&task=search_cont.searchAccount')
                         ->setColumns(2)
-                        ->text("Account Number", "name='AccountNumber' class='input'")
+                        // ->text("Account Number", "name='AccountNumber' class='input'")
+                        ->lookupDB("Account Number", "name='AccountNumber' class='input ui-autocomplete-input' hint='use % sign for unknown values like SB%%024'", "index.php?option=com_xbank&task=transaction_cont.AccountNumber&format=raw",
+                        array("a"=>"b"),
+                        array("AccountNumber", "Name", "Balance", "Scheme"), "AccountNumber")
                         ->select("Account Type", "name='SchemeType'", $accountTypeArray)
-                        ->lookupDB("Member ID", "name='UserID' class='input' onblur='javascript:$(\"#memberDetailsL\").load(\"index.php?option=com_xbank&task=accounts_cont.memberDetails&id=\"+this.value);$(\"#accountsDetailsF\").load(\"index.php?option=com_xbank&task=accounts_cont.accountsDetails&id=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.MemberID&format=raw", array("a" => "b"), array("id", "Name", "FatherName", "BranchName"), "id")
+                        ->lookupDB("Member ID", "name='UserID' class='input' hint='Search account belongs to this member' ", "index.php?option=com_xbank&task=accounts_cont.MemberID&format=raw", array("a" => "b"), array("id", "Name", "FatherName", "BranchName"), "id")
                         ->select("Active Status", "name='ActiveStatus'", array("Any" => '%', "Active" => '1', "DeActive" => '0'))
                         ->select("Select Branch", "name='BranchId'", Branch::getAllBranchNames())
                         ->_()
                         ->submit('Search');
         $data['contents'] = $this->form->get();
-        JRequest::setVar("layout", "accountsearchform");
-        $this->load->view('search.html', $data);
-        $this->jq->getHeader();
+        if(!$return){
+            JRequest::setVar("layout", "accountsearchform");
+            $this->load->view('search.html', $data);
+            $this->jq->getHeader();
+        }else
+            return $data['contents'];
         //$this->load->view('template', $data);
     }
 
@@ -55,6 +61,10 @@ class search_cont extends CI_Controller {
      */
     function searchAccount() {
         xDeveloperToolBars::onlyCancel("search_cont.dashboard", "cancel", "Search Accounts");
+
+        if(inp('AccountNumber')=='' and inp('UserID')=='')
+            re('search_cont.searchAccountForm','Either AccountNumber or UserID must be filled','error');
+
         $query = "select a.*,m.id as MemberID, m.Name as MemberName, s.Name as SchemeName from jos_xaccounts a left join jos_xmember m on a.member_id=m.id join jos_xschemes s on s.id=a.schemes_id ";
 //                $join=" join documents_submitted ds on a.id=ds.accounts_id join documents d on d.id=ds.documents_id";
         $where = " where ";
@@ -98,18 +108,8 @@ class search_cont extends CI_Controller {
         $i = 1;
         //setInfo("SEARCH ACCOUNT", "");
 
-        $form = $this->form->open("one", 'index.php?option=com_xbank&task=search_cont.searchAccount')
-                        ->setColumns(2)
-                        ->text("Account Number", "name='AccountNumber' class='input'")
-                        ->select("Account Type", "name='SchemeType' ", $accountTypeArray)
-                        ->lookupDB("Member ID", "name='UserID' class='input' onblur='javascript:$(\"#memberDetailsL\").load(\"index.php?option=com_xbank&task=accounts_cont.memberDetails&id=\"+this.value);$(\"#accountsDetailsF\").load(\"index.php?option=com_xbank&task=accounts_cont.accountsDetails&id=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.MemberID&format=raw", array("a" => "b"), array("id", "Name", "FatherName", "BranchName"), "id")
-                        ->select("Active Status", "name='ActiveStatus'", array("Any" => '%', "Active" => '1', "DeActive" => '0'))
-                        ->select("Select Branch", "name='BranchId'", Branch::getAllBranchNames())
-                        ->_()
-                        ->submit('Search');
 
-
-        $data['contents'] = $this->form->get();
+        $data['contents'] = $this->searchAccountForm(true);
 //        echo $query;
         JRequest::setVar("layout", "searchAccountsView");
         $this->load->view('search.html', $data);

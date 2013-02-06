@@ -24,6 +24,7 @@ class balancesheet_cont extends CI_Controller {
         }
 
 	function getBalanceSheet($fromDate=null,$toDate=null,$branch=null){
+        $arr=array();
                 if(inp('BranchId') !='' and inp('BranchId') !='%')
                     $branch=inp('BranchId');
                 if($branch == null) $branch= Branch::getCurrentBranch()->id;    
@@ -50,7 +51,7 @@ class balancesheet_cont extends CI_Controller {
                 
                 $LT_SUM=0;
                 $RT_SUM=0;
-                $PANDL = $this->getPandLClosingValue($toDate,$branch);
+                $PANDL = $this->getPandLClosingValue($fromDate,$toDate,$branch);
 
                 foreach($heads as $h){
                         $clbs = $h->getClosingBalance($toDate,$branch);
@@ -180,13 +181,15 @@ class balancesheet_cont extends CI_Controller {
                 $this->jq->getHeader();
         }
 
-        function getPandLClosingValue($dateOn=null,$branch=null){
+        function getPandLClosingValue($dateFrom=null,$dateOn=null,$branch=null){
+
                 $dateOn = date("Y-m-d", strtotime(date("Y-m-d", strtotime($dateOn)) . " +1 DAY"));
-                
+                // echo $dateOn;
                 $t=new Transaction();
                 $t->select("SUM(amountDr) as amountDr, SUM(amountCr) as amountCr");
                 $t->include_related('account/scheme/balancesheet','Head');
                 $t->include_related('account/scheme/balancesheet','subtract_from');
+                $t->where("created_at >=",$dateFrom);
                 $t->where("created_at <",$dateOn);
                 $t->where_related("account/scheme/balancesheet","is_pandl",1);
                 if($branch!='')
@@ -198,9 +201,9 @@ class balancesheet_cont extends CI_Controller {
                 $t->get();
 
                 if(($t->amountDr - $t->amountCr) < 0)
-                    $title="Net Loss";
-                else
                     $title="Net Profit";
+                else
+                    $title="Net Loss";
 
                 $arr = array(
                     'PandL' => $title,
@@ -351,9 +354,9 @@ class balancesheet_cont extends CI_Controller {
             $arr=array();
 
             $a=new Account();
-            // $a->select('SUM(OpeningBalanceDr) as OpeningBalanceDr');
-            // $a->select('SUM(OpeningBalanceCr) as OpeningBalanceCr');
-            // $a->select('AccountNumber');
+            $a->select('OpeningBalanceDr');
+            $a->select('OpeningBalanceCr');
+            $a->select('AccountNumber');
             $a->include_related('scheme/balancesheet','Head');
             $a->include_related('scheme/balancesheet','subtract_from');
             if($branch!=null)
@@ -586,7 +589,7 @@ class balancesheet_cont extends CI_Controller {
                                               'task'=>'report_cont.transactionDetails',
                                               'class'=>'alertinwindow',
                                               'title'=>'_blank',
-                                              'url_post'=>array('vn'=>'#voucher_no','format'=>'"raw"')
+                                              'url_post'=>array('vn'=>'#voucher_no','format'=>'"raw"','tr_type'=>'#transaction_type_id','branch_id'=>'#branch_id')
                                               )
                       )//Links array('field'=>array('task'=>,'class'=>''))
                 );

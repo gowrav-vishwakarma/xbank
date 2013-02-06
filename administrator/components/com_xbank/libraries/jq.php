@@ -76,7 +76,7 @@ class JQ {
 
         $printContentScript="
             $('<button>Print</button>')
-                .appendTo('#element-box')
+                .appendTo('#header-box')
                 .css({'position':'absolute','top':'0px','right':'0px'})
                 .click(function(){
                     $('#element-box').printElement();

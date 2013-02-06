@@ -51,7 +51,7 @@ foreach($transactions as $t){
     	<td ><?php echo $t->created_at; ?></td>
 <!--        <td><?php  ?></td>-->
         <td ><center><?php echo $t->Narration; ?></center></td>
-        <td><a class='alertinwindow' href="index.php?option=com_xbank&task=report_cont.transactionDetails&vn=<?php echo $t->voucher_no?>&format=raw"><?php echo ($t->display_voucher_no ? $t->display_voucher_no : $t->voucher_no) ?></a></td>
+        <td><a class='alertinwindow' Title='Transaction type' href="index.php?option=com_xbank&task=report_cont.transactionDetails&vn=<?php echo $t->voucher_no?>&format=raw&tr_type=<?php echo $t->transaction_type_id?>"><?php echo ($t->display_voucher_no ? $t->display_voucher_no : $t->voucher_no) ?></a></td>
         <td><center><?php echo $t->amountDr; ?></center></td>
         <td><center><?php echo $t->amountCr; ?></center></td>
         <td><?php echo (($DRtotal + $debitopeningbalance) - ($CRtotal + $creditopeningbalance)) > 0 ? (($DRtotal + $debitopeningbalance) - ($CRtotal + $creditopeningbalance))." Dr" : (($CRtotal + $creditopeningbalance) - ($DRtotal + $debitopeningbalance))." Cr"; ?></td>

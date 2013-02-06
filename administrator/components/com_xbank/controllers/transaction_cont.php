@@ -190,7 +190,11 @@ class transaction_cont extends CI_Controller {
      function confirmDeposit() {
         
 //        $ac = Account::getAccountForCurrentBranch(inp('AccountNumber'));
-	$ac = new Account();
+        if(trim(inp('AccountNumber'))==''){
+            echo "<h1>Account Number is must, cannot procced</h1> <div class='falsefalse'></div>";
+            return;
+        }
+    	$ac = new Account();
         $ac->where("AccountNumber",inp('AccountNumber'))->get();
         $msg = "you may proceed";
         if (!$ac->exists() || inp("Amount") == "" || !is_numeric(inp("Amount")) || $ac->ActiveStatus == 0) 

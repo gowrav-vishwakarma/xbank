@@ -237,12 +237,21 @@ class agent_cont extends CI_Controller {
 
     function commissionReport(){
         xDeveloperToolBars::onlyCancel("agent_cont.commissionReportFrom", "cancel", "View Commission Payable to Agents");
-        $msg = "";
+        $msg = "RD Commissions ";
+
         $a=new Agent(inp('Agents_Id'));
 
         $p=new Premium();
         $p->include_related('account','AccountNumber');
+        $p->include_related('account','created_at');
         $p->include_related('account/member','Name');
+        
+        $p->include_related('account/agent','id');
+        $p->include_related('account/agent/member','Name');
+        $p->include_related('account/agent/member','FatherName');
+        $p->include_related('account/agent/member','PermanentAddress');
+        $p->include_related('account/agent/member','PhoneNos');
+
         $p->where('AgentCommissionSend',1);
         $p->where_related('account/agent','id',inp('Agents_Id'));
         if(inp('fromDate')){
@@ -254,20 +263,76 @@ class agent_cont extends CI_Controller {
             $msg .= " till date " . inp('toDate');
         }
         
+        $p->where_related('account','branch_id',Branch::getCurrentBranch()->id);
         $p->get();
 
         $msg .= " :: For Agent " . $a->Name;
         $data['report'] = getReporttable($p,             //model
-                array("Account Number",        "Member Name",       "PaidOn","Commission", "Phone Number","Amount Due","Due Date","Agent","Dealer"),       //heads
-                array('account_AccountNumber','account_member_Name','PaidOn','~ (#Amount * #AgentCommissionPercentage / 100.0)', 'member_PhoneNos','Amount','DueDate','agent_member_Name','dealer_DealerName'),       //fields
-                array('Amount'),        //totals_array
-                array(),        //headers
+                array("Account Number", "Opening Date",       "Member Name",       "PaidOn","Commission",'TDS','NetCommission',"Amount Deposit","Commission Pay Date"),       //heads
+                array('account_AccountNumber','account_created_at', 'account_member_Name','PaidOn','~ (#Amount * #AgentCommissionPercentage / 100.0)','~ (#Amount * #AgentCommissionPercentage * 10 / 10000.0)','~ ((#Amount * #AgentCommissionPercentage / 100.0) - (#Amount * #AgentCommissionPercentage * 10 / 10000.0))', 'Amount','DueDate'),       //fields
+                array('~ (#Amount * #AgentCommissionPercentage / 100.0)','Amount','~ (#Amount * #AgentCommissionPercentage * 10 / 10000.0)','~ ((#Amount * #AgentCommissionPercentage / 100.0) - (#Amount * #AgentCommissionPercentage * 10 / 10000.0))'),        //totals_array
+                array(
+                    "Agent Name" => "account_agent_member_Name",
+                    "Father / Husband Name" =>"account_agent_member_FatherName",
+                    "Agent Code" => 'account_agent_id',
+                    "Address "=> "account_agent_member_PermanentAddress",
+                    "Phone Number"=>"account_agent_member_PhoneNos"
+                    
+                    
+                    ),        //headers
                 array('sno'=>true),     //options
                 "<h3>". $msg . "</h3>",     //headerTemplate
                 '',      //tableFooterTemplate
                 ""      //footerTemplate
                 );
         // $p->check_last_query();
+
+        $fd_tra=new Transaction();
+
+        $fd_tra->include_related('account','AccountNumber');
+        $fd_tra->include_related('referenceaccount','AccountNumber');
+        $fd_tra->include_related('account','created_at');
+        $fd_tra->include_related('referenceaccount','RdAmount');
+        $fd_tra->include_related('referenceaccount/member','Name');
+        
+        $fd_tra->include_related('referenceaccount/agent','id');
+        $fd_tra->include_related('referenceaccount/agent/member','Name');
+        $fd_tra->include_related('referenceaccount/agent/member','FatherName');
+        $fd_tra->include_related('referenceaccount/agent/member','PermanentAddress');
+        $fd_tra->include_related('referenceaccount/agent/member','PhoneNos');
+
+        $fd_tra->where_related('referenceaccount/agent','id',inp('Agents_Id'));
+        $fd_tra->where_related('account/scheme','Name','Saving Account');
+        $fd_tra->where_in('transaction_type_id',array(6,11,13,2)); //HARD CODED TODO REMOVE HARD CODE
+        $fd_tra->where_related("referenceaccount/scheme",'SchemeType <>','Recurring');
+        $fd_tra->where_related("referenceaccount",'branch_id',Branch::getCurrentBranch()->id);
+            
+        if(inp('fromDate')){
+            $fd_tra->where('created_at >=',inp('fromDate'));
+            $msg = "FD Commissions From date " . inp('fromDate');
+        }
+        if(inp('toDate')){
+            $fd_tra->where('created_at <',inp('toDate'));
+            $msg .= " till date " . inp('toDate');
+        }
+
+
+        $fd_tra->get_iterated();
+
+        // $fd_tra->check_last_query();
+
+        $data['report'] .= getReporttable($fd_tra,             //model
+                array("Account Number",       "Member Name",       "Account Opening Date","Commission",'TDS','NetCommission','Amount Deposit'),       //heads
+                array('referenceaccount_AccountNumber', 'referenceaccount_member_Name','created_at','amountCr','~(#amountCr * 10 / 100.0)','~((#amountCr) - (#amountCr * 10 / 100.0))','referenceaccount_RdAmount'),       //fields
+                array('~(#amountCr * 10 / 100.0)','amountCr','~ (#Amount * #AgentCommissionPercentage * 10 / 100.0)','~((#amountCr) - (#amountCr * 10 / 100.0))','referenceaccount_RdAmount'),        //totals_array
+                array(),        //headers
+                array('sno'=>true),     //options
+                "<h3>". $msg . "</h3>",     //headerTemplate
+                '',      //tableFooterTemplate
+                ""      //footerTemplate
+                );
+
+
         JRequest::setVar("layout","generalreport");
         $this->load->view('report.html', $data);
         $this->jq->getHeader();

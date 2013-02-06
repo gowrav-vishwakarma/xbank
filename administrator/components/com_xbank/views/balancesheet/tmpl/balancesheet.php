@@ -1,5 +1,5 @@
 <?php echo $form; ?>
-<center><h2>Bhawani Credit Co-Operative Society<br/>Balance Sheet</h2></center>
+<center><h2>Bhawani Credit Co-Operative Society<br/>Balance Sheet [ <?php echo Branch::getCurrentBranch()->Name; ?> ]</h2></center>
 <h3 align='center'>From <?php echo date('d-M-Y',strtotime($this->session->userdata('fromdate'))) ?> to <?php echo date('d-M-Y',strtotime($this->session->userdata('todate'))); ?></h3>
 <table width='100%' border='1' id='bal'>
 	<tr>

@@ -131,8 +131,8 @@ class accounts_cont extends CI_Controller {
         }
 
 
-
-        $data['tabs'] = $this->jq->getTab(1);
+        $data['tabs'] = "<h3 align='center'>Create Account Here and Then Edit from 'Account Search' to set/update Opening Balances</h3>";
+        $data['tabs'] .= $this->jq->getTab(1);
         JRequest::setVar("layout", "accountopenform");
         $this->load->view('accounts.html', $data);
         $this->jq->getHeader();

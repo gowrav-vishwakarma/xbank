@@ -309,7 +309,7 @@ function getReportTable($model, $heads, $fields, $totals_array,$headers, $option
     foreach ($model as $m):
         $html .="<tr >";
         if ($option['sno'] == true) {
-            $html .=" <td>".sprintf('%03d',$sno++)."</td>";
+            $html .=" <td>".sprintf('%06d',$sno++)."</td>";
         }
         foreach ($fields as $f) {
             if(strpos($f,"~") !==false){
@@ -369,7 +369,7 @@ function getReportTable($model, $heads, $fields, $totals_array,$headers, $option
         }
         foreach ($fields as $f) {
             if (in_array($f, $totals_array)) {
-                $html .= "<th align='left'>" . $sum[$f] . "</th>";
+                $html .= "<th align='left'>" . round($sum[$f],2) . "</th>";
             } else {
                 $html .= "<td>&nbsp;</td>";
             }
@@ -436,4 +436,13 @@ function objectToArray($object)
     $array = json_decode($json, true);
 
     return $array;
+}
+
+function nextDate($date=null,$is_date=false){
+    if($date==null) $date=getNow('Y-m-d');
+    if($is_date==false)
+        $date=inp($date);
+    
+    $date = date("Y-m-d", strtotime(date("Y-m-d", strtotime($date)) . " +1 DAY"));    
+    return $date;
 }

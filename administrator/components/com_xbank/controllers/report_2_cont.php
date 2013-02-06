@@ -109,7 +109,7 @@ class report_2_cont extends CI_Controller {
         $a->include_related('account/agent/member','FatherName');
         $a->include_related('account/agent/member','PermanentAddress');
         $a->include_related('account/agent/member','PhoneNos');
-         $a->include_related('account/member','Name');
+        $a->include_related('account/member','Name');
         $a->include_related('account/member','FatherName');
         $a->include_related('account/member','PermanentAddress');
         $a->include_related('account/member','PhoneNos');
@@ -117,7 +117,8 @@ class report_2_cont extends CI_Controller {
 	$a->where('DueDate >=' ,inp('fromDate'));
 	$a->where('DueDate <=', inp('toDate'));
 	$a->where('PaidOn is null');
-	
+	$a->where_related('account','branch_id',Branch::getCurrentBranch()->id);
+    $a->where_related('account','ActiveStatus',1);
 	$a->where_related('account/agent','id',inp('agent_id'));
 	$a->group_by('account_id');
 	$a->get();
