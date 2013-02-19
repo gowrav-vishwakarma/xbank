@@ -721,9 +721,9 @@ class report_cont extends CI_Controller {
         if (!$ac->result_count())
             re("report_cont.accountstatementform","The Account Number ".inp("AccountNumber")." does not exist. Try Again","error");
         if (inp("fromDate") && inp("toDate")) {
-            $query = $this->db->query("select * from jos_xtransactions t join jos_xtransaction_type ty on t.transaction_type_id=ty.id where t.accounts_id =" . $ac->id . " and created_at between '" . inp("fromDate") . "' and DATE_ADD('" . inp("toDate") . "',INTERVAL +1 DAY) order by created_at")->result();
+            $query = $this->db->query("select * from jos_xtransactions t /*  join jos_xtransaction_type ty on t.transaction_type_id=ty.id */ where t.accounts_id =" . $ac->id . " and created_at between '" . inp("fromDate") . "' and DATE_ADD('" . inp("toDate") . "',INTERVAL +1 DAY) order by created_at")->result();
         } else {
-            $query = $this->db->query("select * from jos_xtransactions t join jos_xtransaction_type ty on t.transaction_type_id=ty.id  where t.accounts_id =" . $ac->id . " order by created_at")->result();
+            $query = $this->db->query("select * from jos_xtransactions t /*  join jos_xtransaction_type ty on t.transaction_type_id=ty.id */  where t.accounts_id =" . $ac->id . " order by created_at")->result();
         }
 
         $openingBalances = $ac->getOpeningBalance(inp("fromDate"));
@@ -1073,18 +1073,26 @@ class report_cont extends CI_Controller {
         //$conn = Doctrine_Manager::connection();
         $DR = 0;
         $CR = 0;
-        $flag = true;
+        $drarr=array();
+        $flag = 1;
         foreach ($transaction as $t) {
             $DR += $this->input->post("DR_$i");
+            $drarr[] =$this->input->post("DR_$i");
             $CR += $this->input->post("CR_$i");
-            if ($this->input->post("created_at_$i") == '0000-00-00 00:00:00' || $this->input->post("created_at_$i") == "")
-                $flag = false;
+            
+            if($this->input->post("created_at_$i") == "")
+                    $flag = 2;
+            if ($this->input->post("created_at_$i") == '0000-00-00 00:00:00' )
+                $flag = 3;
             $i++;
         }
-        if ($DR != $CR || $flag == false) {
+        if ($DR != $CR || $flag != 1) {
+            echo "<pre>";
+            print_r($_POST);
+            echo "</pre>";
             echo "<h2>WARNING : You have made either of the mistakes</h2>
                 <br>Credit Balance should be equal to the debit balance for a transaction.<br>
-                The date of transaction is not entered correctly.";
+                The date of transaction is not entered correctly. Dr = $DR, Cr = $CR, flag = $flag, $i";
         } else {
             try {
                 $this->db->trans_begin();

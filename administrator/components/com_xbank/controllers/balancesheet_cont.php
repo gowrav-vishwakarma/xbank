@@ -183,8 +183,7 @@ class balancesheet_cont extends CI_Controller {
 
         function getPandLClosingValue($dateFrom=null,$dateOn=null,$branch=null){
 
-                $dateOn = date("Y-m-d", strtotime(date("Y-m-d", strtotime($dateOn)) . " +1 DAY"));
-                // echo $dateOn;
+                $dateOn = date("Y-m-d", strtotime(date("Y-m-d", strtotime($dateOn)) . " +1 DAY"));    
                 $t=new Transaction();
                 $t->select("SUM(amountDr) as amountDr, SUM(amountCr) as amountCr");
                 $t->include_related('account/scheme/balancesheet','Head');

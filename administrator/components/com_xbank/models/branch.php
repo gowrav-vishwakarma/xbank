@@ -54,6 +54,7 @@ class Branch extends DataMapper {
             'join_table' => 'jos_xlog',
             'other_field' => 'branch'
         ),
+       
     );
     var $validation = array(
         'Name' => array(

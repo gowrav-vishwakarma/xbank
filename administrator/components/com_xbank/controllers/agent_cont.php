@@ -18,6 +18,7 @@ class agent_cont extends CI_Controller {
         $a->include_related("member","PermanentAddress");
         $a->include_related("member","PhoneNos");
         $a->where_related("member","branch_id",Branch::getCurrentBranch()->id);
+        $a->where("ActiveStatus",1);
         $a->get();
         
 
@@ -323,8 +324,8 @@ class agent_cont extends CI_Controller {
 
         $data['report'] .= getReporttable($fd_tra,             //model
                 array("Account Number",       "Member Name",       "Account Opening Date","Commission",'TDS','NetCommission','Amount Deposit'),       //heads
-                array('referenceaccount_AccountNumber', 'referenceaccount_member_Name','created_at','amountCr','~(#amountCr * 10 / 100.0)','~((#amountCr) - (#amountCr * 10 / 100.0))','referenceaccount_RdAmount'),       //fields
-                array('~(#amountCr * 10 / 100.0)','amountCr','~ (#Amount * #AgentCommissionPercentage * 10 / 100.0)','~((#amountCr) - (#amountCr * 10 / 100.0))','referenceaccount_RdAmount'),        //totals_array
+                array('referenceaccount_AccountNumber', 'referenceaccount_member_Name','created_at','~round((#amountCr + (#amountCr * 11.112/100.0)),0)','~(round((#amountCr + (#amountCr * 11.112/100.0)),0) * 10 / 100.0)','amountCr','referenceaccount_RdAmount'),       //fields
+                array('~round((#amountCr + (#amountCr * 11.112/100.0)),0)','amountCr','~ (#Amount * #AgentCommissionPercentage * 10 / 100.0)','~(round((#amountCr + (#amountCr * 11.112/100.0)),0) * 10 / 100.0)','referenceaccount_RdAmount'),        //totals_array
                 array(),        //headers
                 array('sno'=>true),     //options
                 "<h3>". $msg . "</h3>",     //headerTemplate

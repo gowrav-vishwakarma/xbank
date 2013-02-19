@@ -107,6 +107,8 @@ class xDeveloperToolBars extends JObject {
     function getStaffManagementToolBar() {
         JToolBarHelper::title('Manage Branch Staff Here', 'generic.png');
         JToolBarHelper::addNewX('staff_cont.createStaffform', 'New Staff');
+        JToolBarHelper::addNewX('staff_cont.markAttendance', 'Mark Attendance');
+        JToolBarHelper::addNewX('staff_cont.markpaidholidaysForm', 'Mark Paid Holidays');
         JToolBarHelper::cancel('com_xbank.index', 'cancel');
     }
 

@@ -483,7 +483,7 @@ class Member_cont extends CI_Controller {
     function confirmMemberEditForm() {
         $id = JRequest::getVar("id");
         $m = new Member($id);
-        $m->where('PanNo', inp('PanNo'))->get();
+        $m->where('PanNo', inp('PanNo'))->get(1);
         if ($m->result_count > 0) {
             echo "<h2>Pan Number is a unique value you cannot repeat it ..</h2>falsefalse";
 //            return;
@@ -604,7 +604,7 @@ class Member_cont extends CI_Controller {
 
 //lose any special characters in the filename
                 $fileName = ereg_replace("[^A-Za-z0-9.]", "-", $fileName);
-                $fileName = 'sig_' . $m->id . "." . $uploadedFileExtension;
+                $fileName = 'sig_' . $m->id . "." . strtolower($uploadedFileExtension);
 
 //always use constants when making file paths, to avoid the possibilty of remote file inclusion
                 $uploadPath = JPATH_SITE . SIGNATURE_FILE_PATH . $fileName;
