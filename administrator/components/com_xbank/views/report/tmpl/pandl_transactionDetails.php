@@ -1,6 +1,6 @@
 <table width="100%" border="1" class="ui-widget" cellpadding="3">
   <tr class="ui-widget-header">
-    <td colspan="5"><div align="center"><strong style="font-size: 16px">DETAILS OF TRANSACTIONS </strong></div></td>
+    <td colspan="5"><div align="center"><strong style="font-size: 16px">DETAILS OF TRANSACTIONS [<?php echo $tr_type ?>]</strong></div></td>
   </tr>
   <tr class="ui-widget-header">
     <td><div align="center"><strong style="font-size: 16px">Sno</strong></div></td>
@@ -23,5 +23,5 @@
   }
   ?>
 </table>
-<a class="alertinwindow" title="Delete Transaction" href="index.php?option=com_xbank&task=report_cont.confirmTransactionDelete&vn=<?php echo $r['Voucher'] ?>&id=<?php echo $accountID; ?>&format=raw"  >DELETE</a>
-<a class="alertinwindow" title="Edit Transaction" href="index.php?option=com_xbank&task=report_cont.confirmTransactionEdit&vn=<?php echo $r['Voucher'] ?>&id=<?php echo $accountID; ?>&format=raw"  >EDIT TRANSACTION</a>
+<a class="alertinwindow" title="Delete Transaction" href="index.php?option=com_xbank&task=report_cont.confirmTransactionDelete&vn=<?php echo $r['Voucher_tech'] ?>&id=<?php echo $accountID; ?>&format=raw"  >DELETE</a>
+<a class="alertinwindow" title="Edit Transaction" href="index.php?option=com_xbank&task=report_cont.confirmTransactionEdit&vn=<?php echo $r['Voucher_tech'] ?>&id=<?php echo $accountID; ?>&format=raw"  >EDIT TRANSACTION</a>

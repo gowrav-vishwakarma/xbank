@@ -6,7 +6,7 @@ class Agent extends DataMapper {
     var $has_many = array(
         'accountsopenned' => array(
             'class' => 'account',
-            'join_self_as' => 'agent',
+            'join_self_as' => 'agents',
             'join_table' => 'jos_xaccounts',
             'other_field' => 'agent'
         ),

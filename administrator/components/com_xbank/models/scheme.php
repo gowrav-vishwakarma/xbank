@@ -9,7 +9,7 @@ class Scheme extends DataMapper {
             'other_field'=>'schemes'
             ),
         'balancesheet'=>array(
-            'class'=>'balance_sheet',
+            'class'=>'balancesheet',
             'join_other_as'=>'balance_sheet',
             'join_table'=>'jos_xschemes',
             'other_field'=>'schemes'

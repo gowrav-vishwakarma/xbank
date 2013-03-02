@@ -8,8 +8,8 @@ if (($ac->CurrentBalanceCr + inp("Amount")) > ($ac->RdAmount)) {
     echo "<h2>Total Deposit is Exeeding then required Deposit</h2>";
     echo "<h2>Total Amount Required : " . ($ac->RdAmount) . "</h2>";
     echo "<h2>Current Amount after Depositing total amount : " . ($ac->CurrentBalanceCr + inp("Amount")) . "</h2>";
-    echo "falsefalse";
-//    return;
+    echo "false";
+    return;
 }
 
 $msg.="<h3>Current Account position</h3>";
@@ -29,36 +29,12 @@ $msg .= formatDrCr($debitAccount, $creditAccount);
 //                    $msg .="<h2> $PaidPremiums premiums paid </h2>";
 
 $msg.="<h3>New Transactions To Happen</h3>";
-
-
-if ($ac->branch->id != Branch::getCurrentBranch()->id) {
-    $debitAccount = array(
-        $debitToAccount => inp("Amount"),
-    );
-    $creditAccount = array(
-        $ac->branch->Code . SP . BRANCH_AND_DIVISIONS . SP . "for" . SP . Branch::getCurrentBranch()->Code => inp("Amount"),
-    );
-
-    $debitAccount += array(
-        Branch::getCurrentBranch()->Code . SP . BRANCH_AND_DIVISIONS . SP . "for" . SP . $ac->branch->Code => inp("Amount"),
-    );
-    $creditAccount += array(
-        $ac->AccountNumber => inp('Amount'),
-    );
-} else {
-    $debitAccount = array(
-        $debitToAccount => inp('Amount')
-    );
-    $creditAccount = array(
-        $ac->AccountNumber => inp('Amount')
-    );
-}
-
-
-
-
-
-//----------------------------------------------------
+$debitAccount = array(
+    $debitToAccount => inp('Amount')
+);
+$creditAccount = array(
+    $ac->AccountNumber => inp('Amount')
+);
 
 
 

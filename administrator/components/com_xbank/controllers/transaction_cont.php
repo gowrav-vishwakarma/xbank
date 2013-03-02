@@ -93,7 +93,7 @@ class transaction_cont extends CI_Controller {
            
         }
         
-        if(file_exists("/home/bhawani/public_html/soft/administrator/components/com_xbank/signatures/sig_".$ac->member->id.".JPG"))
+        if(file_exists("/public_html/soft/administrator/components/com_xbank/signatures/sig_".$ac->member->id.".JPG"))
 	            echo $msg . "<br/>Specimen Signature <img src='http://www.bhawanicredit.com/soft" . SIGNATURE_FILE_PATH . "sig_" . $ac->member->id . ".JPG' />";
 	        else
 	        	echo $msg . "<br/>Specimen Signature <img src='http://www.bhawanicredit.com/soft" . SIGNATURE_FILE_PATH . "sig_" . $ac->member->id . ".jpg' />";
@@ -190,10 +190,14 @@ class transaction_cont extends CI_Controller {
      function confirmDeposit() {
         
 //        $ac = Account::getAccountForCurrentBranch(inp('AccountNumber'));
-	$ac = new Account();
+        if(trim(inp('AccountNumber'))==''){
+            echo "<h1>Account Number is must, cannot procced</h1> <div class='falsefalse'></div>";
+            return;
+        }
+    	$ac = new Account();
         $ac->where("AccountNumber",inp('AccountNumber'))->get();
         $msg = "you may proceed";
-        if ($ac->count() == 0 || inp("Amount") == "" || !is_numeric(inp("Amount")) || $ac->ActiveStatus == 0) 
+        if (!$ac->exists() || inp("Amount") == "" || !is_numeric(inp("Amount")) || $ac->ActiveStatus == 0) 
             {
             $msg = "<h1>No Account found .. proceeding may generate error </h1><br>falsefalse";
             echo $msg;
@@ -440,18 +444,17 @@ class transaction_cont extends CI_Controller {
 
                 if (inp("DRAccount_$i") != "") {
                     $debitAccount +=array(inp("DRAccount_$i") => inp("dramount_$i"));
-                    $this->JVDebitAccount(inp("DRAccount_$i"), inp("dramount_$i"));
+//                    $this->JVDebitAccount(inp("DRAccount_$i"), inp("dramount_$i"));
                 }
                 if (inp("CRAccount_$i") != "") {
                     $creditAccount +=array(inp("CRAccount_$i") => inp("cramount_$i"));
-                    $this->JVCreditAccount(inp("CRAccount_$i"), inp("cramount_$i"));
+//                    $this->JVCreditAccount(inp("CRAccount_$i"), inp("cramount_$i"));
                 }
             }
 
 //            $voucherNo=Transactions::getNewVoucherNumber();
             Transaction::doTransaction($debitAccount, $creditAccount, inp("Naration"), TRA_JV_ENTRY, $voucherNo);
-      		 $this->db->trans_commit();
-               re("transaction_cont.jv","Transaction done successfully");
+       $this->db->trans_commit();
         } catch (Exception $e) {
             echo $e->getMessage();
             $this->db->trans_rollback();
@@ -461,8 +464,10 @@ class transaction_cont extends CI_Controller {
     }
 
     function JVDebitAccount($acc, $amt) {
-       
-            $ac = Account::getAccountForCurrentBranch($acc, false);
+        $conn = Doctrine_Manager::connection();
+        try {
+            $conn->beginTransaction();
+            $ac = Accounts::getAccountForCurrentBranch($acc, false);
             switch ($ac->scheme->SchemeType) {
                 case ACCOUNT_TYPE_DEFAULT:
                     break;
@@ -487,12 +492,20 @@ class transaction_cont extends CI_Controller {
             }
 
 //	 		echo "code run";
-           
+            $conn->commit();
+//	 		$this->load->view('template');
+        } catch (Doctrine_Exception $e) {
+            $conn->rollback();
+            echo $e->getMessage();
+            return;
+        }
     }
 
     function JVCreditAccount($acc, $amt) {
-       
-            $ac = Account::getAccountForCurrentBranch($acc, false);
+        $conn = Doctrine_Manager::connection();
+        try {
+            $conn->beginTransaction();
+            $ac = Accounts::getAccountForCurrentBranch($acc, false);
             switch ($ac->Schemes->SchemeType) {
                 case ACCOUNT_TYPE_DEFAULT:
                     break;
@@ -500,13 +513,13 @@ class transaction_cont extends CI_Controller {
 //                    Accounts::updateInterest($ac);
                     break;
                 case ACCOUNT_TYPE_FIXED:
-                    throw new Exception("Fixed Deposit Account cannot be credited");
+//                    throw new Exception("Fixed Deposit Account cannot be credited");
                     break;
                 case ACCOUNT_TYPE_LOAN:
 //                    $this->creditLoanAccount($ac,$amt);
                     break;
                 case ACCOUNT_TYPE_RECURRING:
-                	//throw new Exception("Recurring Account cannot be credited");
+                	throw new Exception("Recurring Account cannot be credited");
 //                    $this->payRDPremiums($ac, $amt);
                     break;
                 case ACCOUNT_TYPE_DDS:
@@ -517,7 +530,13 @@ class transaction_cont extends CI_Controller {
             }
 
 //	 		echo "code run";
-           
+            $conn->commit();
+//	 		$this->load->view('template');
+        } catch (Doctrine_Exception $e) {
+            $conn->rollback();
+            echo $e->getMessage();
+            return;
+        }
     }
 
     function payRDPremiums($ac, $amt) {

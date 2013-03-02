@@ -70,7 +70,11 @@ $premiums->where("accounts_id",$account->id)->get();
     <td>&nbsp;</td>
   </tr>
   <tr>
-    <td colspan="2">&nbsp;</td>
+    <td colspan="2"><strong> Documents: </strong> <?php echo (isset($documents))? implode(",",$documents) : "-- no --" ; ?></td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td colspan="2"></td>
     <td>&nbsp;</td>
   </tr>
 <tr>

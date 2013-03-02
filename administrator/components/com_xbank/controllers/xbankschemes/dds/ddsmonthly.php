@@ -41,7 +41,7 @@ if (SET_COMMISSIONS_IN_MONTHLY) {
         $voucherNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $acc->id);
 
         $amount = $ac->amountCr;
-        if ($acc->agents_id !== null or $acc->agents_id != 0) {
+        if ($acc->agents_id !== null && $acc->agents_id != 0) {
             $monthDifference = my_date_diff(getNow("Y-m-d"), $acc->created_at);
             $monthDifference = $monthDifference["months_total"] + 1;
             $percent = explode(",", $acc->scheme->AccountOpenningCommission);

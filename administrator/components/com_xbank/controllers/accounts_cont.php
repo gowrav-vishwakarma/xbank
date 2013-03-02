@@ -131,8 +131,8 @@ class accounts_cont extends CI_Controller {
         }
 
 
-
-        $data['tabs'] = $this->jq->getTab(1);
+        $data['tabs'] = "<h3 align='center'>Create Account Here and Then Edit from 'Account Search' to set/update Opening Balances</h3>";
+        $data['tabs'] .= $this->jq->getTab(1);
         JRequest::setVar("layout", "accountopenform");
         $this->load->view('accounts.html', $data);
         $this->jq->getHeader();
@@ -939,15 +939,12 @@ class accounts_cont extends CI_Controller {
         $s = $acc->schemes_id;
         $sc = new Scheme();
         $sc->where('id', $s)->get();
-        //$acc = Doctrine::getTable("Accounts")->findOneById($id);
-        //$sc = Doctrine::getTable("Schemes")->findOneById($acc->schemes_id);
         $schemeType = $sc->SchemeType;
 
-        //$this->load->library('form');
         $b = Branch::getCurrentBranch();
         $branchCode = $b->Code;
 
-        $this->jq->addInfo("Agent", "Default branch Agent");
+        $this->jq->addInfo("Agent", $acc->agents_id . " :: " . Agent::getAgentFromAccount($acc->id)->Name );
         $defaultAgent = $this->jq->flashMessages(true);
 
         $this->jq->addInfo("Member", "Member Details");
@@ -964,33 +961,23 @@ class accounts_cont extends CI_Controller {
 
 
 
-//        setInfo("EDIT ACCOUNT", "");
 
         if ($schemeType == ACCOUNT_TYPE_BANK) {
             $form = $this->form->open("NewBankAccount", "index.php?option=com_xbank&task=accounts_cont.editAccounts&id=$id")
                             ->setColumns(2)
-                            ->text("Account number : $branchCode - ", "name='AccountNumber' class='input req-string' value='$acc->AccountNumber' DISABLED")
+                            ->lookupDB("Account number", "name='AccountNumber' class='input req-string' value='$acc->AccountNumber'", "index.php?option=com_xbank&task=accounts_cont.AccountNumber&format=raw", array("a"=>"b"), array("AccountNumber"), "")
                             ->text("Account Name","name='AccountDisplayName' value='".$acc->AccountDisplayName."'")
-//                            ->lookupDB("Account number : $branchCode - ", "name='AccountNumber' class='input req-string' value='$acc->AccountNumber'", "index.php?//ajax/lookupDBDQL", array("select" => "a.*, m.Name as MemberName", "from" => "Accounts a", "leftJoin" => "a.Branch b", "leftJoin" => "a.Member m", "where" => "a.AccountNumber Like '%\$term%'", "andWhere" => "b.id='$b->id'", "limit" => "10"), array("AccountNumber","MemberName"), "")
+//                            ->lookupDB("Member Name", "name='UserID' class='input req-string' value='" . $acc->member_id . "'  onblur='javascript:jQuery(\"#memberDetailsO\").load(\"index.php?option=com_xbank&task=accounts_cont.memberDetails&format=raw&id=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.MemberID&format=raw", array("a"=>"b"), array("id", "Name", "FatherName", "BranchName"), "id")
+//                            ->div("memberDetailsO","",$member)
                             ->text("Member Name", "name='UserID' class='input req-string' value='" . $acc->member->Name . "' DISABLED")
-//                        ->lookupDB("Member ID","name='UserID' class='input req-string' onblur='javascript:$(\"#memberDetailsB\").load(\"index.php?//mod_member/member_cont/memberDetails/\"+this.value);'","index.php?//ajax/lookupDBDQL",array("select"=>"m.id AS ID, m.Name AS Name, m.PanNo AS PanNo, m.PhoneNos","from"=>"Member m, m.Branch b","where"=>"b.id=$b->id","andWhere"=>"m.Name Like '%\$term%'","orWhere"=>"m.id Like '%\$term%'"),array("id","Name"),"id")
-//                        ->div("memberDetailsB","",$member)
-//                        ->selectAjax("Account Under","name='AccountType' class='req-string not-req' not-req-val='Select_Account_Type'",Branch::getAllSchemesForCurrentBranchOfType(ACCOUNT_TYPE_BANK))
                             ->text("Account Under", "name='AccountType' class='input req-string' value='" . $acc->scheme->Name . "' DISABLED")
-//                        ->text("Initial Opening Amount","name='initialAmount' class='input req-numeric tooltip' title='Put the initial opening amount for account'")
-                            ->text("Agent's Name", "name='Agents_Id' class='input' value='" . Agent::getAgentFromAccount($acc->id)->Name . "' DISABLED")
-//                        ->div("agentDetails","",$defaultAgent)
-                            // 		->text("RD/EMI for amount","name='rdamount' class='input req-string'")
-                            // 		->text("Openning Balance","name='OpenningBalance' class='input req-string'")
+                            ->text("Opening Balance CR","name='initialAmountCR' class='input req-numeric tooltip' value='$acc->OpeningBalanceCr' title='Put the opening CR amount for account'")
+                            ->text("Opening Balance DR","name='initialAmountDR' class='input req-numeric tooltip' value='$acc->OpeningBalanceDr' title='Put the opening DR amount for account'")
+                            ->lookupDB("Agent's Member ID", "name='Agents_Id' class='input' value='$acc->agents_id'  onblur='javascript:jQuery(\"#agentDetailsO\").load(\"index.php?option=com_xbank&task=accounts_cont.agentDetails&format=raw&aid=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.AgentMemberID&format=raw", array("a"=>"b"), array("id", "Name", "PanNo"), "id")
+                            ->div("agentDetailsO", "", $defaultAgent)
                             ->select("Active Status", "name='ActiveStatus'", array("Active" => '1', "DeActive" => '0'), $acc->ActiveStatus);
-            // 		->text("Nominee","name='Nominee' class='input req-string'")
-            // 		->text("Nominee Age","name='NomineeAge' class='input req-numeric req-min' minlength ='1'")
-            // 		->text("Relation With Nominee","Name='RelationWithNominee' class='input req-string'")
-            // 		->dateBox("Minor Nominee DOB","name='MinorNomineeDOB' class='input req-string'")
-            // 		->text("Minor Parent Name","name='MinorNomineeParentName' class='input req-string'")
             $form = $form->select("Operation Mode", "name='ModeOfOperation'", array("Select_Mode" => '-1', "Self" => 'Self', "Joint" => 'Joint', "Any One" => 'Any', "Otehr" => 'Other'), $acc->ModeOfOperation);
-            // 		->lookupDB("Interest To Account number : $branchCode - ","name='InterestTo' class='input'","index.php?//ajax/lookupDBDQL",array("select"=>"a.*, m.Name AS Name, m.PanNo AS Pan","from"=>"Accounts a","leftJoin"=>"a.Branch b, a.Member m","where"=>"a.AccountNumber Like '%\$term%'","andWhere"=>"b.id='$b->id'","orWhere"=>"m.Name like '%\$term%'","limit"=>"10"),array("Name","PanNo","AccountNumber"),"AccountNumber")
-            // Documents to be submitted
+//            Documents to be submitted
             $i = 1;
             foreach ($documents as $d) {
                 if ($d->SavingAccount == "" or $d->SavingAccount == 0) {
@@ -1017,24 +1004,17 @@ class accounts_cont extends CI_Controller {
         if ($schemeType == ACCOUNT_TYPE_FIXED) {
             $form = $this->form->open("FixedAndMIS", "index.php?option=com_xbank&task=accounts_cont.editAccounts&id=$id")
                             ->setColumns(2)
-//                        ->text("AccountID","name='AccountID' class='input ' DISABLED value='Auto Generated'")
-                            ->text("Account number : $branchCode - ", "name='AccountNumber' class='input req-string' value='$acc->AccountNumber' DISABLED")
+                            ->lookupDB("Account number", "name='AccountNumber' class='input req-string' value='$acc->AccountNumber'", "index.php?option=com_xbank&task=accounts_cont.AccountNumber&format=raw", array("a"=>"b"), array("AccountNumber"), "")
+                            ->text("Account Name","name='AccountDisplayName' value='".$acc->AccountDisplayName."'")
+//                            ->lookupDB("Member Name", "name='UserID' class='input req-string' value='" . $acc->member_id . "'  onblur='javascript:jQuery(\"#memberDetailsO\").load(\"index.php?option=com_xbank&task=accounts_cont.memberDetails&format=raw&id=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.MemberID&format=raw", array("a"=>"b"), array("id", "Name", "FatherName", "BranchName"), "id")
+//                            ->div("memberDetailsO","",$member)
                             ->text("Member Name", "name='UserID' class='input req-string' value='" . $acc->member->Name . "' DISABLED")
                             ->text("Account Under", "name='AccountType' class='input req-string' value='" . $acc->scheme->Name . "' DISABLED")
-//                        ->text("FD Amount","name='initialAmount' class='input req-numeric'")
-                            ->text("Agent's Name", "name='Agents_Id' class='input' value='" . Agent::getAgentFromAccount($acc->id)->Name . "' DISABLED")
-                            ->_()
-                            // 		->text("RD for amount","name='rdamount' class='input req-string'")
-                            // 		->text("Openning Balance","name='OpenningBalance' class='input req-string'")
-                            ->select("Active Status", "name='ActiveStatus'", array("Active" => '1', "DeActive" => '0'), $acc->ActiveStatus)
-                            // 		->text("Nominee","name='Nominee' class='input req-string'")
-                            // 		->text("Nominee Age","name='NomineeAge' class='input req-numeric req-min' minlength ='1'")
-                            // 		->text("Relation With Nominee","Name='RelationWithNominee' class='input req-string'")
-                            // 		->dateBox("Minor Nominee DOB","name='MinorNomineeDOB' class='input req-string'")
-                            // 		->text("Minor Parent Name","name='MinorNomineeParentName' class='input req-string'")
-                            ->select("Operation Mode", "name='ModeOfOperation'", array("Select_Mode" => '-1', "Self" => 'Self', "Joint" => 'Joint', "Any One" => 'Any', "Otehr" => 'Other'), $acc->ModeOfOperation)
-//                        ->lookupDB("Interest To Account number : $branchCode - ","name='InterestTo' class='input'","index.php?//ajax/lookupDBDQL",array("select"=>"a.*, m.Name AS Name, m.PanNo AS Pan, s.Name as Scheme","from"=>"Accounts a","leftJoin"=>"a.Branch b, a.Member m, a.Schemes s","where"=>"a.AccountNumber Like '%\$term%'","andWhere"=>"b.id='$b->id'","limit"=>"10"),array("Name","Pan","AccountNumber","Scheme"),"AccountNumber")
-                            ->_();
+                            ->text("Opening Balance CR","name='initialAmountCR' class='input req-numeric tooltip' value='$acc->OpeningBalanceCr' title='Put the opening CR amount for account'")
+                            ->text("Opening Balance DR","name='initialAmountDR' class='input req-numeric tooltip' value='$acc->OpeningBalanceDr' title='Put the opening DR amount for account'")
+                            ->lookupDB("Agent's Member ID", "name='Agents_Id' class='input' value='$acc->agents_id'  onblur='javascript:jQuery(\"#agentDetailsO\").load(\"index.php?option=com_xbank&task=accounts_cont.agentDetails&format=raw&aid=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.AgentMemberID&format=raw", array("a"=>"b"), array("id", "Name", "PanNo"), "id")
+                            ->div("agentDetailsO", "", $defaultAgent)
+                            ->select("Active Status", "name='ActiveStatus'", array("Active" => '1', "DeActive" => '0'), $acc->ActiveStatus);
             $i = 1;
             foreach ($documents as $d) {
                 if ($d->FixedMISAccount == "" or $d->FixedMISAccount == 0) {
@@ -1062,30 +1042,22 @@ class accounts_cont extends CI_Controller {
         if ($schemeType == ACCOUNT_TYPE_LOAN) {
             $form = $this->form->open("LoanAccounts", "index.php?option=com_xbank&task=accounts_cont.editAccounts&id=$id")
                             ->setColumns(2)
-//                        ->text("AccountID","name='AccountID' class='input ' DISABLED value='Auto Generated'")
-                            ->text("Account number : $branchCode - ", "name='AccountNumber' class='input req-string' value='$acc->AccountNumber' DISABLED")
+                            ->lookupDB("Account number", "name='AccountNumber' class='input req-string' value='$acc->AccountNumber'", "index.php?option=com_xbank&task=accounts_cont.AccountNumber&format=raw", array("a"=>"b"), array("AccountNumber"), "")
+                            ->text("Account Name","name='AccountDisplayName' value='".$acc->AccountDisplayName."'")
+//                            ->lookupDB("Member Name", "name='UserID' class='input req-string' value='" . $acc->member_id . "'  onblur='javascript:jQuery(\"#memberDetailsO\").load(\"index.php?option=com_xbank&task=accounts_cont.memberDetails&format=raw&id=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.MemberID&format=raw", array("a"=>"b"), array("id", "Name", "FatherName", "BranchName"), "id")
+//                            ->div("memberDetailsO","",$member)
                             ->text("Member Name", "name='UserID' class='input req-string' value='" . $acc->member->Name . "' DISABLED")
                             ->text("Account Under", "name='AccountType' class='input req-string' value='" . $acc->scheme->Name . "' DISABLED")
                             ->text("Loan Amount", "name='initialAmount' class='input req-numeric' value='$acc->RdAmount' DISABLED")
-                            ->text("Agent's Name", "name='Agents_Id' class='input' value='" . Agent::getAgentFromAccount($acc->id)->Name . "' DISABLED")
+                            ->text("Opening Balance CR","name='initialAmountCR' class='input req-numeric tooltip' value='$acc->OpeningBalanceCr' title='Put the opening CR amount for account'")
+                            ->text("Opening Balance DR","name='initialAmountDR' class='input req-numeric tooltip' value='$acc->OpeningBalanceDr' title='Put the opening DR amount for account'")
                             ->_()
-//                        ->div("agentDetails","",$defaultAgent)
-                            //		->text("EMI for amount","name='rdamount' class='input req-string'")
-                            // 		->text("Openning Balance","name='OpenningBalance' class='input req-string'")
+                            ->lookupDB("Agent's Member ID", "name='Agents_Id' class='input' value='$acc->agents_id'  onblur='javascript:jQuery(\"#agentDetailsO\").load(\"index.php?option=com_xbank&task=accounts_cont.agentDetails&format=raw&aid=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.AgentMemberID&format=raw", array("a"=>"b"), array("id", "Name", "PanNo"), "id")
+                            ->div("agentDetailsO", "", $defaultAgent)
                             ->select("Active Status", "name='ActiveStatus'", array("Active" => '1', "DeActive" => '0'), $acc->ActiveStatus)
-                            // 		->text("Nominee","name='Nominee' class='input req-string'")
-                            // 		->text("Nominee Age","name='NomineeAge' class='input req-numeric req-min' minlength ='1'")
-                            // 		->text("Relation With Nominee","Name='RelationWithNominee' class='input req-string'")
-                            // 		->dateBox("Minor Nominee DOB","name='MinorNomineeDOB' class='input req-string'")
-                            // 		->text("Minor Parent Name","name='MinorNomineeParentName' class='input req-string'")
-                            //                ->text("Gaurantor","name='Nominee' class='input req-string'")
-                            // 		->text("Gaurantor Age","name='NomineeAge' class='input req-numeric req-min' minlength ='1'")
                             ->lookupDB("Gaurantor","name='Nominee' class='input' value='$acc->Nominee' ","index.php?option=com_xbank&task=accounts_cont.MemberID&format=raw",array("a"=>"b"),array("id","Name"),"Name")
                             ->text("Gaurantor Address", "name='MinorNomineeParentName' class='input' value='$acc->MinorNomineeParentName'")  // IMP : Used as gaurantor address in loan accounts
                             ->text("Gaurantor Phone Nos.", "Name='RelationWithNominee' class='input' value='$acc->RelationWithNominee'")
-                            ->select("Operation Mode", "name='ModeOfOperation'", array("Select_Mode" => '-1', "Self" => 'Self', "Joint" => 'Joint', "Any One" => 'Any', "Otehr" => 'Other'), $acc->ModeOfOperation)
-                            // 		->selectAjax("Loan Amount From Account","name='InterestTo' class='req-string not-req' not-req-val='Select_Account_Type'",Branch::getAllSchemesForCurrentBranchOfName('Bank Accounts'))
-//                        ->lookupDB("Loan Amount From Account : $branchCode - ","name='InterestTo' class='input'","index.php?//ajax/lookupDBDQL",array("select"=>"a.*, s.Name","from"=>"Accounts a, a.Schemes s, a.Branch b","where"=>"a.AccountNumber Like '%\$term%' AND (s.Name='Bank Accounts' OR s.Name='Cash Account' OR s.Name='Saving Account') AND b.id='$b->id' AND a.LockingStatus<>1 AND a.ActiveStatus<>0","limit"=>"10"),array("AccountNumber"),"AccountNumber")
                             ->dateBox("Loan Insurrance Date", "name='LoanInsurranceDate' value='$acc->LoanInsurranceDate'");
             //                ->selectAjax("Select Account if Loan Ag. Security","name='SecurityAccount' class='req-string not-req' not-req-val='Select_Account'",$this->db->query("select a.id, a.AccountNumber,m.Name,DATE_ADD(a.created_at,INTERVAL s.MaturityPeriod MONTH) as MaturityDate, (a.CurrentBalanceCr - a.CurrentBalanceDr) from accounts a join member m on a.member_id=m.id join schemes s on a.schemes_id=s.id where (s.SchemeType='Deposit' or s.SchemeType='Fixed & Mis' or s.SchemeType='Recurring') and a.branch_id=".Branch::getCurrentBranch()->id." and  a.member_id=".inp("UserID")." and a.ActiveStatus=1")->result())
             //                ->lookupDB("Select Account if Loan Ag. Security","name='SecurityAccount' class='input req-string' onblur='javascript:$(\"#accountsDetails\").load(\"mod_accounts/accounts_cont/accountsDetails/\"+this.value);'","index.php?//ajax/lookupDBDQL",array("select"=>"a.id AS Id,a.AccountNumber AS AccNum, m.Name AS Name, DATE_ADD(a.created_at,INTERVAL s.MaturityPeriod MONTH) AS MaturityDate, (a.CurrentBalanceCr - a.CurrentBalanceDr) AS CurrentBalance","from"=>"Accounts a","leftJoin"=>"a.member m","leftJoin"=>"a.schemes s","where"=>"s.SchemeType='Deposit'","orWhere"=>"s.SchemeType='Fixed & Mis'","orWhere"=>"s.SchemeType='Recurring'","andWhere"=>"a.branch_id='$b->id'","andWhere"=>"a.ActiveStatus =1","andWhere"=>"a.AccountNumber Like '%\$term%'"),array("Id"),"Id")
@@ -1098,7 +1070,7 @@ class accounts_cont extends CI_Controller {
                 $securityAcc = $this->db->query("Select AccountNumber as accNum from jos_xaccounts where id=$acc->LoanAgainstAccount")->row()->accNum;
             $form = $form->text("Account Number(if Loan Ag. Security)", "Name='SecurityAccount' class='input' value='$securityAcc' DISABLED")
 //                        ->div("accountsDetailsF","",$accounts);
-                            ->_()
+//                            ->_()
                             ->lookupDB("Dealer ID", "name='Dealer' class='input'value='$acc->dealer_id' onblur='javascript:jQuery(\"#DealerDetails\").load(\"index.php?option=com_xbank&format=raw&task=accounts_cont.dealerDetails&id=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.getDealer&format=raw", array("a" => "b"), array("id", "DealerName", "Address"), "id")
                             ->div("DealerDetails", "", $dealer);
             $i = 1;
@@ -1127,26 +1099,18 @@ class accounts_cont extends CI_Controller {
         if ($schemeType == ACCOUNT_TYPE_RECURRING) {
             $form = $this->form->open("RD", "index.php?option=com_xbank&task=accounts_cont.editAccounts&id=$id")
                             ->setColumns(2)
-//                        ->text("AccountID","name='AccountID' class='input ' DISABLED value='Auto Generated'")
-                            ->text("Account number : $branchCode - ", "name='AccountNumber' class='input req-string' value='$acc->AccountNumber' DISABLED")
+                            ->lookupDB("Account number", "name='AccountNumber' class='input req-string' value='$acc->AccountNumber'", "index.php?option=com_xbank&task=accounts_cont.AccountNumber&format=raw", array("a"=>"b"), array("AccountNumber"), "")
+                            ->text("Account Name","name='AccountDisplayName' value='".$acc->AccountDisplayName."'")
                             ->text("Member Name", "name='UserID' class='input req-string' value='" . $acc->member->Name . "' DISABLED")
                             ->text("Account Under", "name='AccountType' class='input req-string' value='" . $acc->scheme->Name . "' DISABLED")
-//                        ->text("Initial Opening Amount","name='initialAmount' class='input req-numeric'")
-//                            ->text("Agent's Name", "name='Agents_Id' class='input' value='" . Agent::getAgentFromAccount($acc->id)->Name . "' DISABLED")
-			->lookupDB("Agent's Member ID", "name='Agents_Id' class='input' value='$acc->agents_id'  onblur='javascript:jQuery(\"#agentDetailsRD\").load(\"index.php?option=com_xbank&task=accounts_cont.agentDetails&format=raw&aid=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.AgentMemberID&format=raw", array("a"=>"b"), array("id", "Name", "PanNo"), "id")
-                            ->div("agentDetailsRD", "", Agent::getAgentFromAccount($acc->id)->Name )
-                            ->text("RECURRING amount", "name='rdamount' class='input req-string' value='$acc->RdAmount'")
-                            // 		->text("Openning Balance","name='OpenningBalance' class='input req-string'")
+                            ->text("RECURRING amount", "name='rdamount' class='input req-string' value='$acc->RdAmount' DISABLED")
+                            ->_()
+                            ->text("Opening Balance CR","name='initialAmountCR' class='input req-numeric tooltip' value='$acc->OpeningBalanceCr' title='Put the opening CR amount for account'")
+                            ->text("Opening Balance DR","name='initialAmountDR' class='input req-numeric tooltip' value='$acc->OpeningBalanceDr' title='Put the opening DR amount for account'")
+                            ->lookupDB("Agent's Member ID", "name='Agents_Id' class='input' value='$acc->agents_id'  onblur='javascript:jQuery(\"#agentDetailsO\").load(\"index.php?option=com_xbank&task=accounts_cont.agentDetails&format=raw&aid=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.AgentMemberID&format=raw", array("a"=>"b"), array("id", "Name", "PanNo"), "id")
+                            ->div("agentDetailsO", "", $defaultAgent)
                             ->select("Active Status", "name='ActiveStatus'", array("Active" => '1', "DeActive" => '0'), $acc->ActiveStatus);
-
-            // 		->text("Nominee","name='Nominee' class='input req-string'")
-            // 		->text("Nominee Age","name='NomineeAge' class='input req-numeric req-min' minlength ='1'")
-            // 		->text("Relation With Nominee","Name='RelationWithNominee' class='input req-string'")
-            // 		->dateBox("Minor Nominee DOB","name='MinorNomineeDOB' class='input req-string'")
-            // 		->text("Minor Parent Name","name='MinorNomineeParentName' class='input req-string'")
-            //
-            // 		->selectAjax("Operation Mode","name='ModeOfOperation' class='not-req req-string' not-req-val='Select_Mode'",array("Select_Mode"=>'-1',"Self"=>'Self',"Joint"=>'Joint',"Any One"=>'Any',"Otehr"=>'Other'))
-            // 		->lookupDB("Interest To Account number : $branchCode - ","name='InterestTo' class='input'","index.php?//ajax/lookupDBDQL",array("select"=>"a.*, m.Name AS Name, m.PanNo AS Pan, s.Name as Scheme","from"=>"Accounts a","leftJoin"=>"a.Branch b, a.Member m, a.Schemes s","where"=>"a.AccountNumber Like '%\$term%'","andWhere"=>"b.id='$b->id'","limit"=>"10"),array("Name","Pan","AccountNumber","Scheme"),"AccountNumber")
+                            
             $i = 1;
             foreach ($documents as $d) {
                 if ($d->RDandDDSAccount == "" or $d->RDandDDSAccount == 0) {
@@ -1173,24 +1137,17 @@ class accounts_cont extends CI_Controller {
         if ($schemeType == ACCOUNT_TYPE_DDS) {
             $form = $this->form->open("DDS", "index.php?option=com_xbank&task=accounts_cont.editAccounts&id=$id")
                             ->setColumns(2)
-//                        ->text("AccountID","name='AccountID' class='input ' DISABLED value='Auto Generated'")
-                            ->text("Account number : $branchCode - ", "name='AccountNumber' class='input req-string' value='$acc->AccountNumber' DISABLED")
+                            ->lookupDB("Account number", "name='AccountNumber' class='input req-string' value='$acc->AccountNumber'", "index.php?option=com_xbank&task=accounts_cont.AccountNumber&format=raw", array("a"=>"b"), array("AccountNumber"), "")
+                            ->text("Account Name","name='AccountDisplayName' value='".$acc->AccountDisplayName."'")
                             ->text("Member Name", "name='UserID' class='input req-string' value='" . $acc->member->Name . "' DISABLED")
                             ->text("Account Under", "name='AccountType' class='input req-string' value='" . $acc->scheme->Name . "' DISABLED")
-//                        ->text("Initial Opening Amount","name='initialAmount' class='input req-numeric'")
-                            ->text("Agent's Name", "name='Agents_Id' class='input' value='" . Agent::getAgentFromAccount($acc->id)->Name . "' DISABLED")
-                            ->text("DDS amount", "name='rdamount' class='input req-string' value='$acc->RdAmount'")
-                            // 		->text("Openning Balance","name='OpenningBalance' class='input req-string'")
+                            ->text("DDS amount", "name='rdamount' class='input req-string' value='$acc->RdAmount' ")
+                            ->_()
+                            ->text("Opening Balance CR","name='initialAmountCR' class='input req-numeric tooltip' value='$acc->OpeningBalanceCr' title='Put the opening CR amount for account'")
+                            ->text("Opening Balance DR","name='initialAmountDR' class='input req-numeric tooltip' value='$acc->OpeningBalanceDr' title='Put the opening DR amount for account'")
+                            ->lookupDB("Agent's Member ID", "name='Agents_Id' class='input' value='$acc->agents_id'  onblur='javascript:jQuery(\"#agentDetailsO\").load(\"index.php?option=com_xbank&task=accounts_cont.agentDetails&format=raw&aid=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.AgentMemberID&format=raw", array("a"=>"b"), array("id", "Name", "PanNo"), "id")
+                            ->div("agentDetailsO", "", $defaultAgent)
                             ->select("Active Status", "name='ActiveStatus'", array("Active" => '1', "DeActive" => '0'), $acc->ActiveStatus);
-
-            // 		->text("Nominee","name='Nominee' class='input req-string'")
-            // 		->text("Nominee Age","name='NomineeAge' class='input req-numeric req-min' minlength ='1'")
-            // 		->text("Relation With Nominee","Name='RelationWithNominee' class='input req-string'")
-            // 		->dateBox("Minor Nominee DOB","name='MinorNomineeDOB' class='input req-string'")
-            // 		->text("Minor Parent Name","name='MinorNomineeParentName' class='input req-string'")
-            //
-            // 		->selectAjax("Operation Mode","name='ModeOfOperation' class='not-req req-string' not-req-val='Select_Mode'",array("Select_Mode"=>'-1',"Self"=>'Self',"Joint"=>'Joint',"Any One"=>'Any',"Otehr"=>'Other'))
-            // 		->lookupDB("Interest To Account number : $branchCode - ","name='InterestTo' class='input'","index.php?//ajax/lookupDBDQL",array("select"=>"a.*, m.Name AS Name, m.PanNo AS Pan, s.Name as Scheme","from"=>"Accounts a","leftJoin"=>"a.Branch b, a.Member m, a.Schemes s","where"=>"a.AccountNumber Like '%\$term%'","andWhere"=>"b.id='$b->id'","limit"=>"10"),array("Name","Pan","AccountNumber","Scheme"),"AccountNumber")
             $i = 1;
             foreach ($documents as $d) {
                 if ($d->RDandDDSAccount == "" or $d->RDandDDSAccount == 0) {
@@ -1218,24 +1175,18 @@ class accounts_cont extends CI_Controller {
         if ($schemeType == ACCOUNT_TYPE_CC) {
             $form = $this->form->open("CCAccounts", "index.php?option=com_xbank&task=accounts_cont.editAccounts&id=$id")
                             ->setColumns(2)
-//                        ->text("AccountID","name='AccountID' class='input ' DISABLED value='Auto Generated'")
-                            ->text("Account number : $branchCode - ", "name='AccountNumber' class='input req-string' value='$acc->AccountNumber' DISABLED")
+                            ->lookupDB("Account number", "name='AccountNumber' class='input req-string' value='$acc->AccountNumber'", "index.php?option=com_xbank&task=accounts_cont.AccountNumber&format=raw", array("a"=>"b"), array("AccountNumber"), "")
                             ->text("Account Name","name='AccountDisplayName' value='".$acc->AccountDisplayName."'")
                             ->text("Member Name", "name='UserID' class='input req-string' value='" . $acc->member->Name . "' DISABLED")
                             ->text("Account Under", "name='AccountType' class='input req-string' value='" . $acc->scheme->Name . "' DISABLED")
-                            ->text("CC Limit", "name='initialAmount' class='input req-numeric' value='$acc->RdAmount' DISABLED")
-                            ->text("Agent's Name", "name='Agents_Id' class='input' value='" . Agent::getAgentFromAccount($acc->id)->Name . "' DISABLED")
-                            // 		->text("EMI for amount","name='rdamount' class='input req-string'")
-                            //		->_()
-                            // 		->text("Openning Balance","name='OpenningBalance' class='input req-string'")
-                            ->select("Active Status", "name='ActiveStatus'", array("Active" => '1', "DeActive" => '0'), $acc->ActiveStatus);
-            // 		->text("Nominee","name='Nominee' class='input req-string'")
-            // 		->text("Nominee Age","name='NomineeAge' class='input req-string'")
-            // 		->text("Relation With Nominee","Name='RelationWithNominee' class='input req-string'")
-            // 		->dateBox("Minor Nominee DOB","name='MinorNomineeDOB' class='input req-string'")
-            // 		->text("Minor Parent Name","name='MinorNomineeParentName' class='input req-string'")
-            // 		->selectAjax("Operation Mode","name='ModeOfOperation' class='not-req req-string' not-req-val='Select_Mode'",array("Select_Mode"=>'-1',"Self"=>'Self',"Joint"=>'Joint',"Any One"=>'Any',"Otehr"=>'Other'))
-            // 		->lookupDB("Interest To Account number : $branchCode - ","name='InterestTo' class='input'","index.php?//ajax/lookupDBDQL",array("select"=>"a.*, m.Name AS Name, m.PanNo AS Pan","from"=>"Accounts a","leftJoin"=>"a.Branch b, a.Member m","where"=>"a.AccountNumber Like '%\$term%'","andWhere"=>"b.id='$b->id'","orWhere"=>"m.Name like '%\$term%'","limit"=>"10"),array("Name","PanNo","AccountNumber"),"AccountNumber")
+                            ->text("CC Limit", "name='rdamount' class='input req-string' value='$acc->RdAmount' ")
+                            ->_()
+                            ->text("Opening Balance CR","name='initialAmountCR' class='input req-numeric tooltip' value='$acc->OpeningBalanceCr' title='Put the opening CR amount for account'")
+                            ->text("Opening Balance DR","name='initialAmountDR' class='input req-numeric tooltip' value='$acc->OpeningBalanceDr' title='Put the opening DR amount for account'")
+                            ->lookupDB("Agent's Member ID", "name='Agents_Id' class='input' value='$acc->agents_id'  onblur='javascript:jQuery(\"#agentDetailsO\").load(\"index.php?option=com_xbank&task=accounts_cont.agentDetails&format=raw&aid=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.AgentMemberID&format=raw", array("a"=>"b"), array("id", "Name", "PanNo"), "id")
+                            ->div("agentDetailsO", "", $defaultAgent)
+                            ->select("Active Status", "name='ActiveStatus'", array("Active" => '1', "DeActive" => '0'), $acc->ActiveStatus)
+                            ->_();
             $i = 1;
             foreach ($documents as $d) {
                 if ($d->CCAccount == "" or $d->CCAccount == 0) {
@@ -1263,22 +1214,15 @@ class accounts_cont extends CI_Controller {
         if ($schemeType == ACCOUNT_TYPE_DEFAULT) {
             $form = $this->form->open("OtherAccounts", "index.php?option=com_xbank&task=accounts_cont.editAccounts&id=$id")
                             ->setColumns(2)
-                            ->text("Account number : $branchCode - ", "name='AccountNumber' class='input req-string' value='$acc->AccountNumber'")
+                            ->lookupDB("Account number", "name='AccountNumber' class='input req-string' value='$acc->AccountNumber'", "index.php?option=com_xbank&task=accounts_cont.AccountNumber&format=raw", array("a"=>"b"), array("AccountNumber"), "")
+                            ->text("Account Name","name='AccountDisplayName' value='".$acc->AccountDisplayName."'")
                             ->text("Member Name", "name='UserID' class='input req-string' value='" . $acc->member->Name . "' DISABLED")
                             ->text("Account Under", "name='AccountType' class='input req-string' value='" . $acc->scheme->Name . "' DISABLED")
-                            // 		->text("Initial Opening Amount","name='initialAmount' class='input req-numeric'")
-                            ->text("Agent's Name", "name='Agents_Id' class='input' value='" . Agent::getAgentFromAccount($acc->id)->Name . "' DISABLED")
-                            // 		->text("EMI for amount","name='rdamount' class='input req-string'")
-                            //		->_()
-                            // 		->text("Openning Balance","name='OpenningBalance' class='input req-string'")
+                            ->text("Opening Balance CR","name='initialAmountCR' class='input req-numeric tooltip' value='$acc->OpeningBalanceCr' title='Put the opening CR amount for account'")
+                            ->text("Opening Balance DR","name='initialAmountDR' class='input req-numeric tooltip' value='$acc->OpeningBalanceDr' title='Put the opening DR amount for account'")
+                            ->lookupDB("Agent's Member ID", "name='Agents_Id' class='input' value='$acc->agents_id'  onblur='javascript:jQuery(\"#agentDetailsO\").load(\"index.php?option=com_xbank&task=accounts_cont.agentDetails&format=raw&aid=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.AgentMemberID&format=raw", array("a"=>"b"), array("id", "Name", "PanNo"), "id")
+                            ->div("agentDetailsO", "", $defaultAgent)
                             ->select("Active Status", "name='ActiveStatus'", array("Active" => '1', "DeActive" => '0'), $acc->ActiveStatus);
-            // 		->text("Nominee","name='Nominee' class='input req-string'")
-            // 		->text("Nominee Age","name='NomineeAge' class='input req-string'")
-            // 		->text("Relation With Nominee","Name='RelationWithNominee' class='input req-string'")
-            // 		->dateBox("Minor Nominee DOB","name='MinorNomineeDOB' class='input req-string'")
-            // 		->text("Minor Parent Name","name='MinorNomineeParentName' class='input req-string'")
-            // 		->selectAjax("Operation Mode","name='ModeOfOperation' class='not-req req-string' not-req-val='Select_Mode'",array("Select_Mode"=>'-1',"Self"=>'Self',"Joint"=>'Joint',"Any One"=>'Any',"Otehr"=>'Other'))
-            // 		->lookupDB("Interest To Account number : $branchCode - ","name='InterestTo' class='input'","index.php?//ajax/lookupDBDQL",array("select"=>"a.*, m.Name AS Name, m.PanNo AS Pan","from"=>"Accounts a","leftJoin"=>"a.Branch b, a.Member m","where"=>"a.AccountNumber Like '%\$term%'","andWhere"=>"b.id='$b->id'","orWhere"=>"m.Name like '%\$term%'","limit"=>"10"),array("Name","PanNo","AccountNumber"),"AccountNumber")
             $i = 1;
             foreach ($documents as $d) {
                 if ($d->OtherAccounts == "" or $d->OtherAccounts == 0) {
@@ -1315,25 +1259,51 @@ class accounts_cont extends CI_Controller {
      */
     function editAccounts() {
         $id = JRequest::getVar("id");
+
+        $u = JFactory::getUser();
+        if ($u->usertype != 'Administrator')
+                re("accounts_cont.editAccountsForm&id=$id","You are not authorized to edit accounts","error");
+        
+        $Ac = new Account($id);
 //        CHECK IF ACCOUNT NUMBER ALREADY EXISTS
         if(inp('AccountNumber')){
-        $query = "select * from jos_xaccounts where id <> ".$id." and AccountNumber = '".inp('AccountNumber')."'";
-        $q=$this->db->query($query);
-        if($q->num_rows())
-                re("com_xbank","Account Number ".inp("AccountNumber")." Already Exists",'error');
+            $query = "select * from jos_xaccounts where id <> ".$id." and AccountNumber = '".inp('AccountNumber')."'";
+            $q=$this->db->query($query);
+            if($q->num_rows())
+                    re("accounts_cont.editAccountsForm&id=$id","Account Number ".inp("AccountNumber")." Already Exists",'error');
         }
+
+//        $u=inp("UserID");
+//        $m=new Member($u);
+//
+//        if (!$m->result_count()) {
+//             re("accounts_cont.editAccountsForm&id=$id","The Member with id $u not found",'error');
+//        }
+
+        if($Ac->agents_id != 0 && inp("Agents_Id") != ""){
+            $ag=new Agent(inp("Agents_Id"));
+
+            if (!$ag->result_count()) {
+                 re("accounts_cont.editAccountsForm&id=$id","The Agent with id ".inp("Agents_Id")." not found",'error');
+            }
+        }
+
+
         try {
             $this->db->trans_begin();
-            $Ac = new Account($id);
+            
             if(inp('AccountNumber')){
                 $Ac->AccountNumber = inp('AccountNumber');
             }
+//            $Ac->member_id = inp("UserID");
+            $Ac->OpeningBalanceCr = (inp("initialAmountCR") ? inp("initialAmountCR") : 0);
+            $Ac->OpeningBalanceDr = (inp("initialAmountDR") ? inp("initialAmountDR") : 0);
             $Ac->ActiveStatus = inp('ActiveStatus');
             $Ac->agents_id = inp("Agents_Id");
+            if($Ac->RdAmount == 0 && inp("rdamount") != "" || $Ac->RdAmount != 0 && inp("rdamount") != "")
+                    $Ac->RdAmount = inp("rdamount");
             $Ac->Nominee = inp('Nominee');  // IMP : used as guarantor for loan accounts
-//			$Ac->NomineeAge=inp('NomineeAge');
             $Ac->RelationWithNominee = inp('RelationWithNominee');  // IMP : Used as Gaurantor Phone nos. for loan accounts
-//			$Ac->MinorNomineeDOB="'".inp('MinorNomineeDOB')."'";
             $Ac->MinorNomineeParentName = inp('MinorNomineeParentName');   // IMP : used as guarantor Address for loan accounts
             $Ac->ModeOfOperation = (inp('ModeOfOperation') == "") ? "Self" : inp('ModeOfOperation');
             if(inp("AccountDisplayName"))
@@ -1668,11 +1638,11 @@ class accounts_cont extends CI_Controller {
      */
     function agentDetails() {
         $id = JRequest::getVar("aid");
-        if ($id){
         $a = new Agent();
-        $a->where('id', $id)->get();
+        if ($id){
+            $a->where('id', $id)->get();
         }
-        if (!$a or $id == ' ') {
+        if (!$a->exists() or trim($id) == '') {
              $this->jq->addError($id . ": ", "No user or User is not Agent <font size='+1'><b>NO COMMISSION GRANTED</b></font>");
             $this->jq->flashMessages();
             return;
@@ -1730,31 +1700,6 @@ class accounts_cont extends CI_Controller {
         }
         echo '{"tags":' . json_encode($list) . '}';
     }
-
-
-     function changeLockingStatus(){
-        xDeveloperToolBars::onlyCancel("accounts_cont.index", "cancel", "Change Locking status of accounts here");
-        $data['acc'] = new Account();
-        $data['acc']->where("LoanAgainstAccount is not null");
-        $data['acc']->where("branch_id",  Branch::getCurrentBranch()->id)->get();
-        JRequest::setVar("layout","lockedaccounts");
-        $this->load->view('accounts.html', $data);
-        $this->jq->getHeader();
-    }
-
-    function swaplockedstatus(){
-        $id = JRequest::getVar("id");
-        $ac = new Account($id);
-//        $ac->where('id', $id)->get();
-        //$ac = Doctrine::getTable("Accounts")->findOneById($id);
-        $ac->LockingStatus = ($ac->LockingStatus == 0) ? 1 : 0;
-        $ac->save();
-        log::write(__FILE__ . " " . __FUNCTION__ . " Locking Status of $ac->AccountNumber with id $ac->id changed to $ac->LockingStatus from " . $this->input->ip_address());
-        re("accounts_cont.changeLockingStatus");
-    }
-
-
-
 
     function test() {
 

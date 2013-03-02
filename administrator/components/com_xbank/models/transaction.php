@@ -27,11 +27,17 @@ class Transaction extends DataMapper {
             'join_other_as' => 'transaction_type',
             'join_table' => 'jos_xtransactions',
             'other_field' => 'transactions'
+        ),
+        'referenceaccount' => array(
+            'class' => 'account',
+            'join_other_as' => 'reference_account',
+            'join_table' => 'jos_xtransactions',
+            'other_field' => 'referencetransactions'
         )
     );
 
    public static function getNewVoucherNumber($branch_id='') {
-        $CI = & get_instance();
+        $CI =& get_instance();
         if(!$branch_id)
                 $branch_id = Branch::getCurrentBranch()->id;
         $q = $CI->db->query("select MAX(t.voucher_no) AS maxVoucher from jos_xtransactions t where t.branch_id= " . $branch_id)->row();
@@ -100,7 +106,7 @@ class Transaction extends DataMapper {
         // Save transaction only when DRAmount > 0
         if ($DRAmount > 0) {
 
-            $reference_account = ((is_array($voucherNo)) ? ($voucherNo['referanceAccount'] == Null ? 'NULL' : $voucherNo['referanceAccount']) : 'NULL');
+            $reference_account_id = ((is_array($voucherNo)) ? ($voucherNo['referanceAccount'] == Null ? 'NULL' : $voucherNo['referanceAccount']) : 'NULL');
 //            $tT = $CI->db->query("select * from jos_xtransaction_type where Transaction= '" . $type . "'")->row();
             $tT = new Transaction_type();
             $tT->where("Transaction",$type)->get();
@@ -125,9 +131,9 @@ class Transaction extends DataMapper {
             $remarks = str_replace("'", " ", $remarks);
             $query = $CI->db->query("insert into jos_xtransactions
                                 (accounts_id,transaction_type_id,staff_id,voucher_no,Narration,
-                                amountDr,updated_at,created_at,branch_id,reference_account,display_voucher_no,side,accounts_in_side)
+                                amountDr,updated_at,created_at,branch_id,reference_account_id,display_voucher_no,side,accounts_in_side)
                                 values($accid,$tT->id,$staff_id,$voucher_no,'$remarks',
-                                $DRAmount,'$updated_at','$created_at',$currentbranchid,$reference_account,$display_voucher_no,'DR',1)");
+                                $DRAmount,'$updated_at','$created_at',$currentbranchid,$reference_account_id,$display_voucher_no,'DR',1)");
 
             if (!$onlyTRansactionSaving) {
                 include(xBANKSCHEMEPATH . "/" . strtolower($DRAccount->SchemeType) . "/" . strtolower($DRAccount->SchemeType) . "accountbeforedebited.php");
@@ -145,7 +151,7 @@ class Transaction extends DataMapper {
             $CRAmountTotal += $amount;
                 $CRAccount = $CI->db->query("select a.id as aid,s.id as sid,s.SchemeType as SchemeType from jos_xaccounts a join jos_xschemes s on a.schemes_id=s.id where (a.AccountNumber='" . $account . "' or a.AccountNumber='" . Branch::getCurrentBranch()->Code . SP . $account . "') and a.branch_id = " . $currentbranchid)->row();
                 $accid = $CRAccount->aid;
-                $reference_account = ((is_array($voucherNo)) ? ($voucherNo['referanceAccount'] == Null ? 'NULL' : $voucherNo['referanceAccount']) : 'NULL');
+                $reference_account_id = ((is_array($voucherNo)) ? ($voucherNo['referanceAccount'] == Null ? 'NULL' : $voucherNo['referanceAccount']) : 'NULL');
 //                $tT = $CI->db->query("select * from jos_xtransaction_type where Transaction ='" . $type."'")->row();
                 $tT = new Transaction_type();
                 $tT->where("Transaction",$type)->get();
@@ -166,9 +172,9 @@ class Transaction extends DataMapper {
                 $accounts_in_side=count($CRs);
                 $query = $CI->db->query("insert into jos_xtransactions
                                 (accounts_id,transaction_type_id,staff_id,voucher_no,Narration,
-                                amountCr,updated_at,created_at,branch_id,reference_account,display_voucher_no,side,accounts_in_side)
+                                amountCr,updated_at,created_at,branch_id,reference_account_id,display_voucher_no,side,accounts_in_side)
                                 values($accid,$tT->id,$staff_id,$voucher_no,'$remarks',
-                                $amount,'$updated_at','$created_at',$currentbranchid,$reference_account,$display_voucher_no,'CR',$accounts_in_side)");
+                                $amount,'$updated_at','$created_at',$currentbranchid,$reference_account_id,$display_voucher_no,'CR',$accounts_in_side)");
 
                 if (!$onlyTRansactionSaving) {
                     include(xBANKSCHEMEPATH . "/" . strtolower($CRAccount->SchemeType) . "/" . strtolower($CRAccount->SchemeType) . "accountbeforecredited.php");
@@ -202,7 +208,7 @@ class Transaction extends DataMapper {
             $accid = $CRAccount->aid;
 
             $Branch = Branch::getCurrentBranch()->id;
-            $reference_account = ((is_array($voucherNo)) ? ($voucherNo['referanceAccount'] == Null ? 'NULL' : $voucherNo['referanceAccount']) : 'NULL');
+            $reference_account_id = ((is_array($voucherNo)) ? ($voucherNo['referanceAccount'] == Null ? 'NULL' : $voucherNo['referanceAccount']) : 'NULL');
 //            $tT = $CI->db->query("select * from jos_xtransaction_type where Transaction ='".$type."'")->row();
             $tT = new Transaction_type();
             $tT->where("Transaction",$type)->get();
@@ -226,9 +232,9 @@ class Transaction extends DataMapper {
             $remarks = str_replace("'", " ", $remarks);
             $query = "insert into jos_xtransactions
                                 (accounts_id,transaction_type_id,staff_id,voucher_no,Narration,
-                                amountCr,updated_at,created_at,branch_id,reference_account,display_voucher_no,side,accounts_in_side)
+                                amountCr,updated_at,created_at,branch_id,reference_account_id,display_voucher_no,side,accounts_in_side)
                                 values($accid,$tT->id,$staff_id,$voucher_no,'$remarks',
-                                $CRAmount,'$updated_at','$created_at',$currentbranchid,$reference_account,$display_voucher_no,'CR',1)";
+                                $CRAmount,'$updated_at','$created_at',$currentbranchid,$reference_account_id,$display_voucher_no,'CR',1)";
 //            executeQuery($query);
 
             if (!$onlyTRansactionSaving) {
@@ -251,7 +257,7 @@ class Transaction extends DataMapper {
 
                 // Save transaction only when DRAmount > 0
 //                $Branch = Branch::getCurrentBranch()->id;
-                $reference_account = ((is_array($voucherNo)) ? ($voucherNo['referanceAccount'] == Null ? 'NULL' : $voucherNo['referanceAccount']) : 'NULL');
+                $reference_account_id = ((is_array($voucherNo)) ? ($voucherNo['referanceAccount'] == Null ? 'NULL' : $voucherNo['referanceAccount']) : 'NULL');
 //                $tT = $CI->db->query("select * from jos_xtransaction_type where Transaction ='".$type."'")->row();
                 $tT = new Transaction_type();
                 $tT->where("Transaction",$type)->get();
@@ -273,9 +279,9 @@ class Transaction extends DataMapper {
                 $accounts_in_side=count($DRs);
                 $query = "insert into jos_xtransactions
                                 (accounts_id,transaction_type_id,staff_id,voucher_no,Narration,
-                                amountDr,updated_at,created_at,branch_id,reference_account,display_voucher_no,side,accounts_in_side)
+                                amountDr,updated_at,created_at,branch_id,reference_account_id,display_voucher_no,side,accounts_in_side)
                                 values($accid,$tT->id,$staff_id,$voucher_no,'$remarks',
-                                $amount,'$updated_at','$created_at',$currentbranchid,$reference_account,$display_voucher_no,'DR',$accounts_in_side)";
+                                $amount,'$updated_at','$created_at',$currentbranchid,$reference_account_id,$display_voucher_no,'DR',$accounts_in_side)";
 //                executeQuery($query);
 
                 if (!$onlyTRansactionSaving) {

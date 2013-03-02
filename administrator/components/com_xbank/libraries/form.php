@@ -33,7 +33,7 @@
 		$enterScript='$("#'.$id.'").keypress(function (e) {
 					    if (e.which == 13) {
 					        var $targ = $(e.target);
-					        if (/*!$targ.is("textarea") && */ !e.shiftKey && !$targ.is(":button,:submit")) {
+					        if (/*!$targ.is("textarea") && */ !$targ.is(":button,:submit")) {
 					            $targ.blur();
 					            var focusNext = false;
 					            $(this).find(":input:visible:not([disabled],[readonly]), a").each(function(){
@@ -87,8 +87,9 @@
  	function text($lable,$attributes,$style="text-transform:capitalize;"){
  		$this->first($lable);
                 $id=$this->getAttribute('name',$attributes);
+        $hint=$this->getAttribute('hint',$attributes);
                 $id=$this->id."_".$id;
- 		$this->html .= "<td><div class='input-container'><input type='text' ";
+ 		$this->html .= "<td onmouseover=\"javascript:jQuery('#hint_$id').show();\" onmouseout=\"javascript:jQuery('#hint_$id').hide();\"><div class='input-container'><input type='text' ";
  		if(is_array($attributes)){
 	 		foreach($attributes as $attr=>$val){
 	 			$this->html .= "$attr='$val' ";
@@ -96,7 +97,7 @@
  		}else{
  			$this->html .= $attributes;
  		}
- 		$this->html .=" style='$style' id='$id'/></div></td>";
+ 		$this->html .=" style='$style' id='$id'/></div><br/><br/><div id='hint_$id' style='display:none;position:absolute;' class='ui-state-hover'>$hint</div></td>";
  		$this->last();
  		return $this;
  	}
@@ -456,6 +457,7 @@
   	function lookupDB($lable,$attributes,$url,$dql,$labelField,$valueField='',$style=''){
   		$this->first($lable);
   		$id=$this->getAttribute('name',$attributes);
+  		$hint=$this->getAttribute('hint',$attributes);
                 $id=$this->id."_".$id;
   		if($valueField=='') $valueField = $labelField;
   		$mapping="";
@@ -481,7 +483,7 @@
 						};";
 		if(!is_array($labelField)) $makeList="";
 		
- 		$this->html .= "<td><div class='input-container'><input type='text' ";
+ 		$this->html .= "<td onmouseover=\"javascript:jQuery('#hint_$id').show();\" onmouseout=\"javascript:jQuery('#hint_$id').hide();\"><div class='input-container'><input type='text' ";
  		if(is_array($attributes)){
 	 		foreach($attributes as $attr=>$val){
 	 			$this->html .= "$attr='$val' ";
@@ -489,7 +491,7 @@
  		}else{
  			$this->html .= $attributes;
  		}
- 		$this->html .=" id='$id' style='$style'/></div></td>";
+ 		$this->html .=" id='$id' style='$style'/></div><br/><br/><div id='hint_$id' style='display:none;position:absolute;' class='ui-state-hover'>$hint</div></td>";
  		$this->last();
 		$script="
 				    var {$id}_data;

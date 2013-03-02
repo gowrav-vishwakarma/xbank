@@ -255,11 +255,32 @@ function getNow($format="Y-m-d H:i:00"){
 $table_id=0;
 
 function getReportTable($model, $heads, $fields, $totals_array,$headers, $option,$headerTemplate="",$tableFooterTemplate="", $footerTemplate="",$links=array()) {
-    global $table_id;
-    $table_id++;
-
-    $tableScript='$("#report_'.$table_id.'").dataTable({"bPaginate" : false, "bSort": false, "sDom": \'ft\' });';
     $CI =& get_instance();
+    $table_id = $CI->session->userdata('table_id');
+    if(!$table_id) $table_id=0;
+    $table_id++;
+    $CI->session->set_userdata('table_id',$table_id);
+
+    // $CI->jq->addJs('js/jquery.dataTables.js');
+    // $CI->jq->addJs('js/TableTools.js');
+    // $CI->jq->addJs('js/ZeroClipboard.js');
+    $headerTemplate_striped=strip_tags($headerTemplate);
+    $tableScript="$('#report_".$table_id."').dataTable({'bPaginate' : false, 'bSort': true, 'sDom': 'T<\"clear\">lfrtp', 
+        'oTableTools': {
+            'sSwfPath': 'copy_csv_xls_pdf.swf',
+            'aButtons': [
+                'copy',
+                'csv',
+                'xls',
+                {
+                    'sExtends': 'pdf',
+                    'sPdfMessage': ' $headerTemplate_striped '
+                },
+                'print'
+            ]
+        }
+     });";
+
     $CI->jq->addDomReadyScript($tableScript);
 
     $html='';
@@ -274,7 +295,7 @@ function getReportTable($model, $heads, $fields, $totals_array,$headers, $option
         }
     }
 
-    $html .= "<br/>
+    $html .= "<br/><br/>
         <table class='adminlist1' border='1' width='100%' id='report_$table_id' class='report'><thead>";
     $html .="<tr>";
     if ($option['sno'] == true) {
@@ -288,7 +309,7 @@ function getReportTable($model, $heads, $fields, $totals_array,$headers, $option
     foreach ($model as $m):
         $html .="<tr >";
         if ($option['sno'] == true) {
-            $html .=" <td>".$sno++."</td>";
+            $html .=" <td>".sprintf('%06d',$sno++)."</td>";
         }
         foreach ($fields as $f) {
             if(strpos($f,"~") !==false){
@@ -307,7 +328,7 @@ function getReportTable($model, $heads, $fields, $totals_array,$headers, $option
                     }else{
                         $ft2="";
                     }
-                    $a_s="<a href='index.php?option=com_xbank&task=".$links[$f]['task']."&".$ft2."' class='".(isset($links[$f]['class'])?$links[$f]['class'] : "" ) ."'>";
+                    $a_s="<a href='index.php?option=com_xbank&task=".$links[$f]['task']."&".$ft2."' class='".(isset($links[$f]['class'])?$links[$f]['class'] : "" ) ."' title='".(isset($links[$f]['title'])?$links[$f]['title'] : "" ) ."'>";
                     $a_e = "</a>";
                 }else{
                     $a_s="";
@@ -322,7 +343,7 @@ function getReportTable($model, $heads, $fields, $totals_array,$headers, $option
                         $ft2="";
                         foreach($links[$f]['url_post'] as $var=>$val){
                             eval('$val_t = '.str_replace("#",'$m->',$val).';');
-                            $ft2.= "&".$var. "=". $val_t;
+                            $ft2.= "&".$var. "=". urlencode($val_t);
                         }
                     }else{
                         $ft2="";
@@ -348,7 +369,7 @@ function getReportTable($model, $heads, $fields, $totals_array,$headers, $option
         }
         foreach ($fields as $f) {
             if (in_array($f, $totals_array)) {
-                $html .= "<th align='left'>" . $sum[$f] . "</th>";
+                $html .= "<th align='left'>" . round($sum[$f],2) . "</th>";
             } else {
                 $html .= "<td>&nbsp;</td>";
             }
@@ -356,8 +377,8 @@ function getReportTable($model, $heads, $fields, $totals_array,$headers, $option
         $html .= "</tr>";
     }
     eval($tableFooterTemplate);
-
     $html .= "</tobdy></table>";
+    $html .= $footerTemplate;
 
     if(isset($model->paginateHTML))
         $html .= $model->paginateHTML;
@@ -394,4 +415,34 @@ function paginateIt(&$model,$pageNumber,$onPage=50){
     $model->paginatHTML="";
 }
 
-?>
+
+function arrayToObject($array)
+{
+    // First we convert the array to a json string
+    $json = json_encode($array);
+
+    // The we convert the json string to a stdClass()
+    $object = json_decode($json);
+
+    return $object;
+}
+
+function objectToArray($object)
+{
+    // First we convert the object into a json string
+    $json = json_encode($object);
+
+    // Then we convert the json string to an array
+    $array = json_decode($json, true);
+
+    return $array;
+}
+
+function nextDate($date=null,$is_date=false){
+    if($date==null) $date=getNow('Y-m-d');
+    if($is_date==false)
+        $date=inp($date);
+    
+    $date = date("Y-m-d", strtotime(date("Y-m-d", strtotime($date)) . " +1 DAY"));    
+    return $date;
+}

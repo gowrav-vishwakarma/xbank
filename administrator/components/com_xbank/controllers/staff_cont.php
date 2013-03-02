@@ -32,7 +32,7 @@ class staff_cont extends CI_Controller {
             $s = new Staff($id);
         else
             $s=new Staff();
-        xDeveloperToolBars::onlyCancel("staff_cont.dashboard", "cancel", "Create Staff");
+        xDeveloperToolBars::onlyCancel("staff_cont.dashboard", "cancel", "Create Staff In Current Branch");
 
         $b = Branch::getCurrentBranch()->id;
         //$this->jq->addInfo("Staff Member Account Details");
@@ -170,6 +170,189 @@ class staff_cont extends CI_Controller {
         else
             re('staff_cont.dashboard', 'Staff Successfully created');
     }
+
+
+         function markAttendance() {
+//        Staff::accessibleTo(BRANCH_ADMIN);
+        $user = JFactory::getUser();
+        $stf = new Staff();
+        $stf->where("jid",$user->id)->get();
+        if ($stf->AccessLevel < 80){
+            re("com_xbank","Only branch admin is authorised to mark staff attendance",'error');
+        }
+        $b = Branch::getCurrentBranch()->id;
+        $staff = new Staff();
+        $staff->where("branch_id",$b)->get();
+
+        $this->load->library('form');
+        xDeveloperToolBars::onlyCancel("staff_cont.dashboard", "cancel", "Mark Staff Attendance here");
+        $form = $this->form->open("one", "index.php?option=com_xbank&task=staff_cont.markStaffAttendance");
+        foreach ($staff as $s) {
+            if ($s->AccessLevel < 100) {
+                $sa = new Staff_attendance();
+                $sa->where("staff_id",$s->id);
+                $sa->where("Date like '".  getNow("Y-m-d")."%'")->get();
+                $status = "";
+                if ($sa) {
+                    switch ($sa->Attendance) {
+                        case "P" :
+                            $status = PRESENT;
+                            break;
+                        case "L" :
+                            $status = LEAVE;
+                            break;
+                        case "A" :
+                            $status = ABSENT;
+                            break;
+                    }
+                }
+
+                $form = $form->setColumns(2)
+                                ->radio("$s->StaffID", "name='Attendance_$s->id'", array("Present " => PRESENT, "Leave " => LEAVE, "Absent " => ABSENT), $status)
+                                ->textArea("Narration", "name='Narration_$s->id'");
+//                ->hidden("","name='staffid' value='$s->id'");
+            }
+        }
+        $form = $form->confirmButton("Confirm", "Mark Attendance", "index.php?option=com_xbank&task=staff_cont.confirmMarkAttendance&format=raw", true);
+        $form = $form->submit('Mark');
+//        echo $this->form->get();
+        $data['contents'] = $this->form->get();
+        JRequest::setVar("layout", "showcontents");
+        $this->load->view('staff.html', $data);
+        $this->jq->getHeader();
+    }
+
+    function confirmMarkAttendance() {
+//        Staff::accessibleTo(BRANCH_ADMIN);
+        $b = Branch::getCurrentBranch()->id;
+        $staff = new Staff();
+        $staff->where("branch_id",$b)->get();
+
+        foreach ($staff as $s) {
+            if (inp("Attendance_$s->id") == "" && $s->AccessLevel < 80) {
+                echo "<h3>Please check the attendance you have marked. Attendance not marked for some staff member...</h3><br>falsefalse";
+                return;
+            }
+        }
+        echo "<table border='1' width='100%'>";
+        echo "<th>Staff ID</th>";
+        echo "<th>Attendance</th>";
+        foreach ($staff as $s) {
+            if ($s->AccessLevel < 80) {
+                echo "<tr>";
+                echo "<td>$s->StaffID</td>";
+                echo "<td>" . inp("Attendance_$s->id") . "</td>";
+                echo "</tr>";
+            }
+        }
+        echo "</table>";
+    }
+
+    function markStaffAttendance() {
+//        Staff::accessibleTo(BRANCH_ADMIN);
+
+        try {
+            $this->db->trans_begin();
+            $b = Branch::getCurrentBranch()->id;
+            $staff = new Staff();
+            $staff->where("branch_id",$b)->get();
+
+            foreach ($staff as $s) {
+                if ($s->AccessLevel > 80)
+                    continue;
+                $sa = new Staff_attendance();
+                $sa->where("staff_id",$s->id);
+                $sa->where("Date like '".  getNow("Y-m-d")."%'")->get();
+                if (!$sa->result_count()) {
+                    $sa = new Staff_attendance();
+                }
+                $sa->Date = getNow("Y-m-d");
+                $sa->Attendance = inp("Attendance_$s->id");
+                $sa->Narration = inp("Narration_$s->id");
+                $sa->staff_id = $s->id;
+                $sa->save();
+            }
+            $this->db->trans_commit();
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            echo $e->getMessage();
+        }
+        re('com_xbank',"Staff Attendance Marked");
+    }
+
+    function markpaidholidaysForm() {
+        $user = JFactory::getUser();
+        $stf = new Staff();
+        $stf->where("jid",$user->id)->get();
+        if ($stf->AccessLevel < 80){
+            re("com_xbank","Only branch admin is authorised to mark staff holidays",'error');
+        }
+        $b = Branch::getCurrentBranch()->id;
+        $month = date("n", strtotime(getNow("Y-m-d")));
+        $year = date("Y", strtotime(getNow("Y-m-d")));
+
+        $paidHolidays = $this->getHolidays(date("n", strtotime(getNow("Y-m-d"))), date("Y", strtotime(getNow("Y-m-d"))));
+        xDeveloperToolBars::onlyCancel("staff_cont.dashboard", "cancel", "Mark Staff Holidays");
+        $this->load->library("form");
+        $this->form->open("one", "index.php?option=com_xbank&task=staff_cont.markpaidholidays&month=$month&year=$year")
+                ->setColumns(2)
+                ->dateBoxMultiSelect("Mark Bank Holiday", "name='holidays' ")
+                ->submit("Mark");
+        $data['contents'] = $this->form->get();
+        JRequest::setVar("layout", "showcontents");
+        $this->load->view('staff.html', $data);
+        $this->jq->getHeader();
+    }
+
+    function getHolidays($month, $year) {
+        $b = Branch::getCurrentBranch()->id;
+        $paidHolidays = "";
+        $holidays = new holiday();
+        $holidays->where("year","$year");
+        $holidays->where("month","$month");
+        $holidays->where("branch_id",$b)->get();
+
+        foreach ($holidays as $h) {
+            $paidHolidays .=$h->HolidayDate . ",";
+        }
+
+        $paidHolidays = trim($paidHolidays, ",");
+        return $paidHolidays;
+    }
+
+    function markpaidholidays() {
+        $month = JRequest::getVar("month");
+        $year = JRequest::getVar("year");
+
+        try {
+            $this->db->trans_begin();
+            $b = Branch::getCurrentBranch()->id;
+            $q = "Delete from jos_xbank_holidays where month=$month and year=$year and branch_id=$b";
+            executeQuery($q);
+//                        $markedholidays=  Doctrine::getTable("BankHolidays")->findByBranch_idAndMonthAndYear($b,$month,$year);
+//                        $holiday=explode(",", inp("holidays"));
+            $holiday = explode(",", $this->input->post("holidays"));
+//                        $holidays=trim($holiday,",");
+            foreach ($holiday as $h) {
+                if ($month != date("n", strtotime($h)) || $year != date("Y", strtotime($h)))
+                    continue;
+                $bankholidays = new holiday();
+                $bankholidays->HolidayDate = $h;
+                $bankholidays->month = date("n", strtotime($h));
+                $bankholidays->year = date("Y", strtotime($h));
+                $bankholidays->branch_id = $b;
+                $bankholidays->save();
+            }
+            $this->db->trans_commit();
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            echo $e->getMessage();
+        }
+        re('staff_cont.dashboard',"Paid Holidays marked successfully");
+    }
+
+
+
 
 }
 

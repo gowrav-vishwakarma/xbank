@@ -60,6 +60,7 @@ class com_xbank extends CI_Controller {
         if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
             $a->where('branch_id',Branch::getCurrentBranch()->id);
         $a->where_related('premiums',"DueDate ", getNow("Y-m-d"));
+        $a->order_by('AccountNumber Desc');
         $a->get();
 
         
@@ -82,7 +83,7 @@ class com_xbank extends CI_Controller {
 */
 
 	$a= new Account();
-        $a->select('*,jos_xaccounts.AccountNumber as AccountNumber, (CurrentBalanceCr + CurrentInterest - CurrentBalanceDr) as Amount');
+        $a->select('*,jos_xaccounts.AccountNumber as AccountNumber, round((CurrentBalanceCr + CurrentInterest - CurrentBalanceDr)) as Amount');
         $a->select_func("DATE_ADD",'[date(jos_xaccounts.created_at),INTERVAL jos_xschemes.MaturityPeriod MONTH]','DueDate');
         $a->include_related('member','Name');
         $a->include_related('member','FatherName');
@@ -181,7 +182,7 @@ class com_xbank extends CI_Controller {
 	
 	        $a= new Account();
 //        $a->select('*, id as ActualCurrentBalance');
-        $a->select('*,jos_xaccounts.AccountNumber as AccountNumber, (CurrentBalanceCr + CurrentInterest - CurrentBalanceDr) as Amount');
+        $a->select('*,jos_xaccounts.AccountNumber as AccountNumber, round((CurrentBalanceCr + CurrentInterest - CurrentBalanceDr)) as Amount');
         $a->select_func("DATE_ADD",'[date(jos_xaccounts.created_at),INTERVAL jos_xschemes.MaturityPeriod MONTH]','DueDate');
         $a->include_related('member','Name');
         $a->include_related('member','FatherName');
@@ -194,7 +195,7 @@ class com_xbank extends CI_Controller {
         $a->where('ActiveStatus',1);
         if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
             $a->where('branch_id',Branch::getCurrentBranch()->id);
-        $a->where_field_func('YEARWEEK(DATE_ADD(DATE(jos_xaccounts.created_at), INTERVAL jos_xschemes.MaturityPeriod MONTH)) = ', "YEARWEEK",getNow("Y-m-d"));
+        $a->where_field_func('WEEKOFYEAR(DATE_ADD(DATE(jos_xaccounts.created_at), INTERVAL jos_xschemes.MaturityPeriod MONTH)) = ', "WEEKOFYEAR",getNow("Y-m-d"));
         $a->where_field_func('YEAR(DATE_ADD(DATE(jos_xaccounts.created_at), INTERVAL jos_xschemes.MaturityPeriod MONTH))= ', "YEAR",getNow("Y-m-d"));
 //        $a->where_related('premiums',"Paid",0);
         $a->group_start();
@@ -255,7 +256,7 @@ class com_xbank extends CI_Controller {
 
 	       $a= new Account();
 //        $a->select('*, id as ActualCurrentBalance');
-        $a->select('*,jos_xaccounts.AccountNumber as AccountNumber, (CurrentBalanceCr + CurrentInterest - CurrentBalanceDr) as Amount');
+        $a->select('*,jos_xaccounts.AccountNumber as AccountNumber, round((CurrentBalanceCr + CurrentInterest - CurrentBalanceDr)) as Amount');
         $a->select_func("DATE_ADD",'[date(jos_xaccounts.created_at),INTERVAL jos_xschemes.MaturityPeriod MONTH]','DueDate');
         $a->include_related('member','Name');
         $a->include_related('member','FatherName');

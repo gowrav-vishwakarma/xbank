@@ -104,7 +104,7 @@ class schemes_cont extends CI_Controller {
 
     function newscheme() {
 //        Staff::accessibleTo(ADMIN);
-
+        $exp="";
         try {
             $this->db->trans_begin();
             $sc = new Scheme();
@@ -266,10 +266,11 @@ class schemes_cont extends CI_Controller {
             log_message('error', __FILE__ . " $sc->Name Scheme commited from " . $this->input->ip_address() . " " . __FUNCTION__);
         } catch (Exception $e) {
             $rollback = true;
+            $exp=$e;
         }
         if ($this->db->trans_status() === false or $rollback == true) {
             $this->db->trans_rollback();
-            re("schemes_cont.dashboard", "Scheme Not Added", "error");
+            re("schemes_cont.dashboard", "Scheme Not Added " . $e->getMessage(), "error");
         }
         $this->db->trans_commit();
         re("schemes_cont.dashboard", "Scheme Added");

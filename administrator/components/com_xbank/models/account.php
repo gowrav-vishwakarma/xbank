@@ -54,6 +54,12 @@ class Account extends DataMapper {
             'join_table' => 'jos_xtransactions',
             'other_field' => 'account'
         ),
+        'referencetransactions' => array(
+            'class' => 'transaction',
+            'join_self_as' => 'reference_account',
+            'join_table' => 'jos_xtransactions',
+            'other_field' => 'referenceaccount'
+        ),
         'documents' => array(
             'class' => 'document',
             'join_self_as' => 'accounts',
@@ -72,7 +78,15 @@ class Account extends DataMapper {
         ),
         'OtherCharges' => array(
             'get_rules' => array('otherCharges')
-        )
+        ),
+        'AccountNumber' => array(
+            'label'=> 'Account Number',
+            'rules' => array('required','unique','always_valildate')
+        ),
+        // 'member' => array(
+        //     'label' => 'Member',
+        //     'rules' => array('required','always_valildate')
+        // )
     );
 
     function _actualcurrentbalance($field) {

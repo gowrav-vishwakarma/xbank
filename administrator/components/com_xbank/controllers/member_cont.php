@@ -10,16 +10,18 @@ class Member_cont extends CI_Controller {
         xDeveloperToolBars::getMemberManagementToolBar();
 
         $a= new Member();
+        $a->select('*');
         $a->where("branch_id",Branch::getCurrentBranch()->id);
+        $a->select_subquery('(SELECT a.CurrentBalanceCr - a.CurrentBalanceDr FROM jos_xaccounts a JOIN jos_xschemes s on a.schemes_id=s.id WHERE a.member_id=${parent}.id AND s.Name="'. CAPITAL_ACCOUNT_SCHEME .'")','ShareCapital');
         $a->limit(100,JRequest::getVar('page_start',0)*100);
         $a->get();
         
 
 //        $a->check_last_query();
         $data['report'] = getReporttable($a,             //model
-                array("Name","Father Name","Address","Phone Nos","Created On","Edit"),       //heads
-                array('Name','FatherName',"PermanentAddress","PhoneNos","created_at","~\"<a href=index.php?option=com_xbank&task=member_cont.editMemberForm&id=#id>Edit</a>\""),       //fields
-                array(),        //totals_array
+                array("Id","Name","Father Name","Address","Phone Nos", "Share Capital",  "Created On","Edit"),       //heads
+                array('id','Name','FatherName',"PermanentAddress","PhoneNos", "ShareCapital", "created_at","~\"<a href=index.php?option=com_xbank&task=member_cont.editMemberForm&id=#id>Edit</a>\""),       //fields
+                array('ShareCapital'),        //totals_array
                 array(),        //headers
                 array('sno'=>true,"sno_start"=>JRequest::getVar('page_start',0)*100,"page"=>true),     //options
                 "",     //headerTemplate
@@ -137,8 +139,8 @@ class Member_cont extends CI_Controller {
 //        $m = new Member();
 //        $m->where('PanNo', inp('PanNo'))->get();
 //        $m->where('PanNo <>',NULL)->get();
-        $q = $this->db->query("select PanNo from jos_xmember where PanNo ='" . inp("PanNo") . "' and PanNo is not null")->row()->PanNo;
-        if ($q->PanNo) {
+        $q = $this->db->query("select PanNo from jos_xmember where PanNo ='" . inp("PanNo") . "' and PanNo is not null");
+        if ($q->num_rows() > 0) {
             echo "<h2>Pan Number is a unique value you cannot repeat it ..</h2>falsefalse";
             return;
         }
@@ -376,11 +378,12 @@ class Member_cont extends CI_Controller {
 
 //            $conn->commit();
         } catch (Exception $e) {
+            $msg = $e->getMessage();
             $rollback = true;
         }
         if ($this->db->trans_status() === false or $rollback == true) {
             $this->db->trans_rollback();
-            re("member_cont.addmemberform", " Member Not Added ", "error");
+            re("member_cont.addmemberform", " Member Not Added ". $msgbest , "error");
         }
         $this->db->trans_commit();
         $msg2 = "";
@@ -417,7 +420,8 @@ class Member_cont extends CI_Controller {
         $hasShareAccount->where('member_id', $id)->where('schemes_id', $scheme->id)->get();
 
         $ag = new Agent();
-        $ag->where('member_id',$id)->get();
+        $ag->where('member_id',$id);
+        $ag->where("ActiveStatus",1)->get();
 
         $this->load->library('form');
         $form = $this->form->open("one", "index.php?option=com_xbank&task=member_cont.editMember&id=$id")
@@ -466,7 +470,7 @@ class Member_cont extends CI_Controller {
         $form = $form->fileupload("Upload Signature Specimen", "name='userfile'")
 //                ->confirmButton("Confirm","New Member to create","index.php?//mod_member/member_cont/confirmMemberCreateForm",true)
                         ->_()
-//                        ->confirmButton("Confirm", "Edit Member", "index.php?option=com_xbank&task=member_cont.confirmMemberEditForm&id=$id&format=raw", true);
+                        ->confirmButton("Edit", "Edit Member", "index.php?option=com_xbank&task=member_cont.confirmMemberEditForm&id=$id&format=raw", true)
 //                        ->resetBtn('Reset');
                         ->submit('Edit');
 
@@ -480,25 +484,38 @@ class Member_cont extends CI_Controller {
     function confirmMemberEditForm() {
         $id = JRequest::getVar("id");
         $m = new Member($id);
-        $m->where('PanNo', inp('PanNo'))->get();
+        $m->where('PanNo', inp('PanNo'))->get(1);
         if ($m->result_count > 0) {
             echo "<h2>Pan Number is a unique value you cannot repeat it ..</h2>falsefalse";
 //            return;
         }
 
-//        if (inp("isAgent") == 1) {
-//            if (inp("AgentAccount") == "") {
-//                echo "<h2>Please give agent's Saving Account Number</h2>false";
-//                return;
-//            }
-//        }
+        if (inp("isAgent")) {
+            $agAcc = new Account();
+            $agAcc->where("AccountNumber like ",inp("AgentAccount"))->get();
+            if (!$agAcc->result_count()) {
+                echo "<h2>Please give correct agent's Saving Account Number</h2>falsefalse";
+            }
+        }
+
+        $ag = new Agent();
+        $ag->where('member_id',$id)->get();
+        if (!inp("isAgent") && $ag->result_count()) {
+                echo "<h2>Proceeding with removing member as agent will remove this agent from all the existing accounts.<br/></h2>";
+                $acc = new Account();
+                $acc->where("agents_id",$ag->id)->get();
+                if($acc->result_count()){
+                    foreach($acc as $a){
+                        echo "<h4>$a->AccountNumber</h4>";
+                    }
+                }
+        }
+
         if (inp("hasShareAccount") == 1) {
             if (inp("shareAccountAmount") == "" || !is_numeric(inp("shareAccountAmount"))) {
                 echo "<h2>Please check for share account </h2>falsefalse";
-//                return;
             }
         }
-//            echo "image path ". inp("userSignature");
         echo "<h2>Proceed with editing member details...</h2>";
     }
 
@@ -588,7 +605,7 @@ class Member_cont extends CI_Controller {
 
 //lose any special characters in the filename
                 $fileName = ereg_replace("[^A-Za-z0-9.]", "-", $fileName);
-                $fileName = 'sig_' . $m->id . "." . $uploadedFileExtension;
+                $fileName = 'sig_' . $m->id . "." . strtolower($uploadedFileExtension);
 
 //always use constants when making file paths, to avoid the possibilty of remote file inclusion
                 $uploadPath = JPATH_SITE . SIGNATURE_FILE_PATH . $fileName;
@@ -622,7 +639,24 @@ class Member_cont extends CI_Controller {
                     $a = new Agent($ag->id);
                 $a->member_id = $m->id;
                 $a->AccountNumber = inp("AgentAccount");
+                $a->ActiveStatus = 1;
                 $a->save();
+            }
+            else{
+                if($ag->result_count()){
+                    // delete all agents_id from accounts
+                    $acc = new Account();
+                    $acc->where("agents_id",$ag->id)->get();
+                    if($acc->result_count()){
+                        foreach($acc as $ac){
+                            $ac->agents_id = 0;
+                            $ac->save();
+                        }
+                    }
+                    $a = new Agent($ag->id);
+                    $a->ActiveStatus = 0;
+                    $a->save();
+                }
             }
             /*            $BranchAgent=Branch::getDefaultAgent();
               $ac=new Accounts();
@@ -866,7 +900,7 @@ class Member_cont extends CI_Controller {
 
     function dealerform() {
 //        Staff::accessibleTo(POWER_USER);
-        xDeveloperToolBars::onlyCancel("com_xbank.index", "cancel", "Add a new Dealer here");
+        xDeveloperToolBars::onlyCancel("member_cont.dashboard", "cancel", "Add a new Dealer here");
         $this->load->library('form');
         $form = $this->form->open("one", "index.php?option=com_xbank&task=member_cont.createDealer")
                         ->setColumns(2)
@@ -874,8 +908,8 @@ class Member_cont extends CI_Controller {
                         ->textArea("Address", "name='address' ")
                         ->submit('Submit');
 
-        echo $this->form->get();
-
+        $data['contents']= $this->form->get();
+        $this->load->view('utility.html',$data);
 //        $this->load->view('member.html');
         $this->jq->getHeader();
     }

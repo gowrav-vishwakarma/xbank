@@ -17,6 +17,10 @@
     </tr>
     <?php
     $i=1;
+    $premium_due_sum=0;
+    $premium_amount_sum=0;
+    $total_sum=0;
+
         foreach($result as $r){
        	$agName = "";
        	$agCode = "";
@@ -42,8 +46,26 @@
             echo "<td>".$agCode."</td>";
             echo "<td>".$agPhone."</td>";
             echo "</tr>";
+
+            $premium_due_sum += $r->premiumcount;
+            $premium_amount_sum += $r->Amount;
+            $total_sum += ($r->premiumcount * $r->Amount);
         }
 
     ?>
-
+    <tr class="ui-widget-header" align="left">
+        <th>Total</th>
+        <th>&nbsp;</th>
+        <th>&nbsp;</th>
+        <th>&nbsp;</th>
+        <th>&nbsp;</th>
+        <th>&nbsp;</th>
+        <th>&nbsp;</th>
+        <th><?php echo $premium_due_sum; ?></th>
+        <th><?php echo $premium_amount_sum; ?></th>
+        <th><?php echo $total_sum; ?></th>
+        <th>&nbsp;</th>
+        <th>&nbsp;</th>
+        <th>&nbsp;</th>
+    </tr>
 </table>

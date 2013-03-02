@@ -17,7 +17,7 @@ $result = $this->db->query("select a.AccountNumber as accnum from jos_xaccounts 
 if ($result)
 {
     $err = true;
-    showError("This Account Number is Illegal due to existing account <br/><b>" . $result->AccountNumber . "</b>falsefalse");
+    showError("This Account Number is Illegal due to existing account <br/><b>" . $result . "</b>falsefalse");
     //$msg .= $this->jq->flashMessages(true);
 }
               $u = inp('UserID');

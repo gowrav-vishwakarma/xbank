@@ -209,49 +209,26 @@ class report_cont extends CI_Controller {
         //function transactionDetails($voucher, $foraccount) {
         //Staff::accessibleTo(USER);
         $voucher = JRequest::getVar("vn");
-       $foraccount = JRequest::getVar("id");
+        $foraccount = JRequest::getVar("id");
+        $transaction_type_id = JRequest::getVar('tr_type','is null');
         $arr = array();
         $Transactions = new Transaction();
+        $Transactions->include_related('transaction_type', 'Transaction');
         $Transactions->where('voucher_no', $voucher);
-        $Transactions->where('branch_id', Branch::getCurrentBranch()->id)->get();
+        // $Transactions->where('transaction_type_id', $transaction_type_id);
+        $Transactions->where('branch_id', (JRequest::getVar('branch_id',false) == false ? Branch::getCurrentBranch()->id : inp('branch_id')))->get();
+        // echo $Transactions->check_last_query();
         //$Transactions = Doctrine::getTable("Transactions")->findByVoucher_noAndBranch_id($voucher, Branch::getCurrentBranch()->id);
         $i = 1;
         foreach ($Transactions as $t) {
-            /** Find whether the transaction is one to many or many to one
-             *
-             */
-//                  $q=Doctrine::getTable("Transactions")->createQuery()
-//                            ->where("amountDr > 0 AND voucher_no = ? ",array($voucher))->execute();
-//                  $DrCount=$q->count();
-//            $amount = 0;
-//            if ($t->amountDr > 0) {
-//                $drAccount = Doctrine::getTable("Accounts")->find($t->accounts_id);
-//                $dr = $drAccount->AccountNumber;
-//                $amount = $t->amountDr;
-//            } else {
-//                $dr = "";
-//
-//                //  $amount=0;
-//            }
-//            if ($t->amountCr > 0) {
-//                $crAccount = Doctrine::getTable("Accounts")->find($t->accounts_id);
-//                $cr = $crAccount->AccountNumber;
-//                $amount = $t->amountCr;
-//            } else {
-//                $cr = "";
-//
-//                //     $amount=0;
-//            }
-//                $drAccount=Doctrine::getTable("Accounts")->find($t->accounts_id);
-//                $crAccount=Doctrine::getTable("Accounts")->find($t->accounts_id_to);
-            //$account = Doctrine::getTable("Accounts")->find($t->accounts_id);
             $account = new Account($t->accounts_id);
 //            $account->where('id',$t->accounts_id)->get();
             $data['accountID'] = $account->id;
-            $arr[] = array("Sno" => $i++, "Voucher" => $t->voucher_no, "Account" => $account->AccountNumber, "DR" => $t->amountDr, "CR" => $t->amountCr);
+            $arr[] = array("Sno" => $i++,"Voucher_tech"=>$t->voucher_no, "Voucher" => ($t->display_voucher_no==0 ? $t->voucher_no: $t->display_voucher_no), "Account" => $account->AccountNumber, "DR" => $t->amountDr, "CR" => $t->amountCr);
         }
         $data['foraccount'] = $foraccount;
         $data['results'] = $arr;
+        $data['tr_type'] = $t->transaction_type_Transaction;
 //        $data['backURL'] = "index.php?//mod_pandl/pandl_cont/accountTransactions/" . $this->session->userdata("Account");
         JRequest::setVar("layout", "pandl_transactionDetails");
         $data['contents'] = $this->load->view('report.html', $data, true);
@@ -374,11 +351,11 @@ class report_cont extends CI_Controller {
         xDeveloperToolBars::onlyCancel("report_cont.dashboard", "cancel", "View BalanceSheets");
 
         $this->load->library("form");
-        $form = $this->form->open("balanceSheet", "index.php?option=com_xbank&task=report_cont.getBalanceSheet")
+        $form = $this->form->open("balanceSheet", "index.php?option=com_xbank&task=balancesheet_cont.getBalanceSheet")
                         ->setColumns(2)
                         ->dateBox("Balance Sheet From", "name='fromDate' class='input'")
-                        ->dateBox("Balance Sheet till", "name='toDate' class='input'")
-                        ->checkbox("Print To PDF", "name='printToPDF' value=1");
+                        ->dateBox("Balance Sheet till", "name='toDate' class='input'");
+                        // ->checkbox("Print To PDF", "name='printToPDF' value=1");
         if (Branch::getCurrentBranch()->Code == "DFL") {
             //                    $branchNames=$this->db->query("select Name from branch")->result();
             $form = $form->select("Select Branch", "name='BranchId'", Branch::getAllBranchNames())
@@ -635,7 +612,7 @@ class report_cont extends CI_Controller {
                     $openingBalanceDr += $a->OpeningBalanceDr;
                     $q = "select sum(t.amountDr) as Debit from jos_xtransactions t where t.accounts_id = $a->id and t.created_at between '" . $dateFrom . "' and DATE_ADD('" . $dateTo . "',INTERVAL +1 DAY) ";
                     $Debit = $this->db->query($q)->row()->Debit;
-                    $q = "select  sum(t.amountCr) as Credit from jos_xtransactions t where t.accounts_id = $a->id and t.created_at between '" . $dateFrom . "' and DATE_ADD('" . $dateTo . "',INTERVAL +1 DAY) ";
+                    $q = "select sum(t.amountCr) as Credit from jos_xtransactions t where t.accounts_id = $a->id and t.created_at between '" . $dateFrom . "' and DATE_ADD('" . $dateTo . "',INTERVAL +1 DAY) ";
                     $Credit = $this->db->query($q)->row()->Credit;
                     if (($Debit + $openingBalanceDr) == 0 and ($Credit + $openingBalanceCr) == 0)
                         continue;
@@ -744,10 +721,9 @@ class report_cont extends CI_Controller {
         if (!$ac->result_count())
             re("report_cont.accountstatementform","The Account Number ".inp("AccountNumber")." does not exist. Try Again","error");
         if (inp("fromDate") && inp("toDate")) {
-
-            $query = $this->db->query("select * from jos_xtransactions t where t.accounts_id =" . $ac->id . " and created_at between '" . inp("fromDate") . "' and DATE_ADD('" . inp("toDate") . "',INTERVAL +1 DAY) order by created_at")->result();
+            $query = $this->db->query("select * from jos_xtransactions t /*  join jos_xtransaction_type ty on t.transaction_type_id=ty.id */ where t.accounts_id =" . $ac->id . " and created_at between '" . inp("fromDate") . "' and DATE_ADD('" . inp("toDate") . "',INTERVAL +1 DAY) order by created_at")->result();
         } else {
-            $query = $this->db->query("select * from jos_xtransactions t where t.accounts_id =" . $ac->id . " order by created_at")->result();
+            $query = $this->db->query("select * from jos_xtransactions t /*  join jos_xtransaction_type ty on t.transaction_type_id=ty.id */  where t.accounts_id =" . $ac->id . " order by created_at")->result();
         }
 
         $openingBalances = $ac->getOpeningBalance(inp("fromDate"));
@@ -1032,9 +1008,6 @@ class report_cont extends CI_Controller {
     //function confirmTransactionEdit($voucherno, $foraccount=0) {
     function confirmTransactionEdit() {
 
-        //re("com_xbank.index","Transaction Editing has been STOPPED","error");
-
-
         $voucherno = JRequest::getVar("vn");
         $foraccount = JRequest::getVar("id");
         $transaction = new Transaction();
@@ -1048,7 +1021,7 @@ class report_cont extends CI_Controller {
         foreach ($transaction as $t) {
             $date = $t->created_at;
             $html .="<tr>";
-            $html .="<td>" . $t->voucher_no . "</td>";
+            $html .="<td>" . ($t->display_voucher_no==0? $t->voucher_no: $t->Display_Voucher_no) . "</td>";
             if($t->transaction_type->Transaction != TRA_JV_ENTRY)
                 $html .="<td><input type='text' name='Narration_$i'  value='$t->Narration' DISABLED></td>";
             else
@@ -1083,7 +1056,7 @@ class report_cont extends CI_Controller {
         $foraccount=JRequest::getVar("id");
         $transaction = new Transaction();
         $transaction->where('voucher_no', $voucherno)->where('branch_id', Branch::getCurrentBranch()->id)->get();
-
+        echo $transaction->check_last_query();
         $closing = new Closing();
         $closing->where('branch_id', Branch::getCurrentBranch()->id)->get();
         $trans_date = JRequest::getVar("transdate");
@@ -1100,18 +1073,26 @@ class report_cont extends CI_Controller {
         //$conn = Doctrine_Manager::connection();
         $DR = 0;
         $CR = 0;
-        $flag = true;
+        $drarr=array();
+        $flag = 1;
         foreach ($transaction as $t) {
             $DR += $this->input->post("DR_$i");
+            $drarr[] =$this->input->post("DR_$i");
             $CR += $this->input->post("CR_$i");
-            if ($this->input->post("created_at_$i") == '0000-00-00 00:00:00' || $this->input->post("created_at_$i") == "")
-                $flag = false;
+            
+            if($this->input->post("created_at_$i") == "")
+                    $flag = 2;
+            if ($this->input->post("created_at_$i") == '0000-00-00 00:00:00' )
+                $flag = 3;
             $i++;
         }
-        if ($DR != $CR || $flag == false) {
+        if ($DR != $CR || $flag != 1) {
+            echo "<pre>";
+            print_r($_POST);
+            echo "</pre>";
             echo "<h2>WARNING : You have made either of the mistakes</h2>
                 <br>Credit Balance should be equal to the debit balance for a transaction.<br>
-                The date of transaction is not entered correctly.";
+                The date of transaction is not entered correctly. Dr = $DR, Cr = $CR, flag = $flag, $i";
         } else {
             try {
                 $this->db->trans_begin();
@@ -1163,7 +1144,7 @@ class report_cont extends CI_Controller {
         $date = $this->session->userdata("daybook");
         xDeveloperToolBars::onlyCancel("report_cont.dayBookForm", "cancel", "DayBook of :" . inp('dateFrom'));
         $b = Branch::getCurrentBranch()->id;
-        $result = $this->db->query("select t.Narration, t.amountDr, t.amountCr ,
+        $result = $this->db->query("select t.Narration, t.amountDr, t.amountCr , t.transaction_type_id,
                                     t.created_at, t.voucher_no,t.display_voucher_no, a.AccountNumber,
                                     a.CurrentBalanceCr, a.CurrentBalanceDr
                                     from jos_xtransactions t
@@ -1236,7 +1217,7 @@ class report_cont extends CI_Controller {
                                 join premiums p on a.id=p.accounts_id
                                 join schemes s on s.id=a.schemes_id
                                 where p.DueDate >= '" . inp('fromDate') . "'
-                                and p.DueDate <= '" . inp('toDate') . "'
+                                and p.DueDate <= '" . nextDate('toDate') . "'
                                 and s.SchemeType = '" . ACCOUNT_TYPE_LOAN . "'
                                 and a.ActiveStatus=1
                                 and a.branch_id = " . Branch::getCurrentBranch()->id);
@@ -1978,6 +1959,10 @@ a.branch_id = $b
         foreach ($acc as $ac) {
             $data['otheraccounts'] .=  $ac->AccountNumber . "<br>";
         }
+
+        foreach($account->documents->include_join_fields()->get() as $doc){
+          $data['documents'][] = $doc->Name . ": " . $doc->join_Description;
+        }
         $data['account']=$account;
         JRequest::setVar("layout","loan");
         $this->load->view('report.html', $data);
@@ -2005,6 +1990,7 @@ a.branch_id = $b
         $q = "select a.*,m.Name from jos_xaccounts a join jos_xschemes s on a.schemes_id = s.id join jos_xmember m on a.member_id = m.id where a.LoanInsurranceDate between '".inp("fromDate")."' and '".inp("toDate")."' ";
         if(inp("BranchId") != '%')
             $q .= " and a.branch_id = ".inp("BranchId");
+          $q .= " ORDER BY a.AccountNumber DESC";
         $data['result'] = $this->db->query($q)->result();
         JRequest::setVar("layout","loaninsurrance");
         $this->load->view('report.html', $data);
@@ -2222,6 +2208,7 @@ premiumcount <= 2
         $a->where_related('scheme','SchemeType like' ,'loan');
         $a->where_related('dealer',"DealerName like '%".inp('DealerName')."%'");
         $a->where("ActiveStatus",1);
+        $a->where("branch_id",Branch::getCurrentBranch()->id);
 
         $a->having("DuePremiumCount <= 2 and DuePremiumCount > 0");
         $a->get();
@@ -2288,9 +2275,11 @@ premiumcount <= 2
 
         $a->where('ActiveStatus',1);
         $a->where('branch_id',Branch::getCurrentBranch()->id);
+        $a->group_start();
         $a->where('AccountNumber like "pl%"');
         $a->or_where('AccountNumber like "sl%"');
-
+        $a->group_end();
+        // $a->where("branch_id",Branch::getCurrentBranch()->id);
         $a->having("DuePremiumCount > 0");
         $a->get();
 //        echo $a->check_last_query();
@@ -2366,7 +2355,7 @@ premiumcount >= 3 and premiumcount <= 4
 
         $p->select_func('COUNT', '*', 'count');
         $p->where("PaidOn is null");
-        $p->where("DueDate between '".inp("fromDate")."' and '".inp("toDate")."'");
+        $p->where("DueDate between '".inp("fromDate")."' and '".nextDate("toDate")."'");
         $p->where_related('account', 'id', '${parent}.id');
 
 
@@ -2389,6 +2378,7 @@ premiumcount >= 3 and premiumcount <= 4
         $a->where('ActiveStatus',1);
         $a->where_related('scheme','SchemeType like' ,'loan');
         $a->where_related('dealer',"DealerName like '%".inp('DealerName')."%'");
+        $a->where("branch_id",Branch::getCurrentBranch()->id);
 
         $a->having("DuePremiumCount >= 3 AND DuePremiumCount <= 4 ");
         $a->get();
@@ -2461,7 +2451,7 @@ premiumcount >= 5
         
         $p->select_func('COUNT', '*', 'count');
         $p->where("PaidOn is null");
-        $p->where("DueDate between '".inp("fromDate")."' and '".inp("toDate")."'");
+        $p->where("DueDate between '".inp("fromDate")."' and '".nextDate("toDate")."'");
         $p->where_related('account', 'id', '${parent}.id');
 
         
@@ -2485,6 +2475,8 @@ premiumcount >= 5
         $a->where_related('dealer',"DealerName like '%".inp('DealerName')."%'");
         $a->where("ActiveStatus",1);
         $a->having("DuePremiumCount >=",5);
+        $a->where("branch_id",Branch::getCurrentBranch()->id);
+
         $a->get();
         //echo $a->check_last_query();
         $data['report']= getReporttable($a,             //model
@@ -2523,17 +2515,19 @@ premiumcount >= 5
         xDeveloperToolBars::onlyCancel("report_cont.RDPremiumDueListForm", "cancel", "RD Premium Due List");
         $q ="select a.AccountNumber,m.Name, m.PermanentAddress, m.FatherName, m.PhoneNos,p.Amount,a.agents_id,a.created_at,
 
-(select count(*) as cnt from jos_xpremiums where accounts_id = a.id and DueDate BETWEEN '".inp('fromDate')."' AND '".inp('toDate')."' AND PaidOn is NULL) as premiumcount
+            (select count(*) as cnt from jos_xpremiums where accounts_id = a.id and DueDate BETWEEN '".inp('fromDate')."' AND '".inp('toDate')."' AND PaidOn is NULL) as premiumcount
 
-from jos_xaccounts a join jos_xmember m on a.member_id=m.id
-join jos_xpremiums p on a.id=p.accounts_id
-join jos_xschemes s on s.id=a.schemes_id
-where
-s.SchemeType = 'recurring' AND
-p.DueDate BETWEEN '".inp('fromDate')."' AND '".inp('toDate')."' AND
-p.PaidOn is NULL AND
-a.branch_id=".Branch::getCurrentBranch()->id."
-GROUP BY p.accounts_id
+            from jos_xaccounts a join jos_xmember m on a.member_id=m.id
+            join jos_xpremiums p on a.id=p.accounts_id
+            join jos_xschemes s on s.id=a.schemes_id
+            where
+            s.SchemeType = 'recurring' AND
+            p.DueDate BETWEEN '".inp('fromDate')."' AND '".nextDate('toDate')."' AND
+            p.PaidOn is NULL AND
+            a.branch_id=".Branch::getCurrentBranch()->id." AND
+            a.ActiveStatus = 1
+            GROUP BY p.accounts_id
+            HAVING premiumcount > 0
 ";
         $data['result'] = $this->db->query($q)->result();
         JRequest::setVar("layout","rdpremiumduelist");
@@ -2574,7 +2568,7 @@ GROUP BY p.accounts_id
         $a->include_related('scheme','NumberOfPremiums');
         $a->where_related('dealer','id',inp('DealerName'));
         $a->where('created_at >=',inp("fromDate"));
-        $a->where('created_at <=',inp("toDate"));
+        $a->where('created_at <=',nextDate("toDate"));
         $a->where("DefaultAC",0);
         if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
             $a->where('branch_id',Branch::getCurrentBranch()->id);
@@ -2649,7 +2643,7 @@ GROUP BY p.accounts_id
          $a=new Premium();
          $a->select('SUM(Amount) as TAmount');
          $a->where('PaidOn >=',inp('fromDate'));
-         $a->where('PaidOn <=',inp('toDate'));
+         $a->where('PaidOn <=',nextDate('toDate'));
          $a->include_related('account/member','Name');
          $a->include_related('account','AccountNumber');
          $a->include_related('account/agent/member','Name');
@@ -2701,7 +2695,7 @@ GROUP BY p.accounts_id
          $t=new Transaction();
          $t->select('SUM(amountCr) as TAmount');
          $t->where('created_at >=',inp('fromDate'));
-          $t->where('created_at <=', date('Y-m-d',strtotime(date("Y-m-d", strtotime(inp('toDate'))) . " +1 day")));
+         $t->where('created_at <=', nextDate('toDate'));
          $t->include_related('account/member','Name');
          $t->include_related('account','AccountNumber');
          $t->include_related('account/dealer','DealerName');
@@ -2711,7 +2705,7 @@ GROUP BY p.accounts_id
          // $t->or_where_related('account/dealer','DealerName is null');
          // $t->group_end();
          $t->where_related("account","branch_id",Branch::getCurrentBranch()->id);
-         $t->where_related('account/scheme','SchemeType','Loan');
+         // $t->where_related('account/scheme','SchemeType','Loan');
          $t->where('transaction_type_id',18);//LoanAccountAmountDeposit
          // $t->limit(300,JRequest::getVar('page_start',0)*300);
          $t->group_by('accounts_id');
@@ -2770,7 +2764,7 @@ GROUP BY p.accounts_id
          $t=new Transaction();
          $t->select('SUM(amountCr) as TAmount');
          $t->where('created_at >=',inp('fromDate'));
-          $t->where('created_at <=', date('Y-m-d',strtotime(date("Y-m-d", strtotime(inp('toDate'))) . " +1 day")));
+          $t->where('created_at <=', nextDate('toDate'));
          $t->include_related('account/member','Name');
          $t->include_related('account','AccountNumber');
          $t->include_related('account/dealer','DealerName');
@@ -2842,7 +2836,7 @@ GROUP BY p.accounts_id
          //$a->select('SUM(amountDr)',"Commission");
          //$a->select('SUM(amountCr)',"Savings");
          $a->select_subquery('(SELECT SUM(amountCr) FROM jos_xtransactions WHERE voucher_no=${parent}.voucher_no AND amountCr<>0 AND id<>${parent}.id)',"TDS");
-         $a->select_subquery('(SELECT jos_xaccounts.AccountNumber FROM jos_xtransactions join jos_xaccounts on jos_xtrasactions.accounts_id=jos_xaccounts.id)',"AccountType");
+         // $a->select_subquery('(SELECT jos_xaccounts.AccountNumber FROM jos_xtransactions join jos_xaccounts on jos_xtrasactions.accounts_id=jos_xaccounts.id)',"AccountType");
          $a->include_related('account/member/asagent','id');
          $a->include_related('account/agent/member','Name');
          $a->include_related('account/agent/member','FatherName');
@@ -2852,15 +2846,16 @@ GROUP BY p.accounts_id
          $a->where('created_at >=', inp('fromDate'));
          $a->where('created_at <=', inp('toDate'));
          $a->where('branch_id',Branch::getCurrentBranch()->id);
+         
          $a->where_related('account/member/asagent','id is not null');
          $a->where_related('account/scheme','SchemeType','SavingAndCurrent');
-         $a->having("AccountType = 'UDR TDS'");
+         // $a->having("AccountType = 'UDR TDS'");
 
          
 
          $a->get(10);
          
-         echo $a->check_last_query();
+         // echo $a->check_last_query();
 /*
          $data['report'] = getReporttable($a,             //model
                 array("Name",       "Father Name", "Pan No","Agent Code", "Comission", "TDS" ,"AccountNumber"),       //heads
