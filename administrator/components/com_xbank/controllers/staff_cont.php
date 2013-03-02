@@ -166,13 +166,13 @@ class staff_cont extends CI_Controller {
             return;
         }
         if(inp("id"))
-            re('staff_cont.dashboard', "staff $s->StaffID Edited created");
+            re('staff_cont.dashboard', "staff $s->StaffID Edited");
         else
             re('staff_cont.dashboard', 'Staff Successfully created');
     }
 
 
-         function markAttendance() {
+    function markAttendance() {
 //        Staff::accessibleTo(BRANCH_ADMIN);
         $user = JFactory::getUser();
         $stf = new Staff();

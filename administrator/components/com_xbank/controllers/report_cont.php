@@ -1056,7 +1056,7 @@ class report_cont extends CI_Controller {
         $foraccount=JRequest::getVar("id");
         $transaction = new Transaction();
         $transaction->where('voucher_no', $voucherno)->where('branch_id', Branch::getCurrentBranch()->id)->get();
-        echo $transaction->check_last_query();
+
         $closing = new Closing();
         $closing->where('branch_id', Branch::getCurrentBranch()->id)->get();
         $trans_date = JRequest::getVar("transdate");

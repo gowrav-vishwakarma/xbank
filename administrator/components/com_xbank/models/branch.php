@@ -54,6 +54,7 @@ class Branch extends DataMapper {
             'join_table' => 'jos_xlog',
             'other_field' => 'branch'
         ),
+       
     );
     var $validation = array(
         'Name' => array(
@@ -102,6 +103,7 @@ class Branch extends DataMapper {
     public static function getAllSchemesForCurrentBranch($asArray=true, $forSelect=true) {
 //        $Acct = Doctrine::getTable('Schemes')->findByBranch_idOrBranch_id(Branch::getCurrentBranch()->id, Branch::getDefaultBranch()->id);
         $Acct = new Scheme();
+        // if(inp('type'))
         $Acct->where("SchemeType", $type);
         $Acct->group_start();
         $Acct->where("branch_id", Branch::getCurrentBranch()->id);
