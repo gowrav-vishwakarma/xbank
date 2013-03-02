@@ -9,7 +9,7 @@ $creditopeningbalance = ($openingbalance < 0 ? round(abs($openingbalance),2):'')
 $CRtotal = 0;
 $DRtotal = 0;
 
-if($transactions){
+if($transactions or true){
     $acc=new Account();
     $acc->where('AccountNumber',inp("AccountNumber"))->get();
 //$acc = Doctrine::getTable("Accounts")->find(inp("AccountNumber"));

@@ -2833,10 +2833,13 @@ premiumcount >= 5
          xDeveloperToolBars::onlyCancel("report_cont.tdsReportForm", "cancel", "TDS Report");
 
          $a= new Transaction();
-         //$a->select('SUM(amountDr)',"Commission");
-         //$a->select('SUM(amountCr)',"Savings");
-         $a->select_subquery('(SELECT SUM(amountCr) FROM jos_xtransactions WHERE voucher_no=${parent}.voucher_no AND amountCr<>0 AND id<>${parent}.id)',"TDS");
-         // $a->select_subquery('(SELECT jos_xaccounts.AccountNumber FROM jos_xtransactions join jos_xaccounts on jos_xtrasactions.accounts_id=jos_xaccounts.id)',"AccountType");
+
+         $a->include_related('referenceaccount/agent/member','Name');
+         $a->include_related('referenceaccount/agent/member','PanNo');
+         $a->select_func('extract','[Year_Month FROM jos_xtransactions.created_at]','YM');
+         
+         $a->select_subquery('(SELECT amountCr FROM jos_xtransactions WHERE voucher_no=${parent}.voucher_no AND amountCr<>0 AND id<>${parent}.id  AND branch_id=${parent}.branch_id AND created_at >= "'.inp('fromDate').'" AND created_at < "'.inp('toDate').'" ORDER BY id LIMIT 1)',"TDS");
+         
          $a->include_related('account/member/asagent','id');
          $a->include_related('account/agent/member','Name');
          $a->include_related('account/agent/member','FatherName');
@@ -2849,28 +2852,17 @@ premiumcount >= 5
          
          $a->where_related('account/member/asagent','id is not null');
          $a->where_related('account/scheme','SchemeType','SavingAndCurrent');
-         // $a->having("AccountType = 'UDR TDS'");
+         // $a->where_related('referenceaccount/agent/member','Name','MEENA DEVRA'); 
 
          
 
-         $a->get(10);
+         $a->get();
          
          // echo $a->check_last_query();
-/*
-         $data['report'] = getReporttable($a,             //model
-                array("Name",       "Father Name", "Pan No","Agent Code", "Comission", "TDS" ,"AccountNumber"),       //heads
-                array('account_agent_member_Name','account_agent_member_FatherName',"account_agent_member_PanNo","account_agent_id", "Commission","TDS","account_AccountNumber"),       //fields
-                array("Commission"),        //totals_array
-                array("From Date" => "fromDate", "To Date" => 'toDate'),        //headers
-                array('sno'=>true,"sno_start"=>JRequest::getVar('page_start',0)*300,"page"=>true),     //options
-                "",     //headerTemplate
-                '',      //tableFooterTemplate
-                ""      //footerTemplate
-                );*/
 
          $data['report'] = getReporttable($a,             //model
-                array("account ID", "Voucher No", "Amt CR", "Amt DR" ,"AccountNUmber","AgentID","TDS"),       //heads
-                array('accounts_id','voucher_no', "amountCr","amountDr","account_AccountNumber","account_member_asagent_id","TDS"),       //fields
+                array("Date", "Agent name",                       "Pan No",                             "Voucher No",   "Comm",  "TDS" ),       //heads
+                array('created_at', 'referenceaccount_agent_member_Name','referenceaccount_agent_member_PanNo', 'voucher_no', "amountCr","TDS"),       //fields
                 array(),        //totals_array
                 array("From Date" => "fromDate", "To Date" => 'toDate'),        //headers
                 array('sno'=>true,"sno_start"=>JRequest::getVar('page_start',0)*300,"page"=>true),     //options
