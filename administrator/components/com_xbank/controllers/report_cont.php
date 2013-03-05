@@ -2661,25 +2661,29 @@ premiumcount >= 3 and premiumcount <= 4
 
     function ddsPremiumReceivedList(){
          xDeveloperToolBars::onlyCancel("report_cont.ddsPremiumReceivedListForm", "cancel", "DDS Premium Received List");
-         $a=new Premium();
-         $a->select('SUM(Amount) as TAmount');
-         $a->where('PaidOn >=',inp('fromDate'));
-         $a->where('PaidOn <=',nextDate('toDate'));
-         $a->include_related('account/member','Name');
-         $a->include_related('account','AccountNumber');
-         $a->include_related('account/agent/member','Name');
-         $a->include_related('account/agent','id');
-         $a->where_related("account","branch_id",Branch::getCurrentBranch()->id);
-         $a->where_related('account/scheme','SchemeType','DDS');
-         // $a->limit(300,JRequest::getVar('page_start',0)*300);
-         $a->group_by('accounts_id');
-         $a->get();
+        
+         $from=inp('fromDate');
+         $to=nextDate('toDate');
+
+         $t=new Transaction();
+         $t->select_func('sum','[amountCr]','Amount');
+         $t->where('created_at >=',$from);
+         $t->where('created_at <',$to);
+
+         $t->include_related('account/member','Name');
+         $t->include_related('account','AccountNumber');
+         $t->include_related('account/agent/member','Name');
+         $t->include_related('account/agent','id');
+         $t->where("branch_id",Branch::getCurrentBranch()->id);
+         $t->where_related('account/scheme','SchemeType','DDS');
+         $t->group_by('accounts_id');
+         $t->get();
 
 
-         $data['report'] = getReporttable($a,             //model
-                array("Account Number",       "Name",               "Amount Deposited","Advisor Name","Advisor Code"),       //heads
-                array('account_AccountNumber','account_member_Name',"TAmount",         "account_agent_member_Name", "account_agent_id"),       //fields
-                array("TAmount"),        //totals_array
+         $data['report'] = getReporttable($t,             //model
+                array("Account Number", "Name",       "Amount Deposited","Advisor Name",              "Advisor Code"),       //heads
+                array('account_AccountNumber','account_member_Name',  "Amount",          "account_agent_member_Name", "account_agent_id"),       //fields
+                array("Amount"),        //totals_array
                 array(),        //headers
                 array('sno'=>true/*,"sno_start"=>JRequest::getVar('page_start',0)*300,"page"=>true*/),     //options
                 "",     //headerTemplate
@@ -2872,14 +2876,15 @@ premiumcount >= 3 and premiumcount <= 4
          $a->where_related('account/member/asagent','id is not null');
          $a->where_related('account/scheme','SchemeType','SavingAndCurrent');
          $a->where_related('referenceaccount/agent/member','Name is not null'); 
-
+         // $a->group_by('YM');
+         // $a->group_by('account_agent_member_Name');
          $a->get();
          
          // echo $a->check_last_query();
 
          $data['report'] = getReporttable($a,             //model
-                array("Date", "Agent name",                       "Pan No",                             "Voucher No",   "Comm",  "TDS" ),       //heads
-                array('created_at', 'referenceaccount_agent_member_Name','referenceaccount_agent_member_PanNo', 'voucher_no', "amountCr","TDS"),       //fields
+                array('YM',"Date", "Agent name",                       "Pan No",                             "Voucher No",   "Comm",  "TDS" ),       //heads
+                array("YM",'created_at', 'referenceaccount_agent_member_Name','referenceaccount_agent_member_PanNo', 'voucher_no', "amountCr","TDS"),       //fields
                 array(),        //totals_array
                 array("From Date" => "fromDate", "To Date" => 'toDate'),        //headers
                 array('sno'=>true,"sno_start"=>JRequest::getVar('page_start',0)*300,"page"=>true),     //options
