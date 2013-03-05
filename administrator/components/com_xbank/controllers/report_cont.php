@@ -2422,30 +2422,8 @@ premiumcount >= 3 and premiumcount <= 4
     
     function loanHardRecoveryList(){
         xDeveloperToolBars::onlyCancel("report_cont.loanHardRecoveryListForm", "cancel", "Loan Hard Recovery List");
-/*        $q ="select a.AccountNumber,m.Name, m.PermanentAddress, m.FatherName, m.PhoneNos,p.Amount,d.DealerName,
 
-(select count(*) as cnt from jos_xpremiums where accounts_id = a.id and DueDate BETWEEN '".inp('fromDate')."' AND '".inp('toDate')."' AND PaidOn is NULL) as premiumcount, a.RdAmount, a.Nominee,a.MinorNomineeParentName,a.RelationWithNominee
-
-from jos_xaccounts a join jos_xmember m on a.member_id=m.id
-join jos_xpremiums p on a.id=p.accounts_id
-join jos_xschemes s on s.id=a.schemes_id
-left join jos_xdealer d on a.dealer_id = d.id
-where
-s.SchemeType = 'Loan' AND
-p.DueDate BETWEEN '".inp('fromDate')."' AND '".inp('toDate')."' AND
-d.DealerName like '%".inp("DealerName")."%' AND
-p.PaidOn is NULL
-
-GROUP BY p.accounts_id
-HAVING
-premiumcount >= 5
-";
-        $data['result'] = $this->db->query($q)->result();
-        JRequest::setVar("layout","loanemiduelist");
-        $this->load->view('report.html', $data);
-        $this->jq->getHeader();
-*/      
-	 $a= new Account();
+      	$a= new Account();
 
         $p = $a->premiums;
         
@@ -2671,7 +2649,51 @@ premiumcount >= 5
         $this->jq->getHeader();
      }
 
+     function ddsPremiumReceivedListForm(){
+        xDeveloperToolBars::onlyCancel("report_cont.dashboard", "cancel", "DDS Premium Received List");
+        $this->load->library("form");
+        $this->form->open("pSearch","index.php?option=com_xbank&task=report_cont.ddsPremiumReceivedList")
+                ->setColumns(2)
+                ->dateBox("Select Date From","name='fromDate' class='input'")
+                ->dateBox("Select Date till","name='toDate' class='input'")
+                ->submit("Go");
+        $data['form']=$this->form->get();
+        $this->load->view("formonly.html",$data);
+        $this->jq->getHeader();
+     }    
 
+    function ddsPremiumReceivedList(){
+         xDeveloperToolBars::onlyCancel("report_cont.ddsPremiumReceivedListForm", "cancel", "DDS Premium Received List");
+         $a=new Premium();
+         $a->select('SUM(Amount) as TAmount');
+         $a->where('PaidOn >=',inp('fromDate'));
+         $a->where('PaidOn <=',nextDate('toDate'));
+         $a->include_related('account/member','Name');
+         $a->include_related('account','AccountNumber');
+         $a->include_related('account/agent/member','Name');
+         $a->include_related('account/agent','id');
+         $a->where_related("account","branch_id",Branch::getCurrentBranch()->id);
+         $a->where_related('account/scheme','SchemeType','DDS');
+         // $a->limit(300,JRequest::getVar('page_start',0)*300);
+         $a->group_by('accounts_id');
+         $a->get();
+
+
+         $data['report'] = getReporttable($a,             //model
+                array("Account Number",       "Name",               "Amount Deposited","Advisor Name","Advisor Code"),       //heads
+                array('account_AccountNumber','account_member_Name',"TAmount",         "account_agent_member_Name", "account_agent_id"),       //fields
+                array("TAmount"),        //totals_array
+                array(),        //headers
+                array('sno'=>true/*,"sno_start"=>JRequest::getVar('page_start',0)*300,"page"=>true*/),     //options
+                "",     //headerTemplate
+                '',      //tableFooterTemplate
+                ""      //footerTemplate
+                );
+
+        JRequest::setVar("layout","generalreport");
+        $this->load->view('report.html', $data);
+        $this->jq->getHeader();
+     }
 
    function vlEMIReceivedListForm(){
         xDeveloperToolBars::onlyCancel("report_cont.dashboard", "cancel", "VL EMI Received List");
@@ -2852,9 +2874,7 @@ premiumcount >= 5
          
          $a->where_related('account/member/asagent','id is not null');
          $a->where_related('account/scheme','SchemeType','SavingAndCurrent');
-         // $a->where_related('referenceaccount/agent/member','Name','MEENA DEVRA'); 
-
-         
+         $a->where_related('referenceaccount/agent/member','Name is not null'); 
 
          $a->get();
          

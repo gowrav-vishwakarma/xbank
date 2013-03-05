@@ -167,7 +167,7 @@ $loanPenalty = 10;
                     MONTH(p.PaidOn) = $thismonth AND
                     DATEDIFF('$closingdate',p.DueDate) <= 62 AND
                     DATEDIFF('$closingdate',p.DueDate) >=0
-                    /* AND p.accounts_id = $this->id */
+                        /* AND p.accounts_id = $this->id */
                     )
                     as t
                     GROUP  BY accounts_id)

@@ -175,6 +175,7 @@ class xDeveloperToolBars extends JObject {
         JToolBarHelper::addNewX('report_cont.allschemedetailsform', 'Periodic<br/> Account Details');
         //JToolBarHelper::addNewX('report_cont.premiums_report', 'Premium Report');
         JToolBarHelper::addNewX('report_cont.rdPremiumReceivedListForm', 'RD Premium <br/>Received List');
+        JToolBarHelper::addNewX('report_cont.ddsPremiumReceivedListForm', 'DDS Premium <br/>Received List');
          JToolBarHelper::addNewX('report_cont.tdsReportForm', 'TDS<br/> Report');
 
 
@@ -260,6 +261,7 @@ class xDeveloperToolBars extends JObject {
     function getNewReportSubMenus(){
         JSubMenuHelper::addEntry("Dealer list", 'index.php?option=com_xbank&task=report_2_cont.dealerWiseReport', false);
         JSubMenuHelper::addEntry("NOC list", 'index.php?option=com_xbank&task=report_2_cont.noclist', false);
+        JSubMenuHelper::addEntry("Time Collapsed List", 'index.php?option=com_xbank&task=report_2_cont.timeCollepsedDueList', false);
     }
 
 

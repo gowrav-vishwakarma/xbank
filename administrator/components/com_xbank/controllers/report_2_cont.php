@@ -283,4 +283,58 @@ class report_2_cont extends CI_Controller {
         $this->load->view('report.html', $data);
         $this->jq->getHeader();
      }
+
+     function timeCollepsedDueList(){
+        xDeveloperToolBars::onlyCancel("report_cont.new_reports", "cancel", "Time Collepsed Due List");
+        
+        $a= new Account();
+
+        $p = $a->premiums;
+        
+        $p->select_func('COUNT', '*', 'count');
+        $p->where("PaidOn is null");
+        // $p->where("DueDate between '".inp("fromDate")."' and '".nextDate("toDate")."'");
+        $p->where_related('account', 'id', '${parent}.id');
+
+        
+        $a->select('*, id as PaneltyDUE, id as OtherCharges');
+        //$a->select('*');
+        $a->include_related('dealer','DealerName');
+        $a->include_related('agent/member','Name');
+        $a->include_related('agent/member','PhoneNos');
+
+        $a->select_subquery($p,'DuePremiumCount');
+        $a->select_subquery('(SELECT MAX(Amount) From jos_xpremiums p WHERE p.accounts_id=${parent}.id)','Amount');
+        // $a->select_subquery('(SELECT count(*) * MAX(Amount) From jos_xpremiums p WHERE p.accounts_id=${parent}.id)','Total');
+
+        $a->include_related('member','Name');
+        $a->include_related('member','FatherName');
+        $a->include_related('member','PhoneNos');
+        $a->include_related('member','CurrentAddress');
+        $a->include_related('scheme','Name');
+
+        $a->where_related('scheme','SchemeType like' ,'loan');
+        $a->where_related('dealer',"DealerName like '%".inp('DealerName')."%'");
+        $a->where("ActiveStatus",1);
+        $a->where("((OpeningBalanceDr + CurrentBalanceDr)-(OpeningBalanceCr + CurrentBalanceCr)) <>",0);
+        $a->having("DuePremiumCount =",0);
+        $a->where("branch_id",Branch::getCurrentBranch()->id);
+
+        $a->get();
+        //echo $a->check_last_query();
+        $data['report']= getReporttable($a,             //model
+                array("Account Number","Scheme","Member Name","Father Name", "Phone Number","Address",'Due Premium Count','EMI Amount',"Due Penalty","Legal/Conveyance/Insurance Charge", 'Total',"Dealer Name","Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
+                array('AccountNumber', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress','DuePremiumCount','Amount','PaneltyDUE','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)",'dealer_DealerName','Nominee','MinorNomineeParentName','RelationWithNominee'),       //fields
+                array('PaneltyDUE','DuePremiumCount','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)"),        //totals_array
+                array(),        //headers
+                array('sno'=>true),     //options
+                "",     //headerTemplate
+                '',      //tableFooterTemplate
+                ""      //footerTemplate
+                );
+
+        JRequest::setVar("layout","generalreport");
+        $this->load->view('report.html', $data);
+        $this->jq->getHeader();
+     }
 }
