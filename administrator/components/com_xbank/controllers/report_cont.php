@@ -2855,18 +2855,20 @@ premiumcount >= 3 and premiumcount <= 4
      function tdsReport(){
          xDeveloperToolBars::onlyCancel("report_cont.tdsReportForm", "cancel", "TDS Report");
 
-         $a= new Transaction();
+         $aa=new Transaction();
 
+         $a= new Transaction();
          $a->include_related('referenceaccount/agent/member','Name');
          $a->include_related('referenceaccount/agent/member','PanNo');
+         $a->include_related('referenceaccount/agent/member','CurrentAddress');
          $a->select_func('extract','[Year_Month FROM jos_xtransactions.created_at]','YM');
+         $a->select_func('extract','[Month FROM jos_xtransactions.created_at]','M');
          
          $a->select_subquery('(SELECT amountCr FROM jos_xtransactions WHERE voucher_no=${parent}.voucher_no AND amountCr<>0 AND id<>${parent}.id  AND branch_id=${parent}.branch_id AND created_at >= "'.inp('fromDate').'" AND created_at < "'.inp('toDate').'" ORDER BY id LIMIT 1)',"TDS");
          
          $a->include_related('account/member/asagent','id');
          $a->include_related('account/agent/member','Name');
          $a->include_related('account/agent/member','FatherName');
-         $a->include_related('account/agent/member','PanNo');
          $a->include_related('account','AccountNumber');
 
          $a->where('created_at >=', inp('fromDate'));
@@ -2878,15 +2880,34 @@ premiumcount >= 3 and premiumcount <= 4
          $a->where_related('referenceaccount/agent/member','Name is not null'); 
          // $a->group_by('YM');
          // $a->group_by('account_agent_member_Name');
-         $a->get();
+         $a_query=$a->get_sql();
          
+         $new_query="
+            SELECT 
+              YM,
+              M, 
+              created_at, 
+              referenceaccount_agent_member_Name, 
+              referenceaccount_agent_member_PanNo,
+              referenceaccount_agent_member_CurrentAddress,
+              SUM(amountCr) amountCr,
+              SUM(TDS) TDS 
+            FROM
+              ($a_query) as temp
+            GROUP BY
+              referenceaccount_agent_member_Name,
+              YM
+          ";
+         // echo $new_query;
+         $a=$this->db->query($new_query)->result();
+
          // echo $a->check_last_query();
 
          $data['report'] = getReporttable($a,             //model
-                array('YM',"Date", "Agent name",                       "Pan No",                             "Voucher No",   "Comm",  "TDS" ),       //heads
-                array("YM",'created_at', 'referenceaccount_agent_member_Name','referenceaccount_agent_member_PanNo', 'voucher_no', "amountCr","TDS"),       //fields
+                array('M', "Agent name",                        "Agent Address",                      "Pan No",                                    "Comm",  "TDS" ),       //heads
+                array("M", 'referenceaccount_agent_member_Name',"referenceaccount_agent_member_CurrentAddress",'referenceaccount_agent_member_PanNo', "~(#amountCr + #TDS)","TDS"),       //fields
                 array(),        //totals_array
-                array("From Date" => "fromDate", "To Date" => 'toDate'),        //headers
+                array("From Date" => "~".inp("fromDate"), "To Date" => "~".nextDate('toDate')),        //headers
                 array('sno'=>true,"sno_start"=>JRequest::getVar('page_start',0)*300,"page"=>true),     //options
                 "",     //headerTemplate
                 '',      //tableFooterTemplate
