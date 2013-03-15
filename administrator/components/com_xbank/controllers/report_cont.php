@@ -166,7 +166,7 @@ class report_cont extends CI_Controller {
         $data['TotalDR'] = $Acc->OpeningBalanceDr;
         $data['TotalCR'] = $Acc->OpeningBalanceCr;
         $data['AccountNumber'] = $Acc->AccountNumber;
-        $openingBalances = $Acc->getOpeningBalance($this->session->userdata("fromdate"));
+        $openingBalances = $Acc->getOpeningBalance($this->session->userdata("fromdate"),null,null,true);
         $arr[] = array("VoucherNumber" => 0, "Date" => '', "Transaction" => "OPENNING BALANCE", "DR" => $openingBalances["DR"], "CR" => $openingBalances["CR"], "referenceAccount" => "");
         foreach ($Transactions as $t) {
 //                if($t->accounts_id == $account){
@@ -641,7 +641,7 @@ class report_cont extends CI_Controller {
         $form = $this->form->open("accountdetails", "index.php?option=com_xbank&task=report_cont.accountStatement")
                         ->setColumns(2)
                         //->lookupDB("Account number", "name='AccountNumber' class='input req-string'", "index.php?option=com_xbank&task=accounts_cont.AccountNumber&format=raw", array("a"=>"b"), array("AccountNumber"), "")
-                        ->lookupDB("Account number : $b->Code - ", "name='AccountNumber' class='input req-string'", "index.php?option=com_xbank&task=report_cont.AccountNumber&format=raw", array("a" => "b"), array("id", "AccountNumber", "MName"), "AccountNumber")
+                        ->lookupDB("Account number : $b->Code - ", "name='AccountNumber' class='input req-string'", "index.php?option=com_xbank&task=report_cont.AccountNumber&format=raw", array("a" => "b"), array("id", "AccountNumber", "MName",'VehicleNumber'), "AccountNumber")
                         ->dateBox("Transactions from", "name='fromDate' class='input'")
                         ->dateBox("Transactions till", "name='toDate' class='input'");
         $form = $form->submit("Go");
@@ -721,9 +721,9 @@ class report_cont extends CI_Controller {
         if (!$ac->result_count())
             re("report_cont.accountstatementform","The Account Number ".inp("AccountNumber")." does not exist. Try Again","error");
         if (inp("fromDate") && inp("toDate")) {
-            $query = $this->db->query("select * from jos_xtransactions t /*  join jos_xtransaction_type ty on t.transaction_type_id=ty.id */ where t.accounts_id =" . $ac->id . " and created_at between '" . inp("fromDate") . "' and DATE_ADD('" . inp("toDate") . "',INTERVAL +1 DAY) order by created_at")->result();
+            $query = $this->db->query("select * from jos_xtransactions t /*  join jos_xtransaction_type ty on t.transaction_type_id=ty.id */ where t.accounts_id =" . $ac->id . " and created_at between '" . inp("fromDate") . "' and DATE_ADD('" . inp("toDate") . "',INTERVAL +1 DAY) order by created_at, id")->result();
         } else {
-            $query = $this->db->query("select * from jos_xtransactions t /*  join jos_xtransaction_type ty on t.transaction_type_id=ty.id */  where t.accounts_id =" . $ac->id . " order by created_at")->result();
+            $query = $this->db->query("select * from jos_xtransactions t /*  join jos_xtransaction_type ty on t.transaction_type_id=ty.id */  where t.accounts_id =" . $ac->id . " order by created_at, id")->result();
         }
 
         $openingBalances = $ac->getOpeningBalance(inp("fromDate"));
@@ -1257,10 +1257,31 @@ class report_cont extends CI_Controller {
         $b = Branch::getCurrentBranch()->id;
         //$q="select a.* from jos_xaccounts a join jos_xschemes s on a.schemes_id = s.id where a.AccountNumber Like '%". $this->input->post("term") . "%' or a.id like '%". $this->input->post("term")."%' limit 10 ";
         //array("select" => "a.*, m.Name as MName", "from" => "Accounts a", "leftJoin" => "a.Branch b", "innerJoin"=>"a.Member m", "where" => "a.AccountNumber Like '%\$term%'", "andWhere" => "b.id='$b->id'", "limit" => "10"), array("id", "AccountNumber","MName"), "id")
-        $q = "select a.*,m.Name as MName from jos_xaccounts a left join jos_xbranch b on a.branch_id=b.id inner join jos_xmember m on a.member_id=m.id where (a.AccountNumber Like '%" . $this->input->post("term") . "%' or m.Name Like '%" . $this->input->post("term") . "%') and (b.id='$b')limit 10";
+        $q = "
+          select 
+            a.*,
+            m.Name as MName,
+            ds.Description
+          from jos_xaccounts a 
+            left join jos_xbranch b on a.branch_id=b.id 
+            inner join jos_xmember m on a.member_id=m.id 
+            left join jos_xdocuments_submitted ds on ds.accounts_id = a.id
+          where 
+            (
+              a.AccountNumber Like '%" . $this->input->post("term") . "%' 
+              or m.Name Like '%" . $this->input->post("term") . "%'
+              or ds.Description like '%".$this->input->post("term")."%'
+              ) 
+            and (b.id='$b')
+            and 
+              (
+                ds.documents_id=1
+                or ds.documents_id is null
+              )
+          limit 10";
         $result = $this->db->query($q)->result();
         foreach ($result as $dd) {
-            $list[] = array('id' => $dd->id, 'AccountNumber' => $dd->AccountNumber, 'MName' => $dd->MName);
+            $list[] = array('id' => $dd->id, 'AccountNumber' => $dd->AccountNumber, 'MName' => $dd->MName ,'VehicleNumber' => $dd->Description);
         }
         echo '{"tags":' . json_encode($list) . '}';
     }
@@ -2132,7 +2153,7 @@ a.branch_id = $b
         JRequest::setVar("layout","allschemedetails_modified");
         $data['contents'] = $this->load->view('report.html', $a);
         $data['contents'] =$this->form->get();
-        $this->load->view('utility.html',$data);
+        $this->load->view('report.html',$data);
         $this->jq->getHeader();
     }
     
@@ -2471,7 +2492,8 @@ premiumcount >= 3 and premiumcount <= 4
         xDeveloperToolBars::onlyCancel("report_cont.RDPremiumDueListForm", "cancel", "RD Premium Due List");
         $q ="select a.AccountNumber,m.Name, m.PermanentAddress, m.FatherName, m.PhoneNos,p.Amount,a.agents_id,a.created_at,
 
-            (select count(*) as cnt from jos_xpremiums where accounts_id = a.id and DueDate BETWEEN '".inp('fromDate')."' AND '".inp('toDate')."' AND PaidOn is NULL) as premiumcount
+            (select count(*) as cnt from jos_xpremiums where accounts_id = a.id and DueDate BETWEEN '".inp('fromDate')."' AND '".inp('toDate')."' AND PaidOn is NULL) as premiumcount,
+            (SELECT MAX(DueDate) FROM jos_xpremiums jp WHERE jp.accounts_id=p.accounts_id) as LastEMIDate
 
             from jos_xaccounts a join jos_xmember m on a.member_id=m.id
             join jos_xpremiums p on a.id=p.accounts_id
@@ -2483,7 +2505,7 @@ premiumcount >= 3 and premiumcount <= 4
             a.branch_id=".Branch::getCurrentBranch()->id." AND
             a.ActiveStatus = 1
             GROUP BY p.accounts_id
-            HAVING premiumcount > 0
+            HAVING premiumcount > 0 and LastEMIDate >= '".getNow('Y-m-d')."'
 ";
         $data['result'] = $this->db->query($q)->result();
         JRequest::setVar("layout","rdpremiumduelist");
@@ -2864,7 +2886,7 @@ premiumcount >= 3 and premiumcount <= 4
          $a->select_func('extract','[Year_Month FROM jos_xtransactions.created_at]','YM');
          $a->select_func('extract','[Month FROM jos_xtransactions.created_at]','M');
          
-         $a->select_subquery('(SELECT amountCr FROM jos_xtransactions WHERE voucher_no=${parent}.voucher_no AND amountCr<>0 AND id<>${parent}.id  AND branch_id=${parent}.branch_id AND created_at >= "'.inp('fromDate').'" AND created_at < "'.inp('toDate').'" ORDER BY id LIMIT 1)',"TDS");
+         // $a->select_subquery('(SELECT amountCr FROM jos_xtransactions WHERE voucher_no=${parent}.voucher_no AND amountCr<>0 AND id<>${parent}.id  AND branch_id=${parent}.branch_id AND created_at >= "'.inp('fromDate').'" AND created_at < "'.inp('toDate').'" ORDER BY id LIMIT 1)',"TDS");
          
          $a->include_related('account/member/asagent','id');
          $a->include_related('account/agent/member','Name');
@@ -2876,12 +2898,20 @@ premiumcount >= 3 and premiumcount <= 4
          $a->where('branch_id',Branch::getCurrentBranch()->id);
          
          $a->where_related('account/member/asagent','id is not null');
+         // $a->group_start();
+         // $a->where_related('account','AccountNumber like',Branch::getCurrentBranch()->Code . ' Commission Paid On %');
+         // $a->or_where_related('account','AccountNumber like', '%Branch & Divisions for '.Branch::getCurrentBranch()->Code);
+         // $a->group_end();
          $a->where_related('account/scheme','SchemeType','SavingAndCurrent');
          $a->where_related('referenceaccount/agent/member','Name is not null'); 
+         $a->order_by('created_at');
+         $a->order_by('id');
          // $a->group_by('YM');
          // $a->group_by('account_agent_member_Name');
-         $a_query=$a->get_sql();
          
+         // $a->get();
+
+         $a_query=$a->get_sql();
          $new_query="
             SELECT 
               YM,
@@ -2890,8 +2920,7 @@ premiumcount >= 3 and premiumcount <= 4
               referenceaccount_agent_member_Name, 
               referenceaccount_agent_member_PanNo,
               referenceaccount_agent_member_CurrentAddress,
-              SUM(amountCr) amountCr,
-              SUM(TDS) TDS 
+              SUM(amountCr) amountCr
             FROM
               ($a_query) as temp
             GROUP BY
@@ -2904,11 +2933,11 @@ premiumcount >= 3 and premiumcount <= 4
          // echo $a->check_last_query();
 
          $data['report'] = getReporttable($a,             //model
-                array('M', "Agent name",                        "Agent Address",                      "Pan No",                                    "Comm",  "TDS" ),       //heads
-                array("M", 'referenceaccount_agent_member_Name',"referenceaccount_agent_member_CurrentAddress",'referenceaccount_agent_member_PanNo', "~(#amountCr + #TDS)","TDS"),       //fields
-                array(),        //totals_array
+                array("Agent name",                        "Agent Address",                      "Pan No",                                  'Month', "TDS %","Total Comm","TDS","Date Of TDS","Challan No","Net Amount" ),       //heads
+                array('referenceaccount_agent_member_Name',"referenceaccount_agent_member_CurrentAddress",'referenceaccount_agent_member_PanNo',"~date('F', mktime(0, 0, 0, #M, 10))", "~'10%'",'~(#amountCr + round(((#amountCr * 111.111/100)-#amountCr),0))',"~round(((#amountCr * 111.111/100)-#amountCr),0)" ,'~""','~""', "amountCr"),       //fields
+                array( "amountCr",'~(#amountCr + round(((#amountCr * 111.111/100)-#amountCr),0))',"~round(((#amountCr * 111.111/100)-#amountCr),0)"),        //totals_array
                 array("From Date" => "~".inp("fromDate"), "To Date" => "~".nextDate('toDate')),        //headers
-                array('sno'=>true,"sno_start"=>JRequest::getVar('page_start',0)*300,"page"=>true),     //options
+                array('sno'=>true,"sno_start"=>JRequest::getVar('page_start',0)*300,"page"=>false),     //options
                 "",     //headerTemplate
                 '',      //tableFooterTemplate
                 ""      //footerTemplate

@@ -211,13 +211,23 @@ class Account extends DataMapper {
         return $returnAccount;
     }
 
-    function getOpeningBalance($date, $ac=null,$side='both') {
+    function getOpeningBalance($date, $ac=null,$side='both',$forPandL=false) {
         if ($ac != null) {
             $this->where("id", $ac)->get();
         }
         $CI = & get_instance();
-        $trans = $CI->db->query("select sum(amountDr) as Dr,sum(amountCr) as Cr from jos_xtransactions where accounts_id = $this->id and created_at < '" . $date . "'")->row();
-        // echo "select sum(amountDr) as Dr,sum(amountCr) as Cr from jos_xtransactions where accounts_id = $this->id and created_at < '" . $date . "'";
+
+
+        $forPandL_query="";
+        if($forPandL){
+            $m=date('m',strtotime($date));
+            $y=date('Y',strtotime($date));
+            if($m >= 1 and $m < 4) $y--;
+            $forPandL_query = " created_at >= '$y-04-01' and ";
+        }
+
+        $trans = $CI->db->query("select sum(amountDr) as Dr,sum(amountCr) as Cr from jos_xtransactions where accounts_id = $this->id and $forPandL_query created_at < '" . $date . "'")->row();
+        // echo "select sum(amountDr) as Dr,sum(amountCr) as Cr from jos_xtransactions where accounts_id = $this->id and $forPandL_query created_at < '" . $date . "'";
         if($side=='both'){
             return array(
                         "DR" =>  $trans->Dr + ( $this->OpeningBalanceDr),

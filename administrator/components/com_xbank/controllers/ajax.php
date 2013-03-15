@@ -137,5 +137,6 @@ class ajax extends CI_Controller{
         echo '{"tags":' . json_encode($list) . '}';
         }
 
+
 }
 ?>

@@ -365,8 +365,36 @@ class com_xbank extends CI_Controller {
         $data['CashAsOnToday'] = $this->db->query("select sum(t.amountDr) as Dr, sum(t.amountCr) as Cr from jos_xtransactions t join jos_xaccounts a on a.id=t.accounts_id join jos_xschemes s on s.id = a.schemes_id where s.`Name` = '" . CASH_ACCOUNT_SCHEME . "' and t.created_at like '".  getNow("Y-m-d")." %' $where")->row();
         $data['BankAsOnToday'] = $this->db->query("select sum(t.amountDr) as Dr, sum(t.amountCr) as Cr from jos_xtransactions t join jos_xaccounts a on a.id=t.accounts_id join jos_xschemes s on s.id = a.schemes_id where s.`Name` = '" . BANK_ACCOUNTS_SCHEME . "' and t.created_at like '".  getNow("Y-m-d")." %' $where")->row();
         
-        $data['loan_insurance_due_report']="hi therer";
-        $data['insuranceDueList'] = $this->db->query("select a.AccountNumber,m.Name,m.PermanentAddress,m.PhoneNos,a.LoanInsurranceDate,d.DealerName from jos_xaccounts a join jos_xmember m on a.member_id = m.id join jos_xdealer d on a.dealer_id=d.id  join jos_xschemes s on a.schemes_id = s.id where (a.LoanInsurranceDate <> '0000-00-00 00:00:00' or a.LoanInsurranceDate is not null) and s.SchemeType = '".ACCOUNT_TYPE_LOAN."' and DATE_ADD(a.LoanInsurranceDate, INTERVAL +365 DAY) >= DATE_ADD('".getNow("Y-m-d")."', INTERVAL -15 DAY) and  DATE_ADD(a.LoanInsurranceDate, INTERVAL +365 DAY) <= DATE_ADD('".getNow("Y-m-d")."', INTERVAL +1 DAY) $where")->result();
+        $a= new Account();
+        $a->select_func("DATE_ADD","[LoanInsurranceDate]", "[INTERVAL +365 DAY]","EndInsuranceDate");
+        $a->select('*');
+        $a->include_related('dealer','DealerName');
+        $a->include_related('dealer','Address');
+        $a->include_related('scheme','Name');
+        $a->include_related('member','Name');
+        $a->include_related('member','FatherName');
+        $a->include_related('member','PermanentAddress');
+        $a->include_related('member','PhoneNos');
+        // $a->select_subquery('(SELECT Description From jos_xdocuments_submitted doc WHERE doc.accounts_id=${parent}.id AND doc.documents_id='.inp('Documents_Submitted').')','Documents');
+        $a->where('branch_id',Branch::getCurrentBranch()->id);
+        // $a->where_related('dealer','DealerName like \'%'.inp('DealerName').'%\'');
+        $a->having("EndInsuranceDate between '".getNow('Y-m-d')."' and '".myDateAdd(getNow('Y-m-d'),30)."'");
+        $a->get();
+        // echo $a->check_last_query();
+        $data['loan_insurance_due_report']=getReporttable($a,             //model
+            array("Account Number","Member Name","Father Name","Address", "Mobile", "Loan Insurance End Date",'DealerName'),       //heads
+            array('AccountNumber','member_Name','member_FatherName','member_PermanentAddress','member_PhoneNos','EndInsuranceDate','dealer_DealerName'),       //fields
+            array(),        //totals_array
+            array(),        //headers
+            array('sno'=>true),     //options
+            "<h3>Loan Insurance Due report </h3>",     //headerTemplate
+            '',      //tableFooterTemplate
+            "",      //footerTemplate,
+            array()
+            );
+
+        // $data['loan_insurance_due_report']
+        // $data['insuranceDueList'] = $this->db->query("select a.AccountNumber,m.Name,m.PermanentAddress,m.PhoneNos,a.LoanInsurranceDate,d.DealerName from jos_xaccounts a join jos_xmember m on a.member_id = m.id join jos_xdealer d on a.dealer_id=d.id  join jos_xschemes s on a.schemes_id = s.id where (a.LoanInsurranceDate <> '0000-00-00 00:00:00' or a.LoanInsurranceDate is not null) and s.SchemeType = '".ACCOUNT_TYPE_LOAN."' and DATE_ADD(a.LoanInsurranceDate, INTERVAL +365 DAY) >= DATE_ADD('".getNow("Y-m-d")."', INTERVAL -15 DAY) and  DATE_ADD(a.LoanInsurranceDate, INTERVAL +365 DAY) <= DATE_ADD('".getNow("Y-m-d")."', INTERVAL +1 DAY) $where")->result();
 
         $this->displayMenubar();
         

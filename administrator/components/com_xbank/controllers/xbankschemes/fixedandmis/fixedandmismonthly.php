@@ -125,7 +125,7 @@ foreach ($schemes as $sc) {
 //                     $interestToAcc->CurrentInterest= $interestToAcc->CurrentInterest + $acc->CurrentBalanceCr *
         if ($account_count) {
             $days = my_date_diff(getNow("Y-m-d"), date("Y-m-d",strtotime($acc->LastCurrentInterestUpdatedAt)));
-            if($days['days_total'] < 30 && date("m",strtotime(getNow("Y-m-d"))!=2))
+            if($days['days_total'] < 30 && (date("m",strtotime(getNow("Y-m-d"))) - 1 ) !=2)
                 $interest = $acc->RdAmount * $days['days_total'] * $sc->Interest / 36500;
             else
                 $interest = $acc->RdAmount * $sc->Interest / 1200;

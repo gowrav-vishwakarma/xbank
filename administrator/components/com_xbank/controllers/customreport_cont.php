@@ -29,6 +29,7 @@ class customreport_cont extends CI_Controller {
                 ->textArea("Form Code", "name='FormCode' class='req-string'  cols=100 rows=6", "")
                 ->textArea("CodeToRun", "name='CodeToRun' class='req-string' cols=100 rows=6", "")
                 ->textArea("Result Mapping", "name='resultMapping'  cols=100 rows=6", "")
+                ->textArea("Totals Of Fields", "name='totalsField'  cols=100 rows=6", "")
                 ->checkBox("Publish Report", "name='published' class='input'")
                 ->submit("Make");
         $data['contents'] = $this->form->get();
@@ -59,6 +60,7 @@ class customreport_cont extends CI_Controller {
                         ->textArea("Form Code", "name='FormCode' class='req-string'  cols=100 rows=6", "", $r->formFields)
                         ->textArea("CodeToRun", "name='CodeToRun' class='req-string' cols=100 rows=6", "", $r->CodeToRun)
                         ->textArea("Result Mapping", "name='resultMapping'  cols=100 rows=6", "", $r->Results)
+                        ->textArea("Totals Of Fields", "name='totalsField'  cols=100 rows=6", "",$r->total_fields)
                         ->checkBox("Publish Report", "name='published' class='input'", ($r->published == 1 ? TRUE : FALSE))
                         ->submit("Make");
         $data['contents'] = $form->get();
@@ -86,6 +88,7 @@ class customreport_cont extends CI_Controller {
         $r->CodeToRun = inp("CodeToRun");
         $r->ReportTitle = inp("reportTitle");
         $r->Results = inp("resultMapping");
+        $r->total_fields = inp("totalsField");
         $r->published = (inp("published") ? 1 : 0);
         $r->save();
         $id = $r->id;
@@ -103,7 +106,7 @@ class customreport_cont extends CI_Controller {
         $r = new Report($id);
         eval($r->CodeToRun);
 
-        $data['contents'] = reporter::getReport($id, $result, $r->Results, $r->ReportTitle);
+        $data['contents'] = reporter::getReport($id, $result, $r->Results, $r->ReportTitle,$r->total_fields);
         JRequest::setVar("layout", "customreport");
         $this->load->view("customreport.html", $data);
         $this->jq->getHeader();

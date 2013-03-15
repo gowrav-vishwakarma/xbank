@@ -66,6 +66,7 @@ class xDeveloperToolBars extends JObject {
             if($u->gid >= 24)
                      JToolBarHelper :: customX('documents_cont.documentForm', 'config', 'config', 'Documents', false, false);
 
+            JToolBarHelper :: customX('printing_cont.index', null, null, 'Printing', false, false);
             JToolBarHelper :: customX('utility_cont.index', 'backup', 'backup', 'Utility', false, false);
             JToolBarHelper :: customX('search_cont.dashboard', 'search', 'search', 'Search', false, false);
         }
@@ -201,6 +202,7 @@ class xDeveloperToolBars extends JObject {
             JToolBarHelper::addNewX("customreport_cont.showTestForm_$r->id", str_replace(" ", "<br/>", "$r->ReportTitle"));
         }
 
+        JToolBarHelper::addNewX('report_2_cont.closingBalanceForm', 'Closing Balance<br/>Of Account');
         JToolBarHelper::addNewX('report_cont.balanceSheetForm', 'Balance<br/> Sheet');
         JToolBarHelper::addNewX('report_cont.accountstatementform', 'Account<br/> Statement');
         JToolBarHelper::addNewX('report_cont.trialbalanceForm', 'Trial<br/> Balance');
@@ -264,6 +266,11 @@ class xDeveloperToolBars extends JObject {
         JSubMenuHelper::addEntry("Time Collapsed List", 'index.php?option=com_xbank&task=report_2_cont.timeCollepsedDueList', false);
     }
 
+    function getPrintingToolBar(){
+        JToolBarHelper::title('Printing Area', 'generic.png');
+        JToolBarHelper::addNewX('printing_cont.voucherPrintForm', 'Voucher Print');
+        JToolBarHelper::cancel('com_xbank.index', 'cancel');
+    }
 
 }
 

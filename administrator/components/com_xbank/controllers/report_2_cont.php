@@ -100,7 +100,8 @@ class report_2_cont extends CI_Controller {
 	$a=new Premium();
 	$a->select('COUNT(*) as PremiumCount');
 	$a->select('SUM(Amount) as PremiumDueSum');
-	$a->select('MAX(Amount) as PremiumAmount');
+    $a->select('MAX(Amount) as PremiumAmount');
+	$a->select_subquery('(SELECT MAX(DueDate) FROM jos_xpremiums WHERE accounts_id=${parent}.accounts_id)','LastEmiDate');
 	$a->include_related('account','id');
 	$a->include_related('account/scheme','Name');
         $a->include_related('account','AccountNumber');
@@ -116,11 +117,12 @@ class report_2_cont extends CI_Controller {
         $a->include_related('account/agent','created_at');
 	$a->where('DueDate >=' ,inp('fromDate'));
 	$a->where('DueDate <=', inp('toDate'));
-	$a->where('PaidOn is null');
-	$a->where_related('account','branch_id',Branch::getCurrentBranch()->id);
-	$a->where_related('account','ActiveStatus',1);
-	
-	$a->where_related('account/agent','id',inp('agent_id'));
+    $a->where('PaidOn is null');
+    $a->where_related('account','branch_id',Branch::getCurrentBranch()->id);
+    $a->where_related('account','ActiveStatus',1);
+    
+    $a->where_related('account/agent','id',inp('agent_id'));
+	$a->having('LastEmiDate >= "'.getNow('Y-m-d').'"');
 	$a->group_by('account_id');
 	$a->get();
 	
@@ -318,6 +320,113 @@ class report_2_cont extends CI_Controller {
                 array("Account Openning Date",'Last Premium',"Account Number","Scheme","Member Name","Father Name", "Phone Number","Address",'EMI Amount', 'Total',"Dealer Name","Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
                 array('~date("Y-m-d",strtotime("#created_at"))','~date("Y-m-d",strtotime("#lastPremium"))','AccountNumber', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress','Amount',"~(#OpeningBalanceDr + #TotalDrTransactions - #TotalCrTransactions)",'dealer_DealerName','Nominee','MinorNomineeParentName','RelationWithNominee'),       //fields
                 array('~(#OpeningBalanceDr + #TotalDrTransactions - #TotalCrTransactions)'),        //totals_array
+                array(),        //headers
+                array('sno'=>true),     //options
+                "",     //headerTemplate
+                '',      //tableFooterTemplate
+                ""      //footerTemplate
+                );
+
+        JRequest::setVar("layout","generalreport");
+        $this->load->view('report.html', $data);
+        $this->jq->getHeader();
+     }
+
+     function closingBalanceForm(){
+        xDeveloperToolBars::onlyCancel("customreport_cont.index", "cancel", "Closing Balances Of Accounts");
+
+        $s=new Scheme();
+        $s->select('DISTINCT(SchemeGroup)');
+        $s->group_by('SchemeGroup');
+        $s->get();
+        // echo $s->check_last_query();
+        $scheme_groups=array();
+        $scheme_groups +=array("All" => "%");
+        $i=0;
+        foreach($s as $ss){
+            $scheme_groups += array($ss->SchemeGroup => $ss->SchemeGroup);
+        }
+
+        $this->form->open("accountOpenningForm","index.php?option=com_xbank&task=report_2_cont.closingBalanceReport")
+                ->setColumns(2)
+                // ->dateBox("Select Date From","name='fromDate' class='input'")
+                ->dateBox("Select Date till","name='toDate' class='input'")
+                ->select("For","name='scheme_group'",$scheme_groups)
+                ->submit("Go");
+        $data['form']=$this->form->get();
+        $this->load->view("formonly.html",$data);
+        $this->jq->getHeader(); 
+
+     }
+
+     function closingBalanceReport(){
+        xDeveloperToolBars::onlyCancel("report_2_cont.closingBalanceForm", "cancel", "Closing Balances Of Accounts");
+        $t=new Transaction();
+        $t->select_func('sum','[amountCr-amountDr]','Amount');
+        // $t->where('created_at >= "'. inp('fromDate').'"');
+        $t->where('created_at <= "'. (nextDate('toDate')==""?nextDate():nextDate('toDate')). '"');
+        $t->include_related('account','OpeningBalanceCr');
+        $t->include_related('account','OpeningBalanceDr');
+        $t->include_related('account','AccountNumber');
+        $t->include_related('account/member','Name');
+        $t->include_related('account/member','FatherName');
+        $t->include_related('account/member','PermanentAddress');
+        $t->include_related('account/member','PhoneNos');
+        if(inp('scheme_group') != "%"){
+            $t->where_related('account/scheme','SchemeGroup',inp('scheme_group'));
+        }
+        $t->where('branch_id',Branch::getCurrentBranch()->id);
+        $t->group_by('accounts_id');
+        $t->get();
+        // echo $t->check_last_query();
+
+        $data['report']= getReporttable($t,             //model
+                array("Account Number",'Name',"Father/Husband Name",'Address','Phone Number',"Closing Balance"),       //heads
+                array('account_AccountNumber','account_member_Name','account_member_FatherName','account_member_PermanentAddress','account_member_PhoneNos',
+                    '~(abs((#account_OpeningBalanceCr - #account_OpeningBalanceDr) + #Amount))'
+                ),       //fields
+                array(),        //totals_array
+                array(),        //headers
+                array('sno'=>true),     //options
+                "",     //headerTemplate
+                '',      //tableFooterTemplate
+                ""      //footerTemplate
+                );
+
+        JRequest::setVar("layout","generalreport");
+        $this->load->view('report.html', $data);
+        $this->jq->getHeader();
+
+     }
+
+     function FDInterestProvisionReportForm(){
+        xDeveloperToolBars::onlyCancel("customreport_cont.index", "cancel", "Closing Balances Of Accounts");
+        $this->form->open("accountOpenningForm","index.php?option=com_xbank&task=report_2_cont.FDInterestProvisionReport")
+                ->dateBox("Select Date till","name='toDate' class='input'")
+                ->submit("Go");
+        $data['form']=$this->form->get();
+        $this->load->view("formonly.html",$data);
+        $this->jq->getHeader(); 
+
+     }
+
+     function FDInterestProvisionReport(){
+        xDeveloperToolBars::onlyCancel("report_2_cont.FDInterestProvisionReportForm", "cancel", "FD Interest Provision");
+        
+        $t=new Transaction();
+        $t->include_related('account','AccountNumber');
+        $t->include_related('account/scheme','Name');
+        $t->include_related('account','RdAmount');
+        $t->include_related('referenceaccount','AccountNumber');
+
+        $t->where_related('account','schemes_id',19);
+        $t->get();
+        // echo $t->check_last_query();
+
+        $data['report']= getReporttable($t,             //model
+                array("Account Number","FD PLan","Amount","Rounded Interest"),       //heads
+                array('referenceaccount_AccountNumber','account_scheme_Name','account_RDAmount',),       //fields
+                array(),        //totals_array
                 array(),        //headers
                 array('sno'=>true),     //options
                 "",     //headerTemplate

@@ -23,7 +23,7 @@ class reporter {
     }
 
     
-    public static function getReport($id,$result,$arr,$ReportTitle){
+    public static function getReport($id,$result,$arr,$ReportTitle,$TotalFields=""){
 //        setInfo($ReportTitle,"");
 //        $html="<center>".$ReportTitle."</center><br/>";
         xDeveloperToolBars::onlyCancel("customreport_cont.index", "cancel", $ReportTitle);
@@ -43,6 +43,8 @@ class reporter {
         }
         $html .="</tr>";
 	$i = 1;
+    $total_fields_array=explode(',',$TotalFields);
+    $total=array();
         foreach($result as $rs){
             $html .= "<tr>";
             $html .="<td>$i</td>";
@@ -50,12 +52,30 @@ class reporter {
                 $field=trim($field);
                  if($field == 'voucher_no')
                     $html .= ("<td><a href='index.php?option=com_xbank&task=report_cont.transactionDetails&vn=".($rs->$field)."&format=raw'>".($rs->$field)."</a></td>");
-                else
+                else{
+                    if(in_array($field, $total_fields_array)){
+                        if(!isset($total[str_replace(" ", "_", $field)])) $total[str_replace(" ", "_", $field)]=0;
+                        $total[str_replace(" ", "_", $field)] += $rs->$field;
+                    }
                     $html .= ("<td>".($rs->$field)."</td>");
+                }
             }
             $html .="</tr>";
             $i++;
         }
+
+        $html .= "<tr>";
+        $html .="<td>Total</td>";
+        foreach(array_keys($arr) as $field){
+            $field=trim($field);
+            if(in_array($field, $total_fields_array)){
+                $html .= ("<td>".$total[str_replace(" ", "_", $field)]."</td>");
+            }else{
+                $html .= ("<td>&nbsp;</td>");
+            }
+        }
+        $html.="</tr>";
+
         $html .="</table>";
         return $html;
     }
