@@ -275,6 +275,14 @@ class Account extends DataMapper {
 
     }
 
+    function getDocuments(){
+        $documents=array();
+        foreach($this->documents->include_join_fields()->get() as $d){
+            $documents[] = $d->join_Description;
+        }
+        return implode(", ", $documents);
+    }
+
 }
 
 ?>

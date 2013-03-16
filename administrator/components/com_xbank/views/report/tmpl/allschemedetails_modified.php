@@ -25,6 +25,7 @@
             $q = " ";
         }
 foreach ($accountcount as $st) {
+    if(!in_array($st->SchemeType, $schemeTypes)) continue;
 ?>
     <div><img src="components/com_xbank/images/plus.gif" name="img<?php echo $st->SchemeType?>" align="absmiddle" id="img<?php echo $st->SchemeType?>" onclick="javascript:showDetails('<?php echo $st->SchemeType ?>')" ><?php echo $st->SchemeType . " ($st->cnt)"; ?></div>
 <?php

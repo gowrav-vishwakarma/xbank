@@ -661,7 +661,7 @@ class transaction_cont extends CI_Controller {
         $no_of_emis=$a->premiums->count();
         $emi_amount=$a->premiums->get()->Amount;
 
-        $forCloseCharge= (($no_of_emis * $emi_amount) - ($loanAmount + $interestGiven))*25.0/100;
+        $forCloseCharge= round((($no_of_emis * $emi_amount) - ($loanAmount + $interestGiven))*25.0/100,0);
 
         
         $a->premiums->select_func('max','[DueDate]','last_emi_date')->get();
@@ -674,7 +674,7 @@ class transaction_cont extends CI_Controller {
             // echo $scheme_interest . "<br/>";
             $d=my_date_diff(getNow('Y-m-d'),$a->premiums->last_emi_date);
             // print_r($d);
-            $overcharge = $currentDr * $scheme_interest / 36500 * $d['days_total'];
+            $overcharge = round($currentDr * $scheme_interest / 36500 * $d['days_total'],0);
             // return;
         }
 
@@ -687,89 +687,11 @@ class transaction_cont extends CI_Controller {
         echo "<h3>Toal Amount Deposited : - ".$a->CurrentBalanceCr . "</h3><br/>";
         $forCloseAmount = ($loanAmount + $interestGiven + ($a->PaneltyDUE) + $a->OtherCharges + $overcharge+ $forCloseCharge - ($a->CurrentBalanceCr));
         echo "<h3>ForClose Amount : = ".$forCloseAmount. "</h3><br/>";
+        echo "<h3>Documents : = ".$a->getDocuments(). "</h3><br/>";
+
         return;
 
-        // ---------------------------------------
-
-        $unpaid = new Premium();
-        $unpaid->where("accounts_id = $ac->id AND (Paid = 0 or Paid is null) AND DueDate <= '" . getNow() . "'")->get();
-        // Unpaid Premiums till date
-        $unpaidTillDate = $unpaid->result_count();
-
-        // SUM(Unpaid Premiums till date)
-        $dueTillDate = $this->db->query("SELECT SUM(Amount) AS Dues FROM jos_xpremiums WHERE accounts_id=$ac->id AND Paid = 0 AND DueDate <= '" . getNow() . "'")->row()->Dues;
-        if ($dueTillDate == null)
-            $dueTillDate = 0;
-        $rate = $ac->scheme->Interest;
-        $premiums = $ac->scheme->NumberOfPremiums;
-        $interest = (($ac->RdAmount * $rate * ($premiums + 1)) / 1200) / $premiums;
-
-        // Interest
-        $interest = round($interest);
-
-        // CurrentInterest
-        $penalty = $ac->CurrentInterest;
-
-        // Unpaid Premiums after date
-        $unpaidAfter = new Premium();
-        $unpaidAfter->where("accounts_id = $ac->id AND Paid = 0 AND DueDate > '" . getNow() . "'")->get();
-        // Unpaid Premiums after date
-        $unpaidAfterDate = $unpaidAfter->result_count();
         
-//           echo "Unpaid Premiums till date  ".$unpaidTillDate."<br/>";
-//           echo "SUM(Unpaid Premiums till date) ".$dueTillDate."<br/>";
-//           echo "Interest ".$interest."<br/>";
-//           echo "CurrentInterest ".$penalty."<br/>";
-//           echo "Unpaid Premiums after date ".$unpaidAfterDate."<br/>";
-//           echo ($interest * $unpaidAfterDate * 25/100);
-
-
-        $ForCloseAmount = ($ac->CurrentBalanceDr + ($interest * $unpaidTillDate) ) - $ac->CurrentBalanceCr + $penalty + ($interest * $unpaidAfterDate * 25 / 100);
-        $ForCloseAmount = round($ForCloseAmount);
-        if (inp("Amount") < ($ForCloseAmount - inp("Discount"))) {
-            $msg .="<h3>You are depositing a lesser amount....<br/>Please deposit an amount of " . ($ForCloseAmount - inp("Discount")) . " for FORCLOSE.</h3>falsefalse";
-            echo $msg;
-            return;
-        }
-         echo "<h2>You Deposited =  " . inp("Amount") . "</h2>";
-         echo "<h2>Your ForCLose Amount =  " . ($ForCloseAmount - inp("Discount")). "</h2>";
-         $msg.="<h3>Current Account position</h3>";
-        $debitAccount = array(
-            $ac->AccountNumber => $ac->CurrentBalanceDr
-        );
-        $creditAccount = array(
-            $ac->AccountNumber => $ac->CurrentBalanceCr
-        );
-        $msg .= formatDrCr($debitAccount, $creditAccount);
-
-        $msg.="<h3>New Transactions To Happen</h3>";
-        $debitAccount = array(
-            CASH_ACCOUNT => inp("Amount") ,//($ForCloseAmount - inp("Discount")),
-            $ac->AccountNumber => (($ac->CurrentBalanceDr - $ac->CurrentBalanceCr)-($ForCloseAmount - inp("Discount")))
-        );
-        $creditAccount = array(
-            $ac->AccountNumber => inp("Amount") ,//($ForCloseAmount - inp("Discount")),
-           FOR_CLOSE_ACCOUNT_ON.$ac->Schemes->Name => (($ac->CurrentBalanceDr - $ac->CurrentBalanceCr)-($ForCloseAmount - inp("Discount")))
-        );
-        $msg .= formatDrCr($debitAccount, $creditAccount);
-
-//        $debitAccount = array(
-//            $ac->AccountNumber => ($interest * $unpaidAfterDate * 25 / 100)
-//        );
-//        $creditAccount = array(
-//            FOR_CLOSE_ACCOUNT_ON.$ac->Schemes->Name => ($interest * $unpaidAfterDate * 25 / 100)
-//        );
-//         $msg .= formatDrCr($debitAccount, $creditAccount);
-
-        $msg.="<h3>Discount Transactions</h3>";
-        $debitAccount = array(
-            Branch::getCurrentBranch()->Code.SP."Discount Paid" =>  inp("Discount")
-        );
-        $creditAccount = array(
-            $ac->AccountNumber => inp("Discount")
-        );
-        $msg .= formatDrCr($debitAccount, $creditAccount);
-        echo $msg;
     }
 
     /**
@@ -779,17 +701,17 @@ class transaction_cont extends CI_Controller {
      */
     function doForClose() {
 //        Staff::accessibleTo(POWER_USER);
-        re("transaction_cont.forClose","For Closed not implemented...");
+        // re("transaction_cont.forClose","For Closed not implemented...");
 
 //        $conn = Doctrine_Manager::connection();
         try {
             $this->db->trans_begin();
 //            $this->jq->addInfo("Doing", inp('AccountNumber') . " to " . inp('Amount') . " has been performed");
             $ac = Account::getAccountForCurrentBranch(inp('AccountNumber'));
-            $voucherNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $ac->id);
+            
 //                        $voucherNo=Transactions::getNewVoucherNumber();
 
-            $this->depositInForCloseAccount($ac, $voucherNo);
+            $this->depositInForCloseAccount($ac);
 
             $this->db->trans_commit();
         } catch (Exception $e) {
@@ -810,96 +732,88 @@ class transaction_cont extends CI_Controller {
      */
     function depositInForCloseAccount($ac, $voucherNo) {
 
-//        Staff::accessibleTo(POWER_USER);
+        $a=new Account();
+        $a->select('*, id as PaneltyDUE, id as OtherCharges');
+        $a->where('AccountNumber',$ac->AccountNumber);
+        $a->get();
 
-        $unpaid = new Premium();
-        $unpaid->where("accounts_id = $ac->id AND Paid = 0 and DueDate <= '" . getNow() . "'")->get();
-        // Unpaid Premiums till date
-        $unpaidTillDate = $unpaid->result_count();
+        if($a->ActiveStatus==0){
+            echo "<h3>This account is not activated</h3>";
+            re("transaction_cont.forClose",$ac->AccountNumber." is Not activated");
+        }
 
-        // SUM(Unpaid Premiums till date)
-        $dueTillDate = $this->db->query("SELECT SUM(Amount) AS Dues FROM jos_xpremiums WHERE accounts_id=$ac->id AND Paid = 0 AND DueDate <= '" . getNow() . "'")->row()->Dues;
-        if ($dueTillDate == null)
-            $dueTillDate = 0;
-        $rate = $ac->scheme->Interest;
-        $premiums = $ac->scheme->NumberOfPremiums;
-        $interest = (($ac->RdAmount * $rate * ($premiums + 1)) / 1200) / $premiums;
+        $loanAmount=$ac->RdAmount;
 
-        // Interest
-        $interest = round($interest);
+        $a->transactions->select_func('sum','[amountDr]','total_interest')->where('transaction_type_id',28)->get();
 
-        // CurrentInterest
-        $penalty = $ac->CurrentInterest;
+        $interestGiven = $a->transactions->total_interest;
 
-        // Unpaid Premiums after date
-        $unpaidAfter = new Premium();
-        $unpaidAfter->where("accounts_id = $ac->id AND Paid = 0 and DueDate > '" . getNow() . "'")->get();
-        // Unpaid Premiums after date
-        $unpaidAfterDate = $unpaidAfter->result_count();
+        $no_of_emis=$a->premiums->count();
+        $emi_amount=$a->premiums->get()->Amount;
 
-//           echo "Unpaid Premiums till date  ".$unpaidTillDate."<br/>";
-//           echo "SUM(Unpaid Premiums till date) ".$dueTillDate."<br/>";
-//           echo "Interest ".$interest."<br/>";
-//           echo "CurrentInterest ".$penalty."<br/>";
-//           echo "Unpaid Premiums after date ".$unpaidAfterDate."<br/>";
-//           echo ($interest * $unpaidAfterDate * 25/100);
+        $forCloseCharge= round((($no_of_emis * $emi_amount) - ($loanAmount + $interestGiven))*25.0/100,0);
 
+        
+        $a->premiums->select_func('max','[DueDate]','last_emi_date')->get();
+        $currentDr= $a->getOpeningBalance($a->premiums->last_emi_date,null,'DR');
 
-        $ForCloseAmount = ($ac->CurrentBalanceDr + ($interest * $unpaidTillDate) ) - $ac->CurrentBalanceCr + $penalty + ($interest * $unpaidAfterDate * 25 / 100);
-        $ForCloseAmount = round($ForCloseAmount);
-//        $extraDeposit = 0;
-//        if (inp("Amount") > $ForCloseAmount)
-//            $extraDeposit = inp("Amount") - $ForCloseAmount;
-//
-//
-//        $ForCloseAmount1 = ($ac->CurrentBalanceDr + ($interest * $unpaidTillDate) ) - $ac->CurrentBalanceCr + $penalty + $extraDeposit;
-//        $ForCloseAmount2 = ($interest * $unpaidAfterDate * 25 / 100);
-//        $ForCloseAmount1 = round($ForCloseAmount1);
-//        $ForCloseAmount2 = round($ForCloseAmount2);
+        $overcharge=0;
+        if(getNow('Y-m-d') > $a->premiums->last_emi_date){
+            // echo $currentDr . "<br/>";
+            $scheme_interest = $a->scheme->Interest;
+            // echo $scheme_interest . "<br/>";
+            $d=my_date_diff(getNow('Y-m-d'),$a->premiums->last_emi_date);
+            // print_r($d);
+            $overcharge = round($currentDr * $scheme_interest / 36500 * $d['days_total'],0);
+            // return;
+        }
 
-//        $debitAccount = array($ac->AccountNumber => $ForCloseAmount1);
-//        $creditAccount = array($ac->AccountNumber => $ForCloseAmount1);
+        $forCloseAmount = ($loanAmount + $interestGiven + ($a->PaneltyDUE) + $a->OtherCharges + $overcharge+ $forCloseCharge - ($a->CurrentBalanceCr));
 
-         $debitAccount = array(
-            CASH_ACCOUNT => ($ForCloseAmount - inp("Discount")),
+        $debitAccount_10 = array(
+            CASH_ACCOUNT => ($forCloseAmount - inp("Discount")),
         );
-        $creditAccount = array(
-            $ac->AccountNumber => ($ForCloseAmount - inp("Discount")),
+        $creditAccount_10 = array(
+            $ac->AccountNumber => ($forCloseAmount - inp("Discount")),
         );
-        Transaction::doTransaction($debitAccount, $creditAccount, "Amount submitted in For Close Account", TRA_FOR_CLOSE_ACCOUNT_AMOUNT_DEPOSIT, $voucherNo);
+        // TODO Docuemnets in narration
+        $voucherNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $ac->id);
+        Transaction::doTransaction($debitAccount_10, $creditAccount_10, "Being For Close Amount deposited & Documents Given ". $ac->getDocuments(), TRA_FOR_CLOSE_ACCOUNT_AMOUNT_DEPOSIT, $voucherNo);
 
-         $debitAccount1 = array(
-            $ac->AccountNumber => (($ac->CurrentBalanceDr - $ac->CurrentBalanceCr)-($ForCloseAmount - inp("Discount")))
+        $debitAccount_20 = array(
+            $ac->AccountNumber => ($forCloseCharge),
         );
-        $creditAccount1 = array(
-           FOR_CLOSE_ACCOUNT_ON.$ac->Schemes->Name => (($ac->CurrentBalanceDr - $ac->CurrentBalanceCr)-($ForCloseAmount - inp("Discount")))
+        $creditAccount_20 = array(
+            FOR_CLOSE_ACCOUNT_ON.$ac->Schemes->Name => ($forCloseCharge),
         );
-        Transaction::doTransaction($debitAccount1, $creditAccount1, "Amount submitted in For Close Account", TRA_FOR_CLOSE_ACCOUNT_AMOUNT_DEPOSIT, $voucherNo);
+        // TODO Docuemnets in narration
+        $voucherNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $ac->id);
+        Transaction::doTransaction($debitAccount_20, $creditAccount_20, "Being For Close Charge Debit ", TRA_FOR_CLOSE_ACCOUNT_AMOUNT_DEPOSIT, $voucherNo);
 
-
-//        $debitAccount = array($ac->AccountNumber => $ForCloseAmount2);
-//        $creditAccount = array(Branch::getCurrentBranch()->Code . SP . FOR_CLOSE_ACCOUNT_ON . $ac->Schemes->Name => $ForCloseAmount2);
-//        Transactions::doTransaction($debitAccount, $creditAccount, "Amount submitted in For Close Account", TRA_FOR_CLOSE_ACCOUNT_AMOUNT_DEPOSIT, $voucherNo);
+        if($overcharge != 0){
+            $debitAccount_30 = array(
+                $ac->AccountNumber => $overcharge
+            );
+            $creditAccount_30 = array(
+               INTEREST_RECEIVED_ON.$ac->Schemes->Name => $overcharge
+            );
+            $voucherNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $ac->id);
+            Transaction::doTransaction($debitAccount_30, $creditAccount_30, "Being Time Over Charge Debit", TRA_FOR_CLOSE_ACCOUNT_AMOUNT_DEPOSIT, $voucherNo);            
+        }
 
         if(inp("Discount")){
-            $debitAccount2 = array(CASH_ACCOUNT => $ForCloseAmount1);
-            $creditAccount2 = array(Branch::getCurrentBranch()->Code.SP."Discount Paid" => $ForCloseAmount1);
-            Transaction::doTransaction($debitAccount2, $creditAccount2, "Amount submitted in For Close Account", TRA_FOR_CLOSE_ACCOUNT_AMOUNT_DEPOSIT, $voucherNo);
+            $debitAccount_40 = array(Branch::getCurrentBranch()->Code.SP."Discount Paid" => inp("Discount"));
+            $creditAccount_40 = array( $ac->AccountNumber => inp("Discount"));
+            $voucherNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $ac->id);
+            Transaction::doTransaction($debitAccount_40, $creditAccount_40, "Being Discount Paid", TRA_FOR_CLOSE_ACCOUNT_AMOUNT_DEPOSIT, $voucherNo);
         }
+
         $q = "update `jos_xpremiums` set `PaidOn` = '" . getNow() . "', Paid=1 where Paid = 0 and `accounts_id` =" . $ac->id;
         executeQuery($q);
 
         $query = "update `jos_xaccounts` set `CurrentInterest` = 0, ActiveStatus=0 where `id` =" . $ac->id;
         executeQuery($query);
 
-        // send sms to customer
-//             $mobile=substr($ac->Member->PhoneNos, 0, 10);
-//            if(is_numeric($mobile) && strlen($mobile)==10){
-//                $sms=new sms();
-//        $msg = "Dear " . $ac->Member->Name . ", you have deposited an amount of Rs. " . inp("Amount") . " in your account $ac->AccountNumber for ForClose on " . getNow("Y-m-d");
-//        $this->sendSMS($ac, $msg);
-//                $sms->sendsms($mobile,$msg);
-//            }
     }
 
     function sendSMS($ac, $msg) {

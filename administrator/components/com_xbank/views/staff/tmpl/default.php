@@ -15,6 +15,7 @@
             <th class="title">Phone Number</th>
             <th class="title">Branch</th>-->
             <th class="title">Edit</th>
+            <th class="title">Status</th>
         </tr>
     </thead>
     <tbody>
@@ -41,6 +42,7 @@
                 <td class="title" align="center"><?php echo $m->PhoneNos; ?></td>
                 <td class="title" align="center"><?php echo $m->registeredinbranch->Name; ?></td>-->
                 <td class="title" align="center"><a title="Edit Staff <?php echo $s->StaffID; ?>" href="index.php?option=com_xbank&task=staff_cont.createStaffform&id=<?php echo $s->id; ?>" !class="alertinwindow">Edit</a></td>
+                <td class="title" align="center"><a title="Edit Staff <?php echo $s->StaffID; ?>" href="index.php?option=com_xbank&task=staff_cont.swapStatus&id=<?php echo $s->id; ?>" !class="alertinwindow"><?php echo $s->userStatus(); ?></a></td>
             </tr>
             <?php
         endforeach;
