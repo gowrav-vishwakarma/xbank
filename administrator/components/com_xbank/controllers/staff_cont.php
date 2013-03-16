@@ -28,6 +28,7 @@ class staff_cont extends CI_Controller {
     }
 
     function swapStatus(){
+        Staff::accessibleTo(BRANCH_ADMIN);
         $s= new Staff(inp('id'));
         $s->swapStatus();
         re('staff_cont.dashboard',"Status Changed");
