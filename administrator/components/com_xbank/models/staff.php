@@ -154,4 +154,28 @@ class Staff extends DataMapper {
         return $user->id;
     }
 
+    function swapStatus(){
+        $status ="SELECT block FROM jos_users WHERE id=". $this->jid;
+        $status=$this->db->query($status)->row();
+        if($status){
+            $status = $status->block == 1 ? 0: 1;
+            $status_update ="UPDATE jos_users SET block =  $status WHERE id=". $this->jid;
+            $this->db->query($status_update);
+        }
+            
+    }
+
+    function userStatus(){
+        $status ="SELECT block FROM jos_users WHERE id=". $this->jid;
+        $status=$this->db->query($status)->row();
+        if($status)
+            return ($status->block == 0 ) ? "Activated" : "DeActivated";
+        else
+            return "MalFunctioned";
+    }
+
+    function accessibleTo($whome){
+        if(Staff::getCurrentStaff()->AccessLevel < $whome) xredirect("index.php?option=com_xbank&task=com_xbank.permissionPage&format=raw");
+    }
+
 }

@@ -22,6 +22,11 @@ class com_xbank extends CI_Controller {
         parent::__construct();
     }
 
+    function permissionPage($msg=""){
+        echo "You are not permitted to do this";
+        exit();
+    }
+
     function index() {
 
         xDeveloperToolBars::getDefaultToolBar();

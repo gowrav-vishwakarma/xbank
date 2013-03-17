@@ -967,9 +967,9 @@ class accounts_cont extends CI_Controller {
                             ->setColumns(2)
                             ->lookupDB("Account number", "name='AccountNumber' class='input req-string' value='$acc->AccountNumber'", "index.php?option=com_xbank&task=accounts_cont.AccountNumber&format=raw", array("a"=>"b"), array("AccountNumber"), "")
                             ->text("Account Name","name='AccountDisplayName' value='".$acc->AccountDisplayName."'")
-//                            ->lookupDB("Member Name", "name='UserID' class='input req-string' value='" . $acc->member_id . "'  onblur='javascript:jQuery(\"#memberDetailsO\").load(\"index.php?option=com_xbank&task=accounts_cont.memberDetails&format=raw&id=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.MemberID&format=raw", array("a"=>"b"), array("id", "Name", "FatherName", "BranchName"), "id")
-//                            ->div("memberDetailsO","",$member)
-                            ->text("Member Name", "name='UserID' class='input req-string' value='" . $acc->member->Name . "' DISABLED")
+                            ->lookupDB("Member Name", "name='UserID' class='input req-string' value='" . $acc->member_id . "'  onblur='javascript:jQuery(\"#memberDetailsO\").load(\"index.php?option=com_xbank&task=accounts_cont.memberDetails&format=raw&id=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.MemberID&format=raw", array("a"=>"b"), array("id", "Name", "FatherName", "BranchName"), "id")
+                            ->div("memberDetailsO","",$acc->member->Name)
+                            // ->text("Member Name", "name='UserID' class='input req-string' value='" . $acc->member->Name . "' DISABLED")
                             ->text("Account Under", "name='AccountType' class='input req-string' value='" . $acc->scheme->Name . "' DISABLED")
                             ->text("Opening Balance CR","name='initialAmountCR' class='input req-numeric tooltip' value='$acc->OpeningBalanceCr' title='Put the opening CR amount for account'")
                             ->text("Opening Balance DR","name='initialAmountDR' class='input req-numeric tooltip' value='$acc->OpeningBalanceDr' title='Put the opening DR amount for account'")
@@ -1006,9 +1006,9 @@ class accounts_cont extends CI_Controller {
                             ->setColumns(2)
                             ->lookupDB("Account number", "name='AccountNumber' class='input req-string' value='$acc->AccountNumber'", "index.php?option=com_xbank&task=accounts_cont.AccountNumber&format=raw", array("a"=>"b"), array("AccountNumber"), "")
                             ->text("Account Name","name='AccountDisplayName' value='".$acc->AccountDisplayName."'")
-//                            ->lookupDB("Member Name", "name='UserID' class='input req-string' value='" . $acc->member_id . "'  onblur='javascript:jQuery(\"#memberDetailsO\").load(\"index.php?option=com_xbank&task=accounts_cont.memberDetails&format=raw&id=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.MemberID&format=raw", array("a"=>"b"), array("id", "Name", "FatherName", "BranchName"), "id")
-//                            ->div("memberDetailsO","",$member)
-                            ->text("Member Name", "name='UserID' class='input req-string' value='" . $acc->member->Name . "' DISABLED")
+                           ->lookupDB("Member Name", "name='UserID' class='input req-string' value='" . $acc->member_id . "'  onblur='javascript:jQuery(\"#memberDetailsO\").load(\"index.php?option=com_xbank&task=accounts_cont.memberDetails&format=raw&id=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.MemberID&format=raw", array("a"=>"b"), array("id", "Name", "FatherName", "BranchName"), "id")
+                           ->div("memberDetailsO","",$acc->member->Name)
+                            // ->text("Member Name", "name='UserID' class='input req-string' value='" . $acc->member->Name . "' DISABLED")
                             ->text("Account Under", "name='AccountType' class='input req-string' value='" . $acc->scheme->Name . "' DISABLED")
                             ->text("Opening Balance CR","name='initialAmountCR' class='input req-numeric tooltip' value='$acc->OpeningBalanceCr' title='Put the opening CR amount for account'")
                             ->text("Opening Balance DR","name='initialAmountDR' class='input req-numeric tooltip' value='$acc->OpeningBalanceDr' title='Put the opening DR amount for account'")
@@ -1044,9 +1044,9 @@ class accounts_cont extends CI_Controller {
                             ->setColumns(2)
                             ->lookupDB("Account number", "name='AccountNumber' class='input req-string' value='$acc->AccountNumber'", "index.php?option=com_xbank&task=accounts_cont.AccountNumber&format=raw", array("a"=>"b"), array("AccountNumber"), "")
                             ->text("Account Name","name='AccountDisplayName' value='".$acc->AccountDisplayName."'")
-//                            ->lookupDB("Member Name", "name='UserID' class='input req-string' value='" . $acc->member_id . "'  onblur='javascript:jQuery(\"#memberDetailsO\").load(\"index.php?option=com_xbank&task=accounts_cont.memberDetails&format=raw&id=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.MemberID&format=raw", array("a"=>"b"), array("id", "Name", "FatherName", "BranchName"), "id")
-//                            ->div("memberDetailsO","",$member)
-                            ->text("Member Name", "name='UserID' class='input req-string' value='" . $acc->member->Name . "' DISABLED")
+                           ->lookupDB("Member Name", "name='UserID' class='input req-string' value='" . $acc->member_id . "'  onblur='javascript:jQuery(\"#memberDetailsO\").load(\"index.php?option=com_xbank&task=accounts_cont.memberDetails&format=raw&id=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.MemberID&format=raw", array("a"=>"b"), array("id", "Name", "FatherName", "BranchName"), "id")
+                           ->div("memberDetailsO","",$acc->member->Name)
+                            // ->text("Member Name", "name='UserID' class='input req-string' value='" . $acc->member->Name . "' DISABLED")
                             ->text("Account Under", "name='AccountType' class='input req-string' value='" . $acc->scheme->Name . "' DISABLED")
                             ->text("Loan Amount", "name='initialAmount' class='input req-numeric' value='$acc->RdAmount' DISABLED")
                             ->text("Opening Balance CR","name='initialAmountCR' class='input req-numeric tooltip' value='$acc->OpeningBalanceCr' title='Put the opening CR amount for account'")
@@ -1101,7 +1101,9 @@ class accounts_cont extends CI_Controller {
                             ->setColumns(2)
                             ->lookupDB("Account number", "name='AccountNumber' class='input req-string' value='$acc->AccountNumber'", "index.php?option=com_xbank&task=accounts_cont.AccountNumber&format=raw", array("a"=>"b"), array("AccountNumber"), "")
                             ->text("Account Name","name='AccountDisplayName' value='".$acc->AccountDisplayName."'")
-                            ->text("Member Name", "name='UserID' class='input req-string' value='" . $acc->member->Name . "' DISABLED")
+                            ->lookupDB("Member Name", "name='UserID' class='input req-string' value='" . $acc->member_id . "'  onblur='javascript:jQuery(\"#memberDetailsO\").load(\"index.php?option=com_xbank&task=accounts_cont.memberDetails&format=raw&id=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.MemberID&format=raw", array("a"=>"b"), array("id", "Name", "FatherName", "BranchName"), "id")
+                           ->div("memberDetailsO","",$acc->member->Name)
+                            // ->text("Member Name", "name='UserID' class='input req-string' value='" . $acc->member->Name . "' DISABLED")
                             ->text("Account Under", "name='AccountType' class='input req-string' value='" . $acc->scheme->Name . "' DISABLED")
                             ->text("RECURRING amount", "name='rdamount' class='input req-string' value='$acc->RdAmount' DISABLED")
                             ->_()
@@ -1139,7 +1141,9 @@ class accounts_cont extends CI_Controller {
                             ->setColumns(2)
                             ->lookupDB("Account number", "name='AccountNumber' class='input req-string' value='$acc->AccountNumber'", "index.php?option=com_xbank&task=accounts_cont.AccountNumber&format=raw", array("a"=>"b"), array("AccountNumber"), "")
                             ->text("Account Name","name='AccountDisplayName' value='".$acc->AccountDisplayName."'")
-                            ->text("Member Name", "name='UserID' class='input req-string' value='" . $acc->member->Name . "' DISABLED")
+                            ->lookupDB("Member Name", "name='UserID' class='input req-string' value='" . $acc->member_id . "'  onblur='javascript:jQuery(\"#memberDetailsO\").load(\"index.php?option=com_xbank&task=accounts_cont.memberDetails&format=raw&id=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.MemberID&format=raw", array("a"=>"b"), array("id", "Name", "FatherName", "BranchName"), "id")
+                           ->div("memberDetailsO","",$acc->member->Name)
+                            // ->text("Member Name", "name='UserID' class='input req-string' value='" . $acc->member->Name . "' DISABLED")
                             ->text("Account Under", "name='AccountType' class='input req-string' value='" . $acc->scheme->Name . "' DISABLED")
                             ->text("DDS amount", "name='rdamount' class='input req-string' value='$acc->RdAmount' ")
                             ->_()
@@ -1177,7 +1181,9 @@ class accounts_cont extends CI_Controller {
                             ->setColumns(2)
                             ->lookupDB("Account number", "name='AccountNumber' class='input req-string' value='$acc->AccountNumber'", "index.php?option=com_xbank&task=accounts_cont.AccountNumber&format=raw", array("a"=>"b"), array("AccountNumber"), "")
                             ->text("Account Name","name='AccountDisplayName' value='".$acc->AccountDisplayName."'")
-                            ->text("Member Name", "name='UserID' class='input req-string' value='" . $acc->member->Name . "' DISABLED")
+                            ->lookupDB("Member Name", "name='UserID' class='input req-string' value='" . $acc->member_id . "'  onblur='javascript:jQuery(\"#memberDetailsO\").load(\"index.php?option=com_xbank&task=accounts_cont.memberDetails&format=raw&id=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.MemberID&format=raw", array("a"=>"b"), array("id", "Name", "FatherName", "BranchName"), "id")
+                           ->div("memberDetailsO","",$acc->member->Name)
+                            // ->text("Member Name", "name='UserID' class='input req-string' value='" . $acc->member->Name . "' DISABLED")
                             ->text("Account Under", "name='AccountType' class='input req-string' value='" . $acc->scheme->Name . "' DISABLED")
                             ->text("CC Limit", "name='rdamount' class='input req-string' value='$acc->RdAmount' ")
                             ->_()
@@ -1216,7 +1222,9 @@ class accounts_cont extends CI_Controller {
                             ->setColumns(2)
                             ->lookupDB("Account number", "name='AccountNumber' class='input req-string' value='$acc->AccountNumber'", "index.php?option=com_xbank&task=accounts_cont.AccountNumber&format=raw", array("a"=>"b"), array("AccountNumber"), "")
                             ->text("Account Name","name='AccountDisplayName' value='".$acc->AccountDisplayName."'")
-                            ->text("Member Name", "name='UserID' class='input req-string' value='" . $acc->member->Name . "' DISABLED")
+                            ->lookupDB("Member Name", "name='UserID' class='input req-string' value='" . $acc->member_id . "'  onblur='javascript:jQuery(\"#memberDetailsO\").load(\"index.php?option=com_xbank&task=accounts_cont.memberDetails&format=raw&id=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.MemberID&format=raw", array("a"=>"b"), array("id", "Name", "FatherName", "BranchName"), "id")
+                           ->div("memberDetailsO","",$acc->member->Name)
+                            // ->text("Member Name", "name='UserID' class='input req-string' value='" . $acc->member->Name . "' DISABLED")
                             ->text("Account Under", "name='AccountType' class='input req-string' value='" . $acc->scheme->Name . "' DISABLED")
                             ->text("Opening Balance CR","name='initialAmountCR' class='input req-numeric tooltip' value='$acc->OpeningBalanceCr' title='Put the opening CR amount for account'")
                             ->text("Opening Balance DR","name='initialAmountDR' class='input req-numeric tooltip' value='$acc->OpeningBalanceDr' title='Put the opening DR amount for account'")
@@ -1273,12 +1281,13 @@ class accounts_cont extends CI_Controller {
                     re("accounts_cont.editAccountsForm&id=$id","Account Number ".inp("AccountNumber")." Already Exists",'error');
         }
 
-//        $u=inp("UserID");
-//        $m=new Member($u);
-//
-//        if (!$m->result_count()) {
-//             re("accounts_cont.editAccountsForm&id=$id","The Member with id $u not found",'error');
-//        }
+
+       $u=inp("UserID");
+       $m=new Member($u);
+
+       if (!$m->result_count()) {
+            re("accounts_cont.editAccountsForm&id=$id","The Member with id $u not found",'error');
+       }
 
         if($Ac->agents_id != 0 && inp("Agents_Id") != ""){
             $ag=new Agent(inp("Agents_Id"));
@@ -1295,7 +1304,7 @@ class accounts_cont extends CI_Controller {
             if(inp('AccountNumber')){
                 $Ac->AccountNumber = inp('AccountNumber');
             }
-//            $Ac->member_id = inp("UserID");
+           $Ac->member_id = inp("UserID");
             $Ac->OpeningBalanceCr = (inp("initialAmountCR") ? inp("initialAmountCR") : 0);
             $Ac->OpeningBalanceDr = (inp("initialAmountDR") ? inp("initialAmountDR") : 0);
             $Ac->ActiveStatus = inp('ActiveStatus');

@@ -438,4 +438,74 @@ class report_2_cont extends CI_Controller {
         $this->load->view('report.html', $data);
         $this->jq->getHeader();
      }
+
+     function dds_commission_and_tds_report_form(){
+        xDeveloperToolBars::onlyCancel("report_cont.dashboard", "cancel", "DDS Commission and TDS Report");
+        $this->form->open("one","index.php?option=com_xbank&task=report_2_cont.dds_commission_and_tds_report")
+            ->dateBox("DDS Commission For date","name='toDate' class='input'")
+            ->submit("go");
+
+        $data['form']=$this->form->get();
+        $this->load->view("formonly.html",$data);
+        $this->jq->getHeader(); 
+
+     }
+
+     function dds_commission_and_tds_report(){
+        xDeveloperToolBars::onlyCancel("report_2_cont.dds_commission_and_tds_report_form", "cancel", "DDS Commission and TDS Report");
+        
+        $m=date('m',strtotime(inp('toDate')));
+        $y=date('Y',strtotime(inp('toDate')));
+        $fromDate="$y-$m-01";
+        $toDate=inp('toDate');
+        
+        $t=new Transaction();
+        
+        $t->select_func('SUM','[amountCr]','AmountSubmitted');
+
+        $t->select_subquery('(SELECT display_voucher_no FROM jos_xtransactions  WHERE reference_account_id=${parent}.accounts_id AND created_at="'.inp('toDate').' 00:00:00" AND side="DR")','display_voucher_no');
+        $t->select_subquery('(SELECT voucher_no FROM jos_xtransactions  WHERE reference_account_id=${parent}.accounts_id AND created_at="'.inp('toDate').' 00:00:00" AND side="DR")','voucher_no');
+        $t->select_subquery('(SELECT amountDr FROM jos_xtransactions  WHERE reference_account_id=${parent}.accounts_id AND created_at="'.inp('toDate').' 00:00:00" AND side="DR")','Commission');
+        $t->select_subquery('(SELECT amountCr FROM jos_xtransactions  WHERE reference_account_id=${parent}.accounts_id AND created_at="'.inp('toDate').' 00:00:00" AND side="CR" limit 1)','NET');
+        $t->select_subquery('(SELECT amountCr FROM jos_xtransactions  WHERE reference_account_id=${parent}.accounts_id AND created_at="'.inp('toDate').' 00:00:00" AND side="CR" limit 1,1)','TDS');
+        
+        $t->include_related('account','AccountNumber');
+        $t->include_related('account/scheme','Name');
+        $t->include_related('account/agent/member','Name');
+        $t->where('transaction_type_id',20); //DDS Account amount deposited
+        $t->where_related('account/scheme','SchemeType','DDS');
+        $t->where('created_at >=',$fromDate);
+        $t->where('created_at <',nextDate('toDate'));
+        $t->where('branch_id',Branch::getCurrentBranch()->id);
+        $t->having ('Commission is not null');
+        $t->group_by('accounts_id');
+
+
+        $t->get_iterated();
+
+        // echo $t->check_last_query();
+
+        $msg="DDS Commission and TDS Report on " . inp('toDate');
+        $data['report'] = getReporttable($t,             //model
+                array("Account Number", "Amount Submitted" , "SchemeName" ,"Commission", 'TDS',"Net Amount" ,"Agent Name" , "Voucher_no"),       //heads
+                array('account_AccountNumber','AmountSubmitted','account_scheme_Name' ,'Commission',"TDS",'NET' ,'account_agent_member_Name' ,'display_voucher_no'),       //fields
+                array(),        //totals_array
+                array(),        //headers
+                array('sno'=>true),     //options
+                "<h3>". $msg . "</h3>",     //headerTemplate
+                '',      //tableFooterTemplate
+                "",      //footerTemplate
+                array('display_voucher_no'=>array(
+                                            'task'=>'report_cont.transactionDetails',
+                                            'class'=>'alertinwindow',
+                                            'title'=>'_blank',
+                                            'url_post'=>array('vn'=>'#voucher_no','format'=>'"raw"','tr_type'=>'#transaction_type_id','branch_id'=>'#branch_id')
+                                        ))
+                );
+
+
+        JRequest::setVar("layout","generalreport");
+        $this->load->view('report.html', $data);
+        $this->jq->getHeader();
+     }
 }

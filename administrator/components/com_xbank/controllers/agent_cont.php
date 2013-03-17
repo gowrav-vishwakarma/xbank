@@ -305,7 +305,7 @@ class agent_cont extends CI_Controller {
         $fd_tra->where_related('referenceaccount/agent','id',inp('Agents_Id'));
         $fd_tra->where_related('account/scheme','Name','Saving Account');
         $fd_tra->where_in('transaction_type_id',array(6,11,13,2)); //HARD CODED TODO REMOVE HARD CODE
-        $fd_tra->where_related("referenceaccount/scheme",'SchemeType <>','Recurring');
+        $fd_tra->where_related("referenceaccount/scheme",'SchemeType','FixedAndMis');
         $fd_tra->where_related("referenceaccount",'branch_id',Branch::getCurrentBranch()->id);
             
         if(inp('fromDate')){
@@ -332,6 +332,54 @@ class agent_cont extends CI_Controller {
                 '',      //tableFooterTemplate
                 ""      //footerTemplate
                 );
+
+        $t=new Transaction();
+        
+        $t->select_func('SUM','[amountCr]','AmountSubmitted');
+
+
+        $t->select_subquery('(SELECT sum(amountDr) FROM jos_xtransactions  WHERE reference_account_id=${parent}.accounts_id AND created_at>="'.inp('fromDate').'" AND  created_at <="'.nextDate('toDate').'" AND side="DR" AND transaction_type_id = 11 )','Commission');
+        // $t->select_subquery('(SELECT sum(amountCr) FROM jos_xtransactions  WHERE  reference_account_id=${parent}.accounts_id AND created_at>="'.inp('fromDate').'" AND  created_at <="'.nextDate('toDate').'" AND side="CR"  AND transaction_type_id = 11 limit 1)','NET');
+        // $t->select_subquery('(SELECT sum(amountCr) FROM jos_xtransactions  WHERE  reference_account_id=${parent}.accounts_id AND created_at>="'.inp('fromDate').'" AND  created_at <="'.nextDate('toDate').'" AND side="CR"  AND transaction_type_id = 11 limit 1,1)','TDS');
+        
+        $t->include_related('account','AccountNumber');
+        $t->include_related('account','created_at');
+        $t->include_related('account/member','Name');
+        $t->include_related('account/scheme','Name');
+        $t->include_related('account/agent/member','Name');
+        // $t->where('transaction_type_id',"in",array(13,20)); //DDS Account amount deposited
+        $t->where_related('account/scheme','SchemeType','DDS');
+        $t->where('created_at >=', inp('fromDate'));
+        $t->where('created_at <',nextDate('toDate'));
+        $t->where_related('account/agent','id',inp('Agents_Id'));
+        $t->where('branch_id',Branch::getCurrentBranch()->id);
+        // $t->having ('Commission is not null');
+        $t->group_by('accounts_id');
+
+
+        $t->get_iterated();
+
+        // echo "haha". inp('toDate');
+
+        $msg="DDS Commission and TDS Report on " . inp('toDate');
+        $data['report'] .= getReporttable($t,             //model
+                array("Account Number","Member Name",'Account Opening Date',"Commission", 'TDS',"NetCommission" , "Amount Deposit"),       //heads
+                array('account_AccountNumber','account_member_Name','account_created_at','Commission',"~(#Commission * 10/100)",'~(#Commission-((#Commission * 10/100)))','AmountSubmitted'),       //fields
+                array(),        //totals_array
+                array(),        //headers
+                array('sno'=>true),     //options
+                "<h3>". $msg . "</h3>",     //headerTemplate
+                '',      //tableFooterTemplate
+                "",      //footerTemplate
+                array('display_voucher_no'=>array(
+                                            'task'=>'report_cont.transactionDetails',
+                                            'class'=>'alertinwindow',
+                                            'title'=>'_blank',
+                                            'url_post'=>array('vn'=>'#voucher_no','format'=>'"raw"','tr_type'=>'#transaction_type_id','branch_id'=>'#branch_id')
+                                        ))
+                );
+
+
 
 
         JRequest::setVar("layout","generalreport");

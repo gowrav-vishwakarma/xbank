@@ -170,6 +170,7 @@ class xDeveloperToolBars extends JObject {
         //JToolBarHelper::addNewX('report_cont.pandlForm', 'Profit & Loss A/c');
         //JToolBarHelper::addNewX('report_cont.AccountBook', 'Account Books');
         // JToolBarHelper::addNewX('report_cont.loan_report', 'Loan<br/> Report');
+        JToolBarHelper::addNewX('report_2_cont.dds_commission_and_tds_report_form', 'DDS Comm & <br/>TDS Report');
         JToolBarHelper::addNewX('report_cont.deposit_insurrance_due_report_form', 'Deposit Insurance <br/>Due Account Details');
         JToolBarHelper::addNewX('report_cont.RDPremiumDueListForm', 'RD Premium<br/> Due List');
        

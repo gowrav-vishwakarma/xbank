@@ -14,6 +14,7 @@ class staff_cont extends CI_Controller {
 
         $user = JFactory::getUser();
         $data['staff'] = new Staff();
+        // $data['staff']->where('jid <>',0);
         if ($user->gid < 24)
             $data['staff']->where("branch_id", Branch::getCurrentBranch()->id);
         //$data['staff']->limit(15, JRequest::getVar("limitstart", 0));
@@ -24,6 +25,13 @@ class staff_cont extends CI_Controller {
 
         $this->load->view("staff.html", $data);
         $this->jq->getHeader();
+    }
+
+    function swapStatus(){
+        Staff::accessibleTo(BRANCH_ADMIN);
+        $s= new Staff(inp('id'));
+        $s->swapStatus();
+        re('staff_cont.dashboard',"Status Changed");
     }
 
     function createStaffform() {

@@ -207,7 +207,7 @@ class report_cont extends CI_Controller {
      */
     function transactionDetails() {
         //function transactionDetails($voucher, $foraccount) {
-        //Staff::accessibleTo(USER);
+        
         $voucher = JRequest::getVar("vn");
         $foraccount = JRequest::getVar("id");
         $transaction_type_id = JRequest::getVar('tr_type','is null');
@@ -900,7 +900,7 @@ class report_cont extends CI_Controller {
 
     //function confirmTransactionDelete($voucherno, $foraccount=0) {
     function confirmTransactionDelete() {
-
+        Staff::accessibleTo(BRANCH_ADMIN);
         $voucherno = JRequest::getVar("vn");
         $foraccount = JRequest::getVar("id");
         $date = "";
@@ -1007,7 +1007,7 @@ class report_cont extends CI_Controller {
 
     //function confirmTransactionEdit($voucherno, $foraccount=0) {
     function confirmTransactionEdit() {
-
+        Staff::accessibleTo(BRANCH_ADMIN);
         $voucherno = JRequest::getVar("vn");
         $foraccount = JRequest::getVar("id");
         $transaction = new Transaction();
@@ -2142,18 +2142,17 @@ a.branch_id = $b
 
         function deposit_insurrance_due_report() {
         xDeveloperToolBars::onlyCancel("report_cont.deposit_insurrance_due_report_form", "cancel", "Deposit Insurance Due Report from ".inp("fromDate")." to ".inp("toDate"));
-        $q = "select s.SchemeType, count(a.id) as cnt from jos_xaccounts a join jos_xschemes s on a.schemes_id = s.id where a.created_at between '".inp('fromDate')."' and DATE_ADD('".inp('toDate')."', INTERVAL +1 DAY) and a.DefaultAC=0 ";
+        $q = "select s.SchemeType, count(a.id) as cnt from jos_xaccounts a join jos_xschemes s on a.schemes_id = s.id where a.created_at between '".inp('fromDate')."' and DATE_ADD('".inp('toDate')."', INTERVAL +1 DAY) and a.DefaultAC=0 ";        
         if(inp('BranchId')!='%')
             $q .= "and a.branch_id=" . inp("BranchId")." group by s.SchemeType";
         else {
             $q .= " group by s.SchemeType";
         }
         $a['accountcount'] = $this->db->query($q)->result();
-        $a['schemeTypes'] = explode(",", ACCOUNT_TYPES);
+        $a['schemeTypes'] = explode(",", "FixedAndMis,SavingAndCurrent,Recurring,DDS");
         JRequest::setVar("layout","allschemedetails_modified");
         $data['contents'] = $this->load->view('report.html', $a);
-        $data['contents'] =$this->form->get();
-        $this->load->view('report.html',$data);
+        
         $this->jq->getHeader();
     }
     
@@ -2304,7 +2303,7 @@ a.branch_id = $b
 
 
     function loanNPAListForm(){
-        xDeveloperToolBars::onlyCancel("report_cont.new_reports", "cancel", "Loan EMI Due List");
+        xDeveloperToolBars::onlyCancel("report_cont.new_reports", "cancel", "Loan NPA List");
         $this->load->library("form");
         $this->form->open("pSearch","index.php?option=com_xbank&task=report_cont.loanNPAList")
                 ->setColumns(2)
@@ -2401,7 +2400,7 @@ premiumcount >= 3 and premiumcount <= 4
 
 
     function loanHardRecoveryListForm(){
-        xDeveloperToolBars::onlyCancel("report_cont.new_reports", "cancel", "Loan EMI Due List");
+        xDeveloperToolBars::onlyCancel("report_cont.new_reports", "cancel", "Loan Hard Recovery List");
         $this->load->library("form");
         $this->form->open("pSearch","index.php?option=com_xbank&task=report_cont.loanHardRecoveryList")
                 ->setColumns(2)

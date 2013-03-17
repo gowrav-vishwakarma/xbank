@@ -140,7 +140,7 @@ class Member_cont extends CI_Controller {
 //        $m->where('PanNo', inp('PanNo'))->get();
 //        $m->where('PanNo <>',NULL)->get();
         $q = $this->db->query("select PanNo from jos_xmember where PanNo ='" . inp("PanNo") . "' and PanNo is not null");
-        if ($q->num_rows() > 0) {
+        if ($q->num_rows() > 0 && inp("FilledForm60") == false) {
             echo "<h2>Pan Number is a unique value you cannot repeat it ..</h2>falsefalse";
             return;
         }
