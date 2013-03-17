@@ -104,7 +104,7 @@ class Branch extends DataMapper {
 //        $Acct = Doctrine::getTable('Schemes')->findByBranch_idOrBranch_id(Branch::getCurrentBranch()->id, Branch::getDefaultBranch()->id);
         $Acct = new Scheme();
         // if(inp('type'))
-        $Acct->where("SchemeType", $type);
+        // $Acct->where("SchemeType", $type);
         $Acct->group_start();
         $Acct->where("branch_id", Branch::getCurrentBranch()->id);
         $Acct->or_where("branch_id", Branch::getDefaultBranch()->id);

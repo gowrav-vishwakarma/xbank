@@ -11,6 +11,14 @@ if (!defined('BASEPATH'))
 //                            ->from("Accounts a")
 //                            ->where('a.AccountNumber like ?', '____' . inp('AccountNumber'))
 //                            ->orWhere('a.AccountNumber = ?', inp('AccountNumber'));
+if(inp("rdamount")%300 > 0){
+    echo "<h2>DDS Amount should be in the multiples of 300 like 300, 600, 900, 1200.....3000, 6000.</h2><br/>falsefalse";
+    return;
+}
+
+
+
+
 $result = $this->db->query("select a.AccountNumber from jos_xaccounts a  where a.AccountNumber like '%" . inp('AccountNumber') . "%' or a.AccountNumber='%" . inp('AccountNumber')."%'")->row();
 //            $result = $q->execute();
            // if ($result->count() > 0) {

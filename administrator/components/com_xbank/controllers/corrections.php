@@ -8,7 +8,7 @@
 class corrections extends CI_Controller {
 	function smReset(){
 
-		$this->db->query('ALTER TABLE `jos_xlog` ADD `staff_id` INT NOT NULL ');
+		// $this->db->query('ALTER TABLE `jos_xlog` ADD `staff_id` INT NOT NULL ');
 		$sm=new Account();
 		$sm->where('DefaultAC',0);
 		$sm->where('schemes_id',6);

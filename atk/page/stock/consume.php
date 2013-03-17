@@ -1,0 +1,29 @@
+<?php
+class page_stock_consume extends Page{
+	function init(){
+		parent::init();
+
+		$form=$this->add('Form');
+		$form->addField('dropdown','item')->setEmptyText('Select Any item')->validateNotNull()->setModel('Items');
+		// $form->addField('dropdown','branch')->setEmptyText('Select Any item')->validateNotNull()->setModel('Branch');
+		$form->addField('line','Quantity')->validateNotNull();
+		$form->addField('DatePicker','date')->validateNotNull()->set(date('Y-m-d'));
+		$form->addField('text','Remarks')->validateNotNull();
+		$form->addSubmit('Consume');
+
+		if($form->isSubmitted()){
+
+
+				$stock_consume=$this->add('Model_Stock_Consume');
+				// $stock_consume['from_id']=$this->api->auth->model['branch_id'];
+				$stock_consume['branch_id']=$this->api->auth->model['branch_id'];
+				$stock_consume['item_id']=$form->get('item');
+				$stock_consume['Quantity']=$form->get('Quantity');
+				$stock_consume['date']=$form->get('date');
+				$stock_consume['Remarks']=$form->get('Remarks');
+				$stock_consume->save();
+
+				$form->js(null,$form->js()->reload())->univ()->successMessage("Stock Consume Successesfully")->execute();
+		}
+	}
+}

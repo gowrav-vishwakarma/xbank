@@ -24,7 +24,7 @@ $form = $form->lookupDB("Member ID", "name='UserID' class='input req-string' onb
                 ->text("Initial Opening Amount", "name='initialAmount' class='input req-numeric'")
                 ->lookupDB("Agent's Member ID", "name='Agents_Id' class='input'  onblur='javascript:jQuery(\"#agentDetailsD\").load(\"index.php?option=com_xbank&task=accounts_cont.agentDetails&format=raw&aid=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.AgentMemberID&format=raw", array("a" => "b"), array("id", "Name", "PanNo"), "id")
                 ->div("agentDetailsD", "", $defaultAgent)
-                ->text("DDS amount", "name='rdamount' class='input req-string'")
+                ->text("DDS amount (in multiples of Rs.300 like 300, 600, 900....3000 etc.)", "name='rdamount' class='input req-string'")// monthly DDS Amount Required
                 ->select("Active Status", "name='ActiveStatus'", array("Active" => '1', "DeActive" => '0'))
                 ->hidden("", "name='CurrentScheme' value='$currentFolder'")
                 ->hidden("", "name='CurrentScheme' value='$currentFolder'");

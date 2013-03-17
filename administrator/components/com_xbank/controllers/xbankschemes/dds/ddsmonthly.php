@@ -39,30 +39,66 @@ if (SET_COMMISSIONS_IN_MONTHLY) {
 //        $acc = Doctrine::getTable("Accounts")->findOneById($ac->accounts_id);
         $acc = new Account($ac->accounts_id);
         $voucherNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $acc->id);
-
-        $amount = $ac->amountCr;
         if ($acc->agents_id !== null && $acc->agents_id != 0) {
-            $monthDifference = my_date_diff(getNow("Y-m-d"), $acc->created_at);
-            $monthDifference = $monthDifference["months_total"] + 1;
-            $percent = explode(",", $acc->scheme->AccountOpenningCommission);
-            $percent = (isset($percent[$monthDifference])) ? $percent[$monthDifference] : $percent[count($percent) - 1];
-            $amount = $amount * $percent / 100;
             $ag = new Agent($acc->agents_id);
             $agentAccount = $ag->AccountNumber;
+//            $amount = $ac->amountCr;
+
+//------------CALCULATING COMMISSION FOR DDS----------------
+            $DA = $acc->RdAmount; // DA => Monthly DDS Amount
+            $x = $ac->amountCr; // x => Amount Submitted in the current month
+            $tA = $ac->CurrentBalanceCr - $x; // tA => Total amount till date given excluding x
+
+            while($x > 0){
+                $y = $DA- ($tA - ((int)($tA / $DA)) * $DA);
+                $z = $tA / $DA;
+                $old = ($x / $DA > 1 ? $y : $x);
+
+                $percent = explode(",", $acc->scheme->AccountOpenningCommission);
+                $percent = (isset($percent[$z])) ? $percent[$z] : $percent[count($percent) - 1];
+                $amount = $old * $percent / 100;
+
+                $voucherNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $acc->id);
+                $transactiondate = date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 day"));
+                $debitAccount = array(
+                    Branch::getCurrentBranch()->Code . SP . COMMISSION_PAID_ON . $acc->scheme->Name => $amount,
+                );
+                $creditAccount = array(
+                    // get agents' account number
+                    //                                            Branch::getCurrentBranch()->Code."_Agent_SA_". $ac->Agents->member_id  => ($amount  - ($amount * 10 /100)),
+                    $agentAccount => ($amount - ($amount * TDS_PERCENTAGE / 100)),
+                    Account::getAccountForCurrentBranch(BRANCH_TDS_ACCOUNT)->AccountNumber => ($amount * TDS_PERCENTAGE / 100),
+                );
+                Transaction::doTransaction($debitAccount, $creditAccount, "DDS Premium Commission $acc->AccountNumber", TRA_PREMIUM_AGENT_COMMISSION_DEPOSIT, $voucherNo, $transactiondate);
+
+                
+                $x = $x - $old;
+                $tA = $tA + $old;
+            }
+                
+//----------------------------------------------------------
+
+//            $monthDifference = my_date_diff(getNow("Y-m-d"), $acc->created_at);
+//            $monthDifference = $monthDifference["months_total"] + 1;
+//            $percent = explode(",", $acc->scheme->AccountOpenningCommission);
+//            $percent = (isset($percent[$monthDifference])) ? $percent[$monthDifference] : $percent[count($percent) - 1];
+//            $amount = $amount * $percent / 100;
+//            $ag = new Agent($acc->agents_id);
+//            $agentAccount = $ag->AccountNumber;
 //            $agentAccount = $acc->agent->AccountNumber;
 
-            $voucherNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $acc->id);
-            $transactiondate = date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 day"));
-            $debitAccount = array(
-                Branch::getCurrentBranch()->Code . SP . COMMISSION_PAID_ON . $acc->scheme->Name => $amount,
-            );
-            $creditAccount = array(
-                // get agents' account number
-                //                                            Branch::getCurrentBranch()->Code."_Agent_SA_". $ac->Agents->member_id  => ($amount  - ($amount * 10 /100)),
-                $agentAccount => ($amount - ($amount * TDS_PERCENTAGE / 100)),
-                Account::getAccountForCurrentBranch(BRANCH_TDS_ACCOUNT)->AccountNumber => ($amount * TDS_PERCENTAGE / 100),
-            );
-            Transaction::doTransaction($debitAccount, $creditAccount, "DDS Premium Commission $acc->AccountNumber", TRA_PREMIUM_AGENT_COMMISSION_DEPOSIT, $voucherNo, $transactiondate);
+//            $voucherNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $acc->id);
+//            $transactiondate = date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 day"));
+//            $debitAccount = array(
+//                Branch::getCurrentBranch()->Code . SP . COMMISSION_PAID_ON . $acc->scheme->Name => $amount,
+//            );
+//            $creditAccount = array(
+//                // get agents' account number
+//                //                                            Branch::getCurrentBranch()->Code."_Agent_SA_". $ac->Agents->member_id  => ($amount  - ($amount * 10 /100)),
+//                $agentAccount => ($amount - ($amount * TDS_PERCENTAGE / 100)),
+//                Account::getAccountForCurrentBranch(BRANCH_TDS_ACCOUNT)->AccountNumber => ($amount * TDS_PERCENTAGE / 100),
+//            );
+//            Transaction::doTransaction($debitAccount, $creditAccount, "DDS Premium Commission $acc->AccountNumber", TRA_PREMIUM_AGENT_COMMISSION_DEPOSIT, $voucherNo, $transactiondate);
             //            Accounts::updateInterest($ac->Agents);
         }
     }
