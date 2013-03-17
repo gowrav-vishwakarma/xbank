@@ -4,7 +4,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-if (($ac->CurrentBalanceCr + inp("Amount")) > ($ac->RdAmount)) {
+if (($ac->CurrentBalanceCr + inp("Amount")) > ($ac->RdAmount) * $ac->scheme->MaturityPeriod) {
     echo "<h2>Total Deposit is Exeeding then required Deposit</h2>";
     echo "<h2>Total Amount Required : " . ($ac->RdAmount) . "</h2>";
     echo "<h2>Current Amount after Depositing total amount : " . ($ac->CurrentBalanceCr + inp("Amount")) . "</h2>";
