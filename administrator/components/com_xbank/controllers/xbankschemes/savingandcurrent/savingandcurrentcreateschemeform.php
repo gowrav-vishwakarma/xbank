@@ -15,6 +15,7 @@ $this->form->open("NewSavingScheme", 'index.php?option=com_xbank&task=schemes_co
                 ->select("Active Status", "name='ActiveStatus'", array('Active' => '1', 'InActive' => '0'), 1)
                 ->select("Under Head", "name='Head' class='not-req tooltip' title='Select the head to which Scheme belongs' not-req-val='-1'", $arr)
                 ->text("Scheme Points","name='SchemePoints' class='input'")
+                ->text("Scheme Group","name='SchemeGroup' class='input'")
 //                ->checkBox("Check if Processing Fee in %", "name='ProcessingFeesinPercent' class='input' value='1' checked")
 //                ->text('Processing Fees', "name='ProcessingFees' class='input req-numeric tooltip' title='Give processing fee in % if Checkbox is checked' value='0'")
 //                ->checkBox("Interest To Account", "name='InterestToAnother' class='input' value='1'")

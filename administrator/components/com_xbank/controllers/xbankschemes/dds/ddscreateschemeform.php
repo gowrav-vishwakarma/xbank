@@ -18,7 +18,8 @@
 //                ->text('Processing Fees', "name='ProcessingFees' class='input req-numeric tooltip' title='Give processing fee in % if Checkbox is checked' value='0'")
 //                ->checkBox("Interest To Account", "name='InterestToAnother' class='input' value='1'")
                 ->text("Period of Maturity for FD, MIS, RD, DDS(in months)", "name='MaturityPeriod' class='input tooltip' title='Period of Maturity for FD, MIS, RD, DDS in years'")
-                ->text("Scheme Points","name='SchemePoints' class='input'");
+                ->text("Scheme Points","name='SchemePoints' class='input'")
+                ->text("Scheme Group","name='SchemeGroup' class='input'");
 //                ->text("Interest % (To Saving Account) for HID", "name='InterestPercentToAnother' class='input tooltip' title='Provide rate of interest for saving account in case of HID Scheme'")
 //                ->checkbox("Is Depriciable", "name='isDepriciable' class='input' value='1'")
 //                ->text("Depriciation % before September", "name='DepriciationPercentBeforeSep' class='input'")

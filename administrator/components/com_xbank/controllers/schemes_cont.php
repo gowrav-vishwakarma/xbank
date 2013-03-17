@@ -135,6 +135,8 @@ class schemes_cont extends CI_Controller {
             $sc->SchemePoints = inp('SchemePoints');
             $sc->CollectorCommissionRate = inp("CollectorCommissionRate");
             $sc->ReducingOrFlatRate = inp("ReducingOrFlatRate");
+            $sc->SchemeGroup=inp('SchemeGroup');
+            if(inp('SchemeGroup')=='') $sc->SchemeGroup=inp('SchemeType');
             $xc = new xConfig("agent");
             if ($xc->getKey("number_of_agent_levels")) {
                 $AgentCommissionString = array();
@@ -297,6 +299,59 @@ class schemes_cont extends CI_Controller {
         }
         else
             re('schemes_cont.dashboard', "You are not authorized to change the scheme status.", "error");
+    }
+
+
+    function deletescheme(){
+        $s=new Scheme(inp('schemeid'));
+        if(!$s->exists()){
+            echo "Scheme Does Not Exists";
+            return;
+        }
+
+        $sc=$s->accounts->where('DefaultAC',0)->count();
+        $sc_activated = $s->accounts->where('ActiveStatus',1)->where('DefaultAC',0)->count();
+        if($sc > 0){
+            echo "This Scheme Has $sc Non Default Accounts out of which $sc_activated are activated, Delete them all to delete this scheme first";
+            return;
+        }
+
+        $this->form->open('deleteScheme','index.php?option=com_xbank&task=schemes_cont.do_deletescheme&format=raw')
+            ->password("Your XAdmin Password to proceed","name='password' class='input required'")
+            ->hidden("","name='scheme_id' value='$s->id'")
+            ->submit("Delete");
+        $data['form']=$this->form->get();
+        $this->load->view("formonly.html",$data);
+        $this->jq->getHeader();
+    }
+
+    function do_deletescheme(){
+        if(inp('password')=="") re('schemes_cont.dashboard',"Please provide your password","error"); 
+        $staff = new Staff();
+        $staff->where('AccessLevel',100)
+            ->where('Password',inp('password'))
+            ->get();
+
+        if(!$staff->exists()){
+            re('schemes_cont.dashboard',"You are not Authenticated","error");
+            return;
+        }
+
+        try {
+            $this->db->trans_begin();
+                $scheme=new Scheme(inp('scheme_id'));
+                $scheme_name = $scheme->Name;
+                $acc= $scheme->accounts->get();
+                $acc->delete_all();
+                $scheme->delete();
+            $this->db->trans_commit();
+            log::write( __FILE__ . " " . __FUNCTION__ . " $scheme_name Deleted From " . $this->input->ip_address(),0);
+            re('schemes_cont.dashboard',"Scheme Removed","info");
+        }catch(Exception $e){
+            $this->db->trans_rollback();
+            re('schemes_cont.dashboard',$e->getMessage(),"error"); 
+            return;
+        }
     }
 
 }

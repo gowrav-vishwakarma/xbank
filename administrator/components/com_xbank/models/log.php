@@ -22,9 +22,10 @@ class Log extends DataMapper{
                     $account=$account;
             }
 		$log=new Log();
-                $log->accounts_id=$account->id;
+        $log->accounts_id=$account->id;
 		$log->Message=$message;
-                $log->branch_id = Branch::getCurrentBranch()->id;
+        $log->branch_id = Branch::getCurrentBranch()->id;
+        $log->staff_id = Staff::getCurrentStaff()->id;
 		$log->save();
 	}
 }

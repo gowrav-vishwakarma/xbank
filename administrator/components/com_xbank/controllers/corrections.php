@@ -7,6 +7,8 @@
 
 class corrections extends CI_Controller {
 	function smReset(){
+
+		$this->db->query('ALTER TABLE `jos_xlog` ADD `staff_id` INT NOT NULL ');
 		$sm=new Account();
 		$sm->where('DefaultAC',0);
 		$sm->where('schemes_id',6);
@@ -14,10 +16,24 @@ class corrections extends CI_Controller {
 		$sm->get();
 
 		$i=1;
-		foreach($sm as $s){
-			$s->AccountNumber = "SM".$i;
-			$s->save();
-			$i++;
+		$tmp=null;
+		try{
+			foreach($sm as $s){
+				// Get previous SM account number used
+				$ts=new Account();
+				$ts->where('AccountNumber','SM'.$i);
+				$ts->where('id >',$s->id);
+				$ts->get();
+				if($ts->exists()){
+					$ts->AccountNumber = $ts->AccountNumber . "_";
+					$ts->save();
+				}
+				$s->AccountNumber = "SM".$i;
+				$s->save();
+				$i++;
+			}
+		}catch(Exception $e){
+			echo $tmp->AccountNumber;
 		}
 	}
 }
