@@ -42,6 +42,6 @@ $query = "UPDATE jos_xaccounts as a JOIN jos_xschemes as s on a.schemes_id=s.id 
 
 //             $this->db->query("UPDATE accounts SET CurrentInterest=0");
 //             $q="UPDATE accounts SET CurrentInterest=0 where branch_id = ".$b->id;
-        $q = "UPDATE accounts as a join schemes as s SET a.CurrentInterest=0 WHERE s.SchemeType='" . ACCOUNT_TYPE_RECURRING . "' and a.ActiveStatus=1 and a.created_at < '" . getNow("Y-m-d") . "' and a.branch_id=" . $b->id;
+        $q = "UPDATE jos_xaccounts as a join jos_xschemes as s SET a.CurrentInterest=0 WHERE s.SchemeType='" . ACCOUNT_TYPE_RECURRING . "' and a.ActiveStatus=1 and a.created_at < '" . getNow("Y-m-d") . "' and a.branch_id=" . $b->id;
         executeQuery($q);
 ?>

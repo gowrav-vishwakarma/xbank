@@ -59,7 +59,7 @@ class xDeveloperToolBars extends JObject {
                     JToolBarHelper :: customX('setdate_cont.setDateTimeForm', 'setdate', 'setdate', 'SetDate', false, false);
                     
             JToolBarHelper::addNew('report_cont.new_reports', 'Loan Reports');
-            JToolBarHelper::addNewX('inventory_cont.dashboard', 'Inventory');
+            JToolBarHelper::addNewX('inventory_cont.dashboard', 'Management');
                     
              if ($u->username != 'admin')
                      JToolBarHelper :: customX('customreport_cont.index', 'config', 'config', 'General Report', false, false);

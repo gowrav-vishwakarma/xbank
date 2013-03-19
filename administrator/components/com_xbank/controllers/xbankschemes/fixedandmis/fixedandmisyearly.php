@@ -32,6 +32,6 @@ $schemes->where("SchemeType","'".ACCOUNT_TYPE_FIXED."'")->get();
             Transaction::doTransaction($debitAccount, $creditAccount, "Yearly Interst posting to Fixed Accounts", TRA_INTEREST_POSTING_IN_FIXED_ACCOUNT, Transaction::getNewVoucherNumber(), date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 day")));
         }
 
-        $q = "UPDATE jos_xaccounts as a join schemes as s SET a.CurrentInterest=0 WHERE s.SchemeType='" . ACCOUNT_TYPE_FIXED . "' and s.InterestToAnotherAccount=0 and s.InterestToAnotherAccountPercent=0 and a.ActiveStatus=1 and a.MaturedStatus=0  and a.created_at < '" . getNow("Y-m-d") . "' and a.branch_id=" . $b->id;
+        $q = "UPDATE jos_xaccounts as a join jos_xschemes as s SET a.CurrentInterest=0 WHERE s.SchemeType='" . ACCOUNT_TYPE_FIXED . "' and s.InterestToAnotherAccount=0 and s.InterestToAnotherAccountPercent=0 and a.ActiveStatus=1 and a.MaturedStatus=0  and a.created_at < '" . getNow("Y-m-d") . "' and a.branch_id=" . $b->id;
         executeQuery($q);
 ?>

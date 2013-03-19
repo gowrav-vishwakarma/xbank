@@ -11,8 +11,10 @@ class inventory_cont extends CI_Controller{
 
 
         function dashboard(){
-            xDeveloperToolBars::getInventoryManagementToolBar();
-            $this->load->view("inventory.html");
+            xDeveloperToolBars::onlyCancel("com_xbank.index", "cancel", "Use Extended System here");
+            $server=            
+            $data['contents']= "<iframe src='http://localhost/xbank/atk' width='100%' height=1000px></iframe>";
+            $this->load->view("inventory.html",$data);
             $this->jq->getHeader();
         }
 

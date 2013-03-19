@@ -47,7 +47,7 @@ if (SET_COMMISSIONS_IN_MONTHLY) {
 //------------CALCULATING COMMISSION FOR DDS----------------
             $DA = $acc->RdAmount; // DA => Monthly DDS Amount
             $x = $ac->amountCr; // x => Amount Submitted in the current month
-            $tA = $ac->CurrentBalanceCr - $x; // tA => Total amount till date given excluding x
+            $tA = $acc->CurrentBalanceCr - $x; // tA => Total amount till date given excluding x
 
             while($x > 0){
                 $y = $DA- ($tA - ((int)($tA / $DA)) * $DA);

@@ -3,7 +3,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-$query = "UPDATE accounts as a JOIN schemes as s on a.schemes_id=s.id  SET a.CurrentInterest=((a.CurrentBalanceCr - a.CurrentBalanceDr) * s.Interest)/1200 WHERE  s.SchemeType='" . ACCOUNT_TYPE_DDS . "' and a.ActiveStatus=1 and a.MaturedStatus=0 and a.created_at < '" . getNow("Y-m-d") . "' and a.branch_id=" . $b->id;
+$query = "UPDATE jos_xaccounts as a JOIN jos_xschemes as s on a.schemes_id=s.id  SET a.CurrentInterest=((a.CurrentBalanceCr - a.CurrentBalanceDr) * s.Interest)/1200 WHERE  s.SchemeType='" . ACCOUNT_TYPE_DDS . "' and a.ActiveStatus=1 and a.MaturedStatus=0 and a.created_at < '" . getNow("Y-m-d") . "' and a.branch_id=" . $b->id;
         executeQuery($query);
 
 
