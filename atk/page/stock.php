@@ -5,9 +5,11 @@ class page_stock extends Page{
 		parent::init();
 
 		$tabs=$this->add('Tabs');
-		$tabs->addtabUrl('stock_category','Category');
-		$tabs->addtabUrl('stock_current','Current Stock');
-		$tabs->addtabUrl('stock_purchase','Purchase');
+		if($this->api->auth->model['AccessLevel']>=80){
+			$tabs->addtabUrl('stock_category','Category');
+			$tabs->addtabUrl('stock_current','Current Stock');
+		}
+		$tabs->addtabUrl('stock_purchase','Add Stock');
 		$tabs->addtabUrl('stock_transfer','Transfer');
 		$tabs->addtabUrl('stock_consume','Consume');
 	}

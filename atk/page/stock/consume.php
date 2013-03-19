@@ -3,6 +3,11 @@ class page_stock_consume extends Page{
 	function init(){
 		parent::init();
 
+		$stock_consume1=$this->add('Model_Stock_Consume');
+		$stock_consume1->addCondition('branch_id',$this->api->auth->model['branch_id']);
+		$stock_consume1->_dsql()->order('date','desc');
+
+
 		$form=$this->add('Form');
 		$form->addField('dropdown','item')->setEmptyText('Select Any item')->validateNotNull()->setModel('Items');
 		// $form->addField('dropdown','branch')->setEmptyText('Select Any item')->validateNotNull()->setModel('Branch');
@@ -10,6 +15,15 @@ class page_stock_consume extends Page{
 		$form->addField('DatePicker','date')->validateNotNull()->set(date('Y-m-d'));
 		$form->addField('text','Remarks')->validateNotNull();
 		$form->addSubmit('Consume');
+
+		$crud=$this->add('CRUD',array('allow_add'=>false,'allow_edit'=>false));
+		$crud->add('misc/Export');
+		if(!$crud->isEditing()){
+		$crud->grid->addQuickSearch(array('item','remarks'));
+		$crud->grid->addPaginator(50);
+		}
+		$crud->setModel($stock_consume1);
+
 
 		if($form->isSubmitted()){
 
@@ -23,7 +37,7 @@ class page_stock_consume extends Page{
 				$stock_consume['Remarks']=$form->get('Remarks');
 				$stock_consume->save();
 
-				$form->js(null,$form->js()->reload())->univ()->successMessage("Stock Consume Successesfully")->execute();
+				$form->js(null,array($form->js()->reload(),$crud->grid->js()->reload()))->univ()->successMessage("Stock Consume Successesfully")->execute();
 		}
 	}
 }
