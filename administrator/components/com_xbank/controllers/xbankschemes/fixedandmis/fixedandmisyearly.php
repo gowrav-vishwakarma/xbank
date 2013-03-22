@@ -4,7 +4,13 @@
  * and open the template in the editor.
  */
 
+$query = "update jos_xaccounts as a join jos_xschemes as s on a.schemes_id = s.id set a.CurrentInterest = round(a.CurrentBalanceCr * s.Interest * DATEDIFF('".getNow("Y-m-d")."',IF(a.created_at > DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 YEAR),a.created_at,DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 YEAR)))/36500 )
+where s.SchemeType = '".ACCOUNT_TYPE_FIXED."' and s.InterestToAnotherAccount = 0 and a.ActiveStatus = 1 and a.MaturedStatus = 0 and a.DefaultAC = 0 and a.branch_id = $b->id ";
+executeQuery($query);
+
+
 // REVERSE ENTRY OF ALL PROVISIONS DONE MONTHLY
+
 $schemes = new Scheme();
 $schemes->where("SchemeType","'".ACCOUNT_TYPE_FIXED."'")->get();
         foreach ($schemes as $sc) {

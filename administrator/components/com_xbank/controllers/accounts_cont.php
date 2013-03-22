@@ -198,6 +198,7 @@ class accounts_cont extends CI_Controller {
             $Acc->RdAmount = inp("rdamount");
             $Acc->DefaultAC = '0';
             $Acc->LastCurrentInterestUpdatedAt = getNow();
+            $Acc->created_at = getNow();
             if(inp('AccountDisplayName'))
                 $Acc->AccountDisplayName = inp('AccountDisplayName');
             $Acc->save();

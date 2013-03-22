@@ -12,7 +12,7 @@ $q="UPDATE jos_xaccounts a
         SET a.LastCurrentInterestUpdatedAt = DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -6 MONTH),
         a.CurrentInterest = 0
         where t.branch_id=".Branch::getCurrentBranch()->id." and
-        t.created_at between DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -6 MONTH) and '".  getNow("Y-m-d")."' and
+        /* t.created_at between DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -6 MONTH) and '".  getNow("Y-m-d")."' and */
         s.SchemeType ='".ACCOUNT_TYPE_BANK."' and
         a.ActiveStatus = 1";
 executeQuery($q);
@@ -24,7 +24,7 @@ $accounts = $CI->db->query("select t.*, a.id as id, s.Interest from jos_xtransac
                             where t.branch_id =".Branch::getCurrentBranch()->id." and
                                 t.created_at between DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -6 MONTH) and '".  getNow("Y-m-d")."' and
                                 s.SchemeType ='".ACCOUNT_TYPE_BANK."' and
-                                a.ActiveStatus = 1 and t.accounts_id in (82,10766)
+                                a.ActiveStatus = 1 /*and t.accounts_id in (82,10766) */
                                 order by t.created_at")->result();
 
 //echo "<table>";
