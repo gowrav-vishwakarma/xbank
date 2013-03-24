@@ -12,10 +12,10 @@ executeQuery($query);
 // REVERSE ENTRY OF ALL PROVISIONS DONE MONTHLY
 
 $schemes = new Scheme();
-$schemes->where("SchemeType","'".ACCOUNT_TYPE_FIXED."'")->get();
+$schemes->where("SchemeType",ACCOUNT_TYPE_FIXED)->get();
         foreach ($schemes as $sc) {
 
-            $accounts = $CI->db->query("select a.* from jos_xaccounts a where a.schemes_id = $sc->id AND a.CurrentInterest > 0 and a.ActiveStatus =1 and a.MaturedStatus=0 and a.created_at < '" . getNow("Y-m-d") . "' and a.branch_id = " . $b->id)->result();
+            $accounts = $CI->db->query("select a.* from jos_xaccounts a where a.schemes_id = $sc->id AND a.CurrentInterest > 0 and a.ActiveStatus =1 /*and a.MaturedStatus=0*/ and a.created_at < '" . getNow("Y-m-d") . "' and a.branch_id = " . $b->id);
             if ($accounts->num_rows() == 0)
                 continue;
 
@@ -31,7 +31,7 @@ $schemes->where("SchemeType","'".ACCOUNT_TYPE_FIXED."'")->get();
                 $b->Code . SP . INTEREST_PROVISION_ON . $schemeName => round($totals)
             );
 
-            foreach ($accounts as $acc) {
+            foreach ($accounts->result() as $acc) {
                 $creditAccount += array($acc->AccountNumber => $acc->CurrentInterest);
             }
 

@@ -3,21 +3,20 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-echo "Running recurring yearly";
 
 $query = "UPDATE jos_xaccounts as a JOIN jos_xschemes as s on a.schemes_id=s.id join (SELECT accounts_id, SUM(Paid*Amount) AS toPost FROM jos_xpremiums WHERE Paid <> 0 AND Skipped =0 And DueDate < '" . getNow("Y-m-d") . "' GROUP BY accounts_id) as p on p.accounts_id=a.id SET a.CurrentInterest=(p.toPost * s.Interest)/1200 WHERE (s.SchemeType='" . ACCOUNT_TYPE_RECURRING . "') and a.ActiveStatus=1 and a.MaturedStatus=0 and a.created_at < '" . getNow("Y-m-d") . "' and a.branch_id=" . $b->id;
         executeQuery($query);
 
 
         $schemes = new Scheme();
-        $schemes->where("SchemeType","'" . ACCOUNT_TYPE_RECURRING . "'")->get();
+        $schemes->where("SchemeType",ACCOUNT_TYPE_RECURRING)->get();
 
         foreach ($schemes as $sc) {
             
-            $accounts = $CI->db->query("select a.* from jos_xaccounts a where a.schemes_id = $sc->id AND a.CurrentInterest > 0 and a.ActiveStatus=1 and a.MaturedStatus=0 and a.created_at < '" . getNow("Y-m-d") . "' and a.branch_id=" . $b->id)->result();
+            $accounts = $CI->db->query("select a.* from jos_xaccounts a where a.schemes_id = $sc->id AND a.CurrentInterest > 0 and a.ActiveStatus=1 and a.MaturedStatus=0 and a.created_at < '" . getNow("Y-m-d") . "' and a.branch_id=" . $b->id);
             if ($accounts->num_rows() == 0)
                 continue;
-
+            // echo "working recurring for " . $sc->Name. "<br/>";
 
             $totals = 0;
             $totals = $CI->db->query("select sum(a.CurrentInterest) as CurrentInterest from jos_xaccounts a where a.schemes_id = " . $sc->id . " and a.CurrentInterest > 0 and a.ActiveStatus = 1 and a.MaturedStatus=0 and a.created_at < '" . getNow("Y-m-d") . "' and a.branch_id = " . $b->id)->row()->CurrentInterest;
@@ -35,7 +34,7 @@ $query = "UPDATE jos_xaccounts as a JOIN jos_xschemes as s on a.schemes_id=s.id 
                 $b->Code . SP . INTEREST_PAID_ON . $schemeName => $totals
             );
 
-            foreach ($accounts as $acc) {
+            foreach ($accounts->result() as $acc) {
                 $creditAccount += array($acc->AccountNumber => $acc->CurrentInterest);
             }
 

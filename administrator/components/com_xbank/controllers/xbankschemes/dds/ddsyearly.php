@@ -19,7 +19,7 @@ $query = "UPDATE jos_xaccounts as a JOIN jos_xschemes as s on a.schemes_id=s.id 
 //        $schemes = $q->execute();
         $CI = & get_instance();
         $schemes = new Scheme();
-        $schemes->where("SchemeType","'".ACCOUNT_TYPE_DDS."'")->get();
+        $schemes->where("SchemeType",ACCOUNT_TYPE_DDS)->get();
 
         foreach ($schemes as $sc) {
 
@@ -33,7 +33,7 @@ $query = "UPDATE jos_xaccounts as a JOIN jos_xschemes as s on a.schemes_id=s.id 
 //                            ->where("a.schemes_id = $sc->id AND a.CurrentInterest > 0 and a.ActiveStatus=1 and a.MaturedStatus=0 and a.created_at < '" . getNow("Y-m-d") . "' and a.branch_id=" . $b->id);
 //            $accounts = $query->execute();
 
-            $accounts = $CI->db->query("select a.AccountNumber, a.CurrentInterest from jos_xaccounts a where a.schemes_id = $sc->id AND a.CurrentInterest > 0 and a.ActiveStatus=1 and a.MaturedStatus=0 and a.created_at < '" . getNow("Y-m-d") . "' and a.branch_id=" . $b->id)->result();
+            $accounts = $CI->db->query("select a.AccountNumber, a.CurrentInterest from jos_xaccounts a where a.schemes_id = $sc->id AND a.CurrentInterest > 0 and a.ActiveStatus=1 and a.MaturedStatus=0 and a.created_at < '" . getNow("Y-m-d") . "' and a.branch_id=" . $b->id);
 
             if ($accounts->num_rows() == 0)
                 continue;
@@ -67,7 +67,7 @@ $query = "UPDATE jos_xaccounts as a JOIN jos_xschemes as s on a.schemes_id=s.id 
                 $b->Code . SP . INTEREST_PAID_ON . $schemeName => $totals
             );
 
-            foreach ($accounts as $acc) {
+            foreach ($accounts->result() as $acc) {
                 $creditAccount += array($acc->AccountNumber => $acc->CurrentInterest);
             }
 
