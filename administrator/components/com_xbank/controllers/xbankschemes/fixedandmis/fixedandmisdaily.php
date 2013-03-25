@@ -65,8 +65,8 @@ foreach ($schemes as $sc) {
 
 
 
-    $q = "UPDATE jos_xaccounts as a join jos_xschemes as s SET a.CurrentInterest=0,a.MaturedStatus=1, a.affectsBalanceSheet=1 WHERE s.id=$sc->id and s.InterestToAnotherAccount=0 and s.InterestToAnotherAccountPercent=0 and a.ActiveStatus=1 and a.MaturedStatus=0 and DATE_ADD(DATE(a.created_at), INTERVAL $sc->MaturityPeriod MONTH) ='" . $i . "' and a.branch_id=" . $b->id;
-    executeQuery($q);
+    // $q = "UPDATE jos_xaccounts as a join jos_xschemes as s SET a.CurrentInterest=0,a.MaturedStatus=1, a.affectsBalanceSheet=1 WHERE s.id=$sc->id and s.InterestToAnotherAccount=0 and s.InterestToAnotherAccountPercent=0 and a.ActiveStatus=1 and a.MaturedStatus=0 and DATE_ADD(DATE(a.created_at), INTERVAL $sc->MaturityPeriod MONTH) ='" . $i . "' and a.branch_id=" . $b->id;
+    // executeQuery($q);
 }
 
 

@@ -28,7 +28,7 @@
             if ($accounts->num_rows() == 0)
                 continue;
             foreach ($accounts->result() as $a) {
-                if ($a->created_at > date("Y-m-d", strtotime(date("Y-m-d", strtotime((date("Y", strtotime(getNow())) - 1) . "-09-30"))))) {
+                if (strtotime($a->created_at) > strtotime((getNow('Y') - 1) . "-09-30")) {
                     $depr = $sc->DepriciationPercentAfterSep;
                 } else {
                     $depr = $sc->DepriciationPercentBeforeSep;
