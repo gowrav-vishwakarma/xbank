@@ -4,6 +4,19 @@
  * and open the template in the editor.
  */
 
+$do_paid_fill = "
+                UPDATE 
+                    jos_xpremiums p join (SELECT accounts_id, MAX(Paid) max_paid FROM jos_xpremiums p GROUP BY accounts_id) tmp on p.accounts_id = tmp.accounts_id
+                SET
+                    p.Paid = tmp.max_paid
+                WHERE
+                    p.DueDate < '".getNow('Y-m-d')."'
+                    AND p.Paid=0
+                    AND p.PaidOn is null
+                ";
+echo $do_paid_fill;
+$CI->db->query($do_paid_fill);
+
 $query = "UPDATE jos_xaccounts as a JOIN jos_xschemes as s on a.schemes_id=s.id join (SELECT accounts_id, SUM(Paid*Amount) AS toPost FROM jos_xpremiums WHERE Paid <> 0 AND Skipped =0 And DueDate < '" . getNow("Y-m-d") . "' GROUP BY accounts_id) as p on p.accounts_id=a.id SET a.CurrentInterest=(p.toPost * s.Interest)/1200 WHERE (s.SchemeType='" . ACCOUNT_TYPE_RECURRING . "') and a.ActiveStatus=1 and a.MaturedStatus=0 and a.created_at < '" . getNow("Y-m-d") . "' and a.branch_id=" . $b->id;
         executeQuery($query);
 
