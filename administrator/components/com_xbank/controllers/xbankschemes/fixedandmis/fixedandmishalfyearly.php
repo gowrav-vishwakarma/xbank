@@ -43,11 +43,13 @@
 //                     $query="update accounts as a join accounts as b on a.InterestToAccount=b.id set a.CurrentBalanceCr= a.CurrentInterest + a.CurrentBalanceCr , a.CurrentBalanceDr = a.CurrentBalanceDr + ($sc->InterestToAnotherAccountPercent * a.RdAmount)/100, a.LastCurrentInterestUpdatedAt = '".getNow("Y-m-d")."', b.CurrentBalanceCr = b.CurrentBalanceCr + ($sc->InterestToAnotherAccountPercent * a.RdAmount)/100 where a.id=$acc->id and b.id=$interestToAcc->id and a.branch_id = ".$b->id;
 //                     executeQuery($query);
 //                        $days=my_date_diff(getNow("Y-m-d"),$acc->LastCurrentInterestUpdatedAt);
-                    $interest = ($sc->InterestToAnotherAccountPercent * $acc->RdAmount) / 100;
-                    $creditAccount = array($acc->AccountNumber => $acc->CurrentInterest);
+                    
+                    $interest_amount = round(($acc->CurrentBalanceCr - $acc->CurrentBalanceDr) * $sc->Interest / 1200 * 6,0);
+                    // echo "working under " . $sc->Name . " scheme's ". $acc->AccountNumber . " account with its balance " . $acc->CurrentBalanceCr.  " and giving interest @ " . $sc->Interest . " = ". $interest_amount . " <br/>";
+                    $creditAccount = array($acc->AccountNumber => $interest_amount);
 
                     $debitAccount = array(
-                        $b->Code . SP . INTEREST_PAID_ON . $sc->Name => $acc->CurrentInterest
+                        $b->Code . SP . INTEREST_PAID_ON . $sc->Name => $interest_amount
                     );
 
                     $voucherNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $acc->id);
@@ -55,6 +57,8 @@
                     Transaction::doTransaction($debitAccount, $creditAccount, "HID Interest posting in $acc->AccountNumber", TRA_INTEREST_POSTING_IN_HID_ACCOUNT, $voucherNo, date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 day")));
 
 
+                    
+                    $interest = ($sc->InterestToAnotherAccountPercent * $acc->RdAmount) / 100;
                     $creditAccount = array($interestToAcc->AccountNumber => $interest);
 
                     $debitAccount = array(
@@ -62,7 +66,7 @@
                     );
 
                     $voucherNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $acc->id);
-                    Transaction::doTransaction($debitAccount, $creditAccount, "HID Interst posting in $acc->AccountNumber", TRA_INTEREST_POSTING_IN_HID_ACCOUNT, $voucherNo, date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 day")));
+                    Transaction::doTransaction($debitAccount, $creditAccount, "HID Amount Transfer in $acc->AccountNumber", TRA_INTEREST_POSTING_IN_HID_ACCOUNT, $voucherNo, date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 day")));
 
 
 
