@@ -44,11 +44,11 @@ $query = "UPDATE jos_xaccounts as a JOIN jos_xschemes as s on a.schemes_id=s.id 
             $creditAccount = array();
 
             $debitAccount = array(
-                $b->Code . SP . INTEREST_PAID_ON . $schemeName => $totals
+                $b->Code . SP . INTEREST_PAID_ON . $schemeName => round($totals,2)
             );
 
             foreach ($accounts->result() as $acc) {
-                $creditAccount += array($acc->AccountNumber => $acc->CurrentInterest);
+                $creditAccount += array($acc->AccountNumber => round($acc->CurrentInterest,2));
             }
 
             Transaction::doTransaction($debitAccount, $creditAccount, "Interst posting in Recurring Account", TRA_INTEREST_POSTING_IN_RECURRING, Transaction::getNewVoucherNumber(), date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 day")));
