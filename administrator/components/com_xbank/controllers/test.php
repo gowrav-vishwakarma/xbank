@@ -470,196 +470,48 @@ class test extends CI_Controller {
         }
     }
 
-<<<<<<< HEAD
-    function BalanceCorrections(){
-        // TODO- add SchemeGroup in schemes table
-        // TODO- add positiveside in balancesheet head
-=======
-    function BalanceCorrections() {
-// TODO- add SchemeGroup in schemes table
-// TODO- add positiveside in balancesheet head
->>>>>>> 19e703c1349f8c9337f90e8d23e5c781784752c9
-        $this->db->query("ALTER TABLE `jos_xbalance_sheet` ADD `positive_side` VARCHAR( 2 ) NOT NULL ");
-        $this->db->query("ALTER TABLE `jos_xbalance_sheet` ADD `is_pandl` TINYINT NOT NULL , ADD `show_sub` VARCHAR( 20 ) NOT NULL ");
-        $this->db->query("ALTER TABLE `jos_xbalance_sheet` ADD `subtract_from` VARCHAR( 2 ) NOT NULL ");
-        $this->db->query("ALTER TABLE `jos_xschemes` ADD COLUMN `SchemeGroup`  varchar(45) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL AFTER `SchemeType`;");
-        $this->db->query("UPDATE jos_xschemes SET SchemeGroup=SchemeType");
-        $this->db->query("UPDATE jos_xschemes SET SchemeGroup=Name WHERE SchemeGroup='Default'");
-<<<<<<< HEAD
-
-        $this->db->query("UPDATE jos_xaccounts SET AccountNumber = REPLACE(AccountNumber,' ','')");
-        $this->ad->query('DELETE FROM jos_xpremiums WHERE accounts_id in (0,5461,5968)');
-
+    function maturedRDs(){
+        $q="SELECT a.AccountNumber, a.created_at, s.MaturityPeriod, a.MaturedStatus FROM jos_xaccounts a JOIN jos_xschemes s on a.schemes_id=s.id WHERE
+                DATE_ADD(DATE(a.created_at), INTERVAL s.MaturityPeriod MONTH) >= '2013-04-01' and a.MaturedStatus =1 and a.branch_id=2";
+        
     }
 
-=======
-    }
+    function premiumCorrection(){
+        $a=new Account();
+        $a->where_related('scheme','SchemeType',ACCOUNT_TYPE_RECURRING);
+        $a->get();
+        echo "Working on ". $a->count() . " accounts <br/>";
+        foreach($a as $acc){
+            $account_premiums=$acc->premiums
+            ->where('DueDate <= "2013-04-01"')
+            ->order_by('id')
+            ->get();
 
-    function penaltyCorrections() {
-        set_time_limit(5000);
-        $date = array("2012-04-30 00:00:00", "2012-05-31 00:00:00", "2012-06-30 00:00:00", "2012-07-31 00:00:00", "2012-08-31 00:00:00", "2012-09-30 00:00:00", "2012-10-31 00:00:00", "2012-11-30 00:00:00");
-        try {
-            $this->db->trans_begin();
-            foreach ($date as $d) {
-                $t = new Transaction();
-                $t->where("created_at", "$d");
-                $t->where("Narration like ", "Penalty deposited on Loan Account %");
-                $t->where("branch_id", Branch::getCurrentBranch()->id)->get();
-                foreach ($t as $tr) {
-                    $acc = new Account($tr->accounts_id);
-                    $acc->CurrentBalanceCr -= $tr->amountCr;
-                    $acc->CurrentBalanceDr -= $tr->amountDr;
-                    $acc->save();
-                    $this->db->query("delete from jos_xtransactions where id = $tr->id");
+            // echo "working for ". $acc->AccountNumber . " and got " . $account_premiums->count(). " premiums <br/>";
+
+            $i=1;
+            $last_i=1;
+            $paid=1;
+            foreach($account_premiums as $p){
+                // echo "working on premium id " . $p->id. "<br/>";
+                if(strtotime(date("Y-m-01",strtotime($p->PaidOn))) > strtotime(date('Y-m-01',strtotime($p->DueDate)))){
+                    $paid = $last_i;
+                    // echo "For " . $p->DueDate . " setting laset <br/>";
                 }
-            }
-            $this->db->trans_commit();
-            echo "transactions deleted";
-        } catch (Exception $e) {
-            $this->db->trans_rollback();
-            echo 'Code : ';
-            print_r($e->errorMessage());
-        }
-
-//--------------------------------------------------------------------
-
-        $b = Branch::getCurrentBranch();
-        $date = array("2012-05-01 00:00:00", "2012-06-01 00:00:00", "2012-07-01 00:00:00", "2012-08-01 00:00:00", "2012-09-01 00:00:00", "2012-10-01 00:00:00", "2012-11-01 00:00:00", "2012-12-01 00:00:00");
-        try {
-            $this->db->trans_begin();
-            foreach ($date as $d) {
-
-                $q = "update `jos_xaccounts` as `a` join `jos_xpremiums` as `p` on `p`.`accounts_id`=`a`.`id` join `jos_xschemes` as `s` on `a`.`schemes_id`=`s`.`id` set `a`.`CurrentInterest` = 0 where `s`.`SchemeType`= '" . ACCOUNT_TYPE_LOAN . "'  and `a`.`created_at` < '" . date("Y-m-d", strtotime($d)) . "' and `a`.`branch_id`=" . $b->id;
-                executeQuery($q);
-
-//PENALTY TRANSFERING
-
-                $loanPenalty = 10;
-                $thismonth = date("m", strtotime(date("Y-m-d", strtotime(date("Y-m-d", strtotime($d)))) . " -1 MONTH")); //getNow("m");
-                $lastmonth = date("m", strtotime(date("Y-m-d", strtotime(date("Y-m-d", strtotime($d)))) . " -2 MONTH"));
-                $closingdate = date("Y-m-d", strtotime($d));
-                $lastmonthlastdate = date("Y-m-t", strtotime(date("Y-m-d", strtotime(date("Y-m-d", strtotime($d)))) . " -2 MONTH"));
-                $firstdateofthismonth = date("Y-m-01", strtotime(date("Y-m-d", strtotime(date("Y-m-d", strtotime($d)))) . " -1 MONTH")); //getNow("Y-m-01");
-                $penaltyQ = "update jos_xaccounts as a join (
-                    select accounts_id, IF(SUM(Penalty) > 300 , 300 , SUM(Penalty)) as Penalty from (
-
-
-                    /* PREMIUM DUE IN THIS MONTH - NOT PAID */
-                    select
-                    'A' as nm,p.id,(DATEDIFF('$closingdate',p.DueDate)) * 10 as Penalty, p.accounts_id,MONTH(p.DueDate), $thismonth, p.PaidOn, p.DueDate
-                    from jos_xpremiums p
-                    where
-                    MONTH(p.DueDate) = $thismonth AND
-                    p.PaidOn is NULL and
-
-                    DATEDIFF('$closingdate',p.DueDate) <= 31 AND
-                    DATEDIFF('$closingdate',p.DueDate) >=0
-                    /* AND p.accounts_id = $this->id */
-
-                    UNION
-
-
-
-                    /* PREMIUM DUE IN THIS MONTH - LATE PAID IN THIS MONTH */
-                    select
-                    'B' as nm,p.id,IF((DATEDIFF(p.PaidOn,p.DueDate)) * 10 > 300,300,(DATEDIFF(p.PaidOn,p.DueDate)) * 10) as Penalty, p.accounts_id,MONTH(p.DueDate), $thismonth, p.PaidOn, p.DueDate
-                    from jos_xpremiums p
-                    where
-                    MONTH(p.DueDate) = $thismonth AND
-                    p.PaidOn > p.DueDate AND
-                    DATEDIFF('$closingdate',p.DueDate) <= 31 AND
-                    DATEDIFF('$closingdate',p.DueDate) >=0
-                    /* AND p.accounts_id = $this->id */
-
-                    UNION
-
-                    /* PREMIUM DUE IN LAST MONTH - STILL NOT PAID */
-                    select
-                    'C' as nm,p.id,if(DATEDIFF('$closingdate',p.Duedate)>=30,300,(DATEDIFF('$closingdate',p.DueDate)+1)*10) as Penalty, p.accounts_id,MONTH(p.DueDate), $thismonth, p.PaidOn, p.DueDate
-                    from jos_xpremiums p
-                    where
-                    MONTH(p.DueDate) = $lastmonth AND
-                    p.PaidOn is NULL AND
-                    DATEDIFF('$closingdate',p.DueDate) <= 62 AND
-                    DATEDIFF('$closingdate',p.DueDate) >=0
-                    /* AND p.accounts_id = $this->id */
-
-                    UNION
-
-                    /* PREMIUM DUE IN LAST MONTH - PAID IN THIS(NEXT) MONTH */
-                    select
-                    'D' as nm,p.id, IF(DAY(p.PaidOn) >= DAY(p.DueDate), (300 - (DATEDIFF('$lastmonthlastdate',p.DueDate) * 10)), (DATEDIFF(p.PaidOn,'$firstdateofthismonth')) * 10) as Penalty, p.accounts_id,MONTH(p.DueDate), $thismonth, p.PaidOn, p.DueDate
-                    from jos_xpremiums p
-                    where
-                    MONTH(p.DueDate) = $lastmonth AND
-                    MONTH(p.PaidOn) = $thismonth AND
-                    DATEDIFF('$closingdate',p.DueDate) <= 62 AND
-                    DATEDIFF('$closingdate',p.DueDate) >=0
-                    /* AND p.accounts_id = $this->id */
-                    )
-                    as t
-                    GROUP  BY accounts_id)
-
-
-                     as temp on a.id = temp.accounts_id
-                     join `jos_xschemes` as `s` on `a`.`schemes_id`=`s`.`id`
-                     set a.CurrentInterest = temp.Penalty
-                     where `s`.`SchemeType`= 'Loan' and
-                    `a`.`ActiveStatus` = 1 and
-                    `a`.`branch_id` =" . $b->id . "
-";
-
-                executeQuery($penaltyQ);
-
-
-
-//*********************************************************************
-
-                $schemes = new Scheme();
-                $schemes->where("SchemeType", ACCOUNT_TYPE_LOAN)->get();
-
-                $penaltyTotal = 0;
-                $creditAccounts = array();
-                $debitAccounts = array();
-
-//calculating penalty amount for each scheme
-                foreach ($schemes as $sc) {
-                    $CI = & get_instance();
-                    $penaltyTotal = $CI->db->query("select sum(a.CurrentInterest) as penalty from jos_xaccounts a where a.branch_id = " . $b->id . " and a.schemes_id= '" . $sc->id . "' and a.ActiveStatus=1 and a.created_at < '" . date("Y-m-d", strtotime($d)) . "' ")->row()->penalty;
-
-                    $creditAccounts = array($b->Code . SP . PENALTY_DUE_TO_LATE_PAYMENT_ON . $sc->Name => $penaltyTotal);
-
-                    $accounts = new Account();
-                    $accounts->where("schemes_id", $sc->id)->where("branch_id", $b->id)->where("ActiveStatus", 1)->where("created_at < ", date("Y-m-d", strtotime($d)))->where("CurrentInterest > ", 0)->get();
-                    if ($accounts->result_count() == 0)
-                        continue;
-                    $debitAccounts = array();
-                    foreach ($accounts as $ac) {
-                        $debitAccounts += array($ac->AccountNumber => $ac->{FIELD_TEMP_PENALTY});
-                    }
-                    $firstDayOfLastMonth = date("Y-m-d", strtotime(date("Y-m-d", strtotime(date("Y-m-d", strtotime($d)))) . " -1 MONTH"));
-                    Transaction::doTransaction($debitAccounts, $creditAccounts, "Penalty deposited on Loan Account for " . date("F", strtotime($firstDayOfLastMonth)), TRA_PENALTY_ACCOUNT_AMOUNT_DEPOSIT, Transaction::getNewVoucherNumber(), date("Y-m-d", strtotime(date("Y-m-d", strtotime(date("Y-m-d", strtotime($d)))) . " -1 day")));
-                    $penaltyTotal = 0;
+                elseif($p->PaidOn == null){
+                    $i++;
+                    $last_i = $i;
+                    $paid=$i;
                 }
-
-
-                $q = "update `jos_xaccounts` as `a` join `jos_xpremiums` as `p` on `p`.`accounts_id`=`a`.`id` join `jos_xschemes` as `s` on `a`.`schemes_id`=`s`.`id` set `a`.`CurrentInterest` = 0 where `s`.`SchemeType`= '" . ACCOUNT_TYPE_LOAN . "' and `a`.`ActiveStatus`=1 and `a`.`created_at` < '" . date("Y-m-d", strtotime($d)) . "' and `a`.`branch_id`=" . $b->id;
-                executeQuery($q);
+                else{
+                    $paid=$i;
+                    $last_i = $i;
+                    $i++;
+                }
+                $p->Paid=$paid;
+                $p->save();
+                $i++;
             }
-            $this->db->trans_commit();
-            echo "new transactions done";
-        } catch (Exception $e) {
-            $this->db->trans_rollback();
-            echo 'Code : ';
-            print_r($e->errorMessage());
         }
-
-//-----------------------------------------------------------------------
     }
-
-    
->>>>>>> 19e703c1349f8c9337f90e8d23e5c781784752c9
-
 }
-
-?>
