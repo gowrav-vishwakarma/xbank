@@ -28,11 +28,11 @@ $schemes->where("SchemeType",ACCOUNT_TYPE_FIXED)->get();
             $creditAccount = array();
 
             $debitAccount = array(
-                $b->Code . SP . INTEREST_PROVISION_ON . $schemeName => round($totals)
+                $b->Code . SP . INTEREST_PROVISION_ON . $schemeName => round($totals,COMMISSION_ROUND_TO)
             );
 
             foreach ($accounts->result() as $acc) {
-                $creditAccount += array($acc->AccountNumber => $acc->CurrentInterest);
+                $creditAccount += array($acc->AccountNumber => round($acc->CurrentInterest,COMMISSION_ROUND_TO));
             }
 
             Transaction::doTransaction($debitAccount, $creditAccount, "Yearly Interst posting to Fixed Accounts", TRA_INTEREST_POSTING_IN_FIXED_ACCOUNT, Transaction::getNewVoucherNumber(), date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 day")));

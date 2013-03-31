@@ -41,24 +41,24 @@ foreach ($schemes as $sc) {
     $schemeName = $sc->Name;
 
     $creditAccount = array(
-        $b->Code . SP . INTEREST_PROVISION_ON . $schemeName => $totals
+        $b->Code . SP . INTEREST_PROVISION_ON . $schemeName => round($totals,COMMISSION_ROUND_TO)
     );
 
     $debitAccount = array(
-        $b->Code . SP . INTEREST_PAID_ON . $schemeName => $totals
+        $b->Code . SP . INTEREST_PAID_ON . $schemeName => round($totals,COMMISSION_ROUND_TO)
     );
 
     Transaction::doTransaction($debitAccount, $creditAccount, "FD monthly Interest Deposited in $schemeName", TRA_INTEREST_POSTING_IN_FIXED_ACCOUNT, Transaction::getNewVoucherNumber(), date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " +0 day")));
 
     // INTEREST TRANSFER
     $debitAccount2 = array(
-        $b->Code . SP . INTEREST_PROVISION_ON . $schemeName => $totals
+        $b->Code . SP . INTEREST_PROVISION_ON . $schemeName => round($totals,COMMISSION_ROUND_TO)
     );
 	
 	$creditAccount2 = array();
     // INTEREST TRANSFER IN FIXED ACCOUNTS
     foreach ($accounts->result() as $acc) {
-        $creditAccount2 += array($acc->AccountNumber => $acc->CurrentInterest);
+        $creditAccount2 += array($acc->AccountNumber => round($acc->CurrentInterest,COMMISSION_ROUND_TO));
     }
 
     Transaction::doTransaction($debitAccount2, $creditAccount2, "Maturity Interest posting to Fixed Accounts", TRA_INTEREST_POSTING_IN_FIXED_ACCOUNT, Transaction::getNewVoucherNumber(), date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " +0 day")));
@@ -106,18 +106,18 @@ foreach ($schemes as $sc) {
         if ($interestToAcc->result_count()) {
             $days = my_date_diff($i, $acc->LastCurrentInterestUpdatedAt);
             $interest = round(($acc->CurrentBalanceCr * $days['days_total'] * $sc->Interest / 36500),2);
-            $creditAccount = array($acc->AccountNumber => $interest);
+            $creditAccount = array($acc->AccountNumber => round($interest,COMMISSION_ROUND_TO));
 
             $debitAccount = array(
-                $b->Code . SP . INTEREST_PAID_ON . $schemeName => $interest
+                $b->Code . SP . INTEREST_PAID_ON . $schemeName => round($interest,COMMISSION_ROUND_TO)
             );
             Transaction::doTransaction($debitAccount, $creditAccount, "Interst posting in $acc->AccountNumber", TRA_INTEREST_POSTING_IN_MIS_ACCOUNT, Transaction::getNewVoucherNumber(), date("Y-m-d", strtotime(date("Y-m-d", strtotime($i)) . " +0 day")));
 
 
-            $creditAccount = array($interestToAcc->AccountNumber => $interest);
+            $creditAccount = array($interestToAcc->AccountNumber => round($interest,COMMISSION_ROUND_TO));
 
             $debitAccount = array(
-                $acc->AccountNumber => $interest
+                $acc->AccountNumber => round($interest,COMMISSION_ROUND_TO)
             );
             Transaction::doTransaction($debitAccount, $creditAccount, "Interst posting in $acc->AccountNumber", TRA_INTEREST_POSTING_IN_MIS_ACCOUNT, Transaction::getNewVoucherNumber(), date("Y-m-d", strtotime(date("Y-m-d", strtotime($i)) . " +0 day")));
 
@@ -171,19 +171,19 @@ $schemes->where("InterestToAnotherAccountPercent <>", 0)->get();
                     executeQuery($query);
 
 
-                    $interest = round((($sc->InterestToAnotherAccountPercent * $acc->RdAmount) / 100),2);
-                    $creditAccount = array($acc->AccountNumber => $acc->CurrentInterest);
+                    $interest = round((($sc->InterestToAnotherAccountPercent * $acc->RdAmount) / 100),COMMISSION_ROUND_TO);
+                    $creditAccount = array($acc->AccountNumber => round($acc->CurrentInterest,ROUND_TO));
 
                     $debitAccount = array(
-                        $b->Code . SP . INTEREST_PAID_ON . $schemeName => $acc->CurrentInterest
+                        $b->Code . SP . INTEREST_PAID_ON . $schemeName => round($acc->CurrentInterest,COMMISSION_ROUND_TO)
                     );
                     Transaction::doTransaction($debitAccount, $creditAccount, "Interst posting in $acc->AccountNumber", TRA_INTEREST_POSTING_IN_HID_ACCOUNT, Transaction::getNewVoucherNumber(), date("Y-m-d", strtotime(date("Y-m-d", strtotime($i)) . " +0 day")));
 
 
-                    $creditAccount = array($interestToAcc->AccountNumber => $interest);
+                    $creditAccount = array($interestToAcc->AccountNumber => round($interest,COMMISSION_ROUND_TO));
 
                     $debitAccount = array(
-                        $acc->AccountNumber => $interest
+                        $acc->AccountNumber => round($interest,COMMISSION_ROUND_TO)
                     );
                     Transaction::doTransaction($debitAccount, $creditAccount, "Interst posting in $acc->AccountNumber", TRA_INTEREST_POSTING_IN_HID_ACCOUNT, Transaction::getNewVoucherNumber(), date("Y-m-d", strtotime(date("Y-m-d", strtotime($i)) . " +0 day")));
 

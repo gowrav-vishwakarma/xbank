@@ -1,4 +1,5 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
 /* 
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -13,9 +14,11 @@
 $CI = & get_instance();
 $schemes = new Scheme();
 $schemes->where("SchemeType",ACCOUNT_TYPE_DDS)->get();
+// echo $schemes->check_last_query();
 if($schemes->result_count()>0){
         foreach ($schemes as $sc) {
             $query = "UPDATE jos_xaccounts as a JOIN jos_xschemes as s on a.schemes_id=s.id SET a.CurrentInterest=round(a.CurrentInterest + (a.CurrentBalanceCr * s.Interest * DATEDIFF('" . getNow("Y-m-d") . "', a.LastCurrentInterestUpdatedAt)/36500),2), a.LastCurrentInterestUpdatedAt='" . getNow("Y-m-d") . "' WHERE s.SchemeType='" . ACCOUNT_TYPE_DDS . "'  and a.ActiveStatus =1 and a.MaturedStatus=0 and DATE_ADD(DATE(a.created_at), INTERVAL +$sc->MaturityPeriod MONTH) ='" . getNow("Y-m-d") . "' and a.branch_id = " . $b->id;
+            // echo "<br/>2 = ".$query;
             executeQuery($query);
 
 
@@ -67,7 +70,8 @@ if($schemes->result_count()>0){
 
 //             $this->db->query("UPDATE accounts SET CurrentInterest=0");
 //             $q="UPDATE accounts SET CurrentInterest=0 where branch_id = ".$b->id;
-        $q = "UPDATE jos_xaccounts as a join jos_xschemes as s SET a.CurrentInterest=0, a.MaturedStatus=1 WHERE s.SchemeType='" . ACCOUNT_TYPE_DDS . "' and a.ActiveStatus=1 and DATE_ADD(DATE(a.created_at), INTERVAL $sc->MaturityPeriod MONTH) ='" . getNow("Y-m-d") . "' and a.branch_id=" . $b->id;
+        $q = "UPDATE jos_xaccounts as a join jos_xschemes as s on a.schemes_id=s.id SET a.CurrentInterest=0, a.MaturedStatus=1 WHERE s.SchemeType='" . ACCOUNT_TYPE_DDS . "' and a.ActiveStatus=1 and DATE_ADD(DATE(a.created_at), INTERVAL $sc->MaturityPeriod MONTH) ='" . getNow("Y-m-d") . "' and a.branch_id=" . $b->id;
+        // echo "<br/>3=".$q;
         executeQuery($q);
         
 }

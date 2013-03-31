@@ -29,17 +29,17 @@ foreach ($schemes as $sc) {
             $creditAccount = array();
 
             $debitAccount = array(
-                $b->Code . SP . INTEREST_PAID_ON . $schemeName => $totals
+                $b->Code . SP . INTEREST_PAID_ON . $schemeName => round($totals,ROUND_TO)
             );
 
             foreach ($accounts->result() as $acc) {
-                $creditAccount += array($acc->AccountNumber => $acc->CurrentInterest);
+                $creditAccount += array($acc->AccountNumber => round($acc->CurrentInterest,ROUND_TO));
             }
 
             Transaction::doTransaction($debitAccount, $creditAccount, "Interest posting in Recurring Account", TRA_INTEREST_POSTING_IN_RECURRING, Transaction::getNewVoucherNumber(), date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " +0 day")));
 
-        $q = "UPDATE jos_xaccounts as a join jos_xschemes as s SET a.CurrentInterest=0, a.MaturedStatus=1, a.affectsBalanceSheet = 1 WHERE s.SchemeType='" . ACCOUNT_TYPE_RECURRING . "' and a.ActiveStatus=1 and a.MaturedStatus=0 and DATE_ADD(DATE(a.created_at), INTERVAL $sc->MaturityPeriod MONTH) ='" . getNow("Y-m-d"). "' and a.branch_id=" . $b->id;
-        executeQuery($q);
-}
+        // $q = "UPDATE jos_xaccounts as a join jos_xschemes as s SET a.CurrentInterest=0, a.MaturedStatus=1, a.affectsBalanceSheet = 1 WHERE s.SchemeType='" . ACCOUNT_TYPE_RECURRING . "' and a.ActiveStatus=1 and a.MaturedStatus=0 and DATE_ADD(DATE(a.created_at), INTERVAL $sc->MaturityPeriod MONTH) ='" . getNow("Y-m-d"). "' and a.branch_id=" . $b->id;
+        // executeQuery($q);
 
+}
 

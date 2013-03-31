@@ -31,8 +31,8 @@ $query = "select t.*,a.id as accid, s.Interest as Interest from jos_xtransaction
 $transactions = $CI->db->query($query);
 foreach ($transactions->result() as $trans) {
 
-    if ($trans->accid == 2689 || $trans->accid == 2692)
-        $asfgf = 13;
+    // if ($trans->accid == 2689 || $trans->accid == 2692)
+    //     $asfgf = 13;
 
     $queryA = "select sum(t.amountCr) as CRSum from jos_xtransactions t join jos_xaccounts a on t.accounts_id = a.id
             where t.branch_id=" . $b->id . " and t.created_at between DATE_ADD(a.LastCurrentInterestUpdatedAt, INTERVAL +1 DAY) and '" . getNow("Y-m-d") . "' and a.id = $trans->accid";
@@ -61,13 +61,14 @@ foreach ($transactions->result() as $trans) {
     $created_at = date("Y-m-d", strtotime(date("Y-m-d", strtotime($trans->created_at))));
     $lastInterestUpdatedAt = date("Y-m-d", strtotime(date("Y-m-d", strtotime($account->LastCurrentInterestUpdatedAt))));
     $days = my_date_diff($created_at, $lastInterestUpdatedAt);
-    $interest = round((((($currentBalanceDrTillDate - $DRSum) - ($currentBalanceCrTillDate - $CRSum)) > 0 ? (($currentBalanceDrTillDate - $DRSum) - ($currentBalanceCrTillDate - $CRSum)) : 0) * $trans->Interest * $days['days_total'] / 36500), 2);
+    // if($account->id == 5861) echo " Interest on amount ". (($currentBalanceDrTillDate - $DRSum) - ($currentBalanceCrTillDate - $CRSum)) . " For " . $days['days_total'] . " days <br/>" ;
+    $interest = round((((($currentBalanceDrTillDate - $DRSum) - ($currentBalanceCrTillDate - $CRSum)) > 0 ? (($currentBalanceDrTillDate - $DRSum) - ($currentBalanceCrTillDate - $CRSum)) : 0) * $trans->Interest * $days['days_total'] / 36500), ROUND_TO);
     $account->CurrentInterest += $interest;
     $account->LastCurrentInterestUpdatedAt = $trans->created_at;
     $account->save();
 
-//    echo "AccountNumber : ".$account->AccountNumber."<br>";
-//    echo "Interest on ".(($account->CurrentBalanceDr - $DRSum) - ($account->CurrentBalanceCr - $CRSum))." till $a->created_at : ".$interest."<br><br>";
+   // echo "AccountNumber : ".$account->AccountNumber."<br>";
+   // echo "Interest on ".(($account->CurrentBalanceDr - $DRSum) - ($account->CurrentBalanceCr - $CRSum))." till $a->created_at : ".$interest."<br><br>";
 }
 
 // INTEREST CALCULATION FROM LastCurrentInterestUpdatedAt to Last Date of the month
@@ -84,8 +85,8 @@ if ($schemes->result_count() > 0) {
         $accounts->where("branch_id", $b->id)->get();
 
         foreach ($accounts as $ac) {
-            if ($ac->id == 2689 || $ac->id == 2692)
-                $asfgf = 13;
+            // if ($ac->id == 2689 || $ac->id == 2692)
+            //     $asfgf = 13;
             $Dr = "select sum(amountDr) as Dr from jos_xtransactions where created_at < '" . getNow("Y-m-d") . "' and accounts_id = $ac->id";
             $Dr = $CI->db->query($Dr)->row()->Dr;
             $Cr = "select sum(amountCr) as Cr from jos_xtransactions where created_at < '" . getNow("Y-m-d") . "' and accounts_id = $ac->id";
@@ -96,7 +97,8 @@ if ($schemes->result_count() > 0) {
 
             $lastInterestUpdatedAt = date("Y-m-d", strtotime(date("Y-m-d", strtotime($ac->LastCurrentInterestUpdatedAt))));
             $days_cnt = my_date_diff(getNow("Y-m-d"), $lastInterestUpdatedAt);
-            $intrst = ((($Dr - $Cr) > 0 ? ($Dr - $Cr) : 0) * $sc->Interest * $days_cnt['days_total'] / 36500);
+            // if($ac->id == 5861) echo "$ac->AccountNumber :: final " . ($Dr - $Cr) . " For " . $days_cnt['days_total'] . " days <br/>";
+            $intrst = round(((($Dr - $Cr) > 0 ? ($Dr - $Cr) : 0) * $sc->Interest * $days_cnt['days_total'] / 36500), ROUND_TO);
             $Acc = new Account($ac->id);
             $Acc->CurrentInterest = round($Acc->CurrentInterest + $intrst);
             $Acc->LastCurrentInterestUpdatedAt = getNow("Y-m-d");

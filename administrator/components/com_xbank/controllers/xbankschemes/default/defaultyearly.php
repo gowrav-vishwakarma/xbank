@@ -37,10 +37,10 @@
                 $depAmt = ($a->CurrentBalanceDr - $a->CurrentBalanceCr) * $depr / 100;
 //                    echo $depAmt;
                 $debitAccount = array(
-                    $b->Code . SP . DEPRECIATION_ON_FIXED_ASSETS => round($depAmt)
+                    $b->Code . SP . DEPRECIATION_ON_FIXED_ASSETS => round($depAmt,COMMISSION_ROUND_TO)
                 );
                 $creditAccount = array(
-                    $a->AccountNumber => round($depAmt)
+                    $a->AccountNumber => round($depAmt,COMMISSION_ROUND_TO)
                 );
 
                 Transaction::doTransaction($debitAccount, $creditAccount, "Depreciation amount calculated", TRA_DEPRICIATION_AMOUNT_CALCULATED, Transaction::getNewVoucherNumber(), date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 day")));
