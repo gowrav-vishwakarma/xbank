@@ -68,7 +68,7 @@ $query = "UPDATE jos_xaccounts as a JOIN jos_xschemes as s on a.schemes_id=s.id 
             );
 
             foreach ($accounts->result() as $acc) {
-                $creditAccount += array($acc->AccountNumber => $acc->CurrentInterest);
+                $creditAccount += array($acc->AccountNumber => $acc->CurrentInterest,COMMISSION_ROUND_TO);
             }
 
             Transaction::doTransaction($debitAccount, $creditAccount, "Interst posting in DDS Account", TRA_INTEREST_POSTING_IN_DDS, Transaction::getNewVoucherNumber(), date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 day")));

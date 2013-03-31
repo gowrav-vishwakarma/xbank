@@ -11,10 +11,10 @@ if (!defined('BASEPATH'))
 //                ->from("Accounts a")
 //                ->where('a.AccountNumber like ?', '____' . inp('AccountNumber'))
 //                ->orWhere('a.AccountNumber = ?', inp('AccountNumber'));
-$result = $this->db->query("select a.AccountNumber as accnum from jos_xaccounts a  where a.AccountNumber like '%" . inp('AccountNumber') . "%' or a.AccountNumber='" . inp('AccountNumber')."'")->row()->accnum;
+$result = $this->db->query("select a.AccountNumber as accnum from jos_xaccounts a  where a.AccountNumber like '%" . inp('AccountNumber') . "%' or a.AccountNumber='" . inp('AccountNumber')."'");
 //$result = $q->execute();
 //if ($result->count() > 0) {
-if ($result)
+if ($result->result_count() > 0)
 {
     $err = true;
     showError("This Account Number is Illegal due to existing account <br/><b>" . $result . "</b>falsefalse");

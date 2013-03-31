@@ -61,13 +61,13 @@ if (SET_COMMISSIONS_IN_MONTHLY) {
                 $voucherNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $acc->id);
                 $transactiondate = date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 day"));
                 $debitAccount = array(
-                    Branch::getCurrentBranch()->Code . SP . COMMISSION_PAID_ON . $acc->scheme->Name => $amount,
+                    Branch::getCurrentBranch()->Code . SP . COMMISSION_PAID_ON . $acc->scheme->Name => round($amount,ROUND_TO),
                 );
                 $creditAccount = array(
                     // get agents' account number
                     //                                            Branch::getCurrentBranch()->Code."_Agent_SA_". $ac->Agents->member_id  => ($amount  - ($amount * 10 /100)),
                     $agentAccount => ($amount - ($amount * TDS_PERCENTAGE / 100)),
-                    Account::getAccountForCurrentBranch(BRANCH_TDS_ACCOUNT)->AccountNumber => ($amount * TDS_PERCENTAGE / 100),
+                    Account::getAccountForCurrentBranch(BRANCH_TDS_ACCOUNT)->AccountNumber => round(($amount * TDS_PERCENTAGE / 100),ROUND_TO),
                 );
                 Transaction::doTransaction($debitAccount, $creditAccount, "DDS Premium Commission $acc->AccountNumber", TRA_PREMIUM_AGENT_COMMISSION_DEPOSIT, $voucherNo, $transactiondate);
 
