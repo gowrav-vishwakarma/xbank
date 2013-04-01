@@ -90,7 +90,7 @@ class balancesheet_cont extends CI_Controller {
                         'amountCr' => $RT_SUM,
                         'Head' => 'Error',
                         'SubtractFrom' => 'Dr'
-                    );
+                    ); 
                 }
 
                 $run_error=arrayToObject($arr);
