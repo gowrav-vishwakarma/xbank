@@ -657,44 +657,34 @@ class test extends CI_Controller {
         $a=new Account();
         // $a->where('AccountNumber like', str_replace("-", "%", inp('acc'))); //Comment to run on all
         $a->where_related('scheme', 'SchemeType', ACCOUNT_TYPE_RECURRING);
-        // $a->where('scheme','SchemeType',ACCOUNT_TYPE_RECURRING);
+        $a->where('branch_id',Branch::getCurrentBranch()->id);
         $a->get();
-        $total_accounts = $a->count();
-        $account_count=1;
+        // $total_accounts = $a->count();
+        // $account_count=1;
         foreach ($a as $acc) {
             // echo "Done " . $account_count++ . " out of " . $total_accounts . "<br/>";
             // ob_end_flush();
             $this->db->query("UPDATE jos_xpremiums SET Paid=0 WHERE accounts_id = $acc->id");
-            $due_and_paid_query = $this->db->query("SELECT GROUP_CONCAT(EXTRACT(YEAR_MONTH FROM DueDate)) DueArray, GROUP_CONCAT(EXTRACT(YEAR_MONTH FROM PaidOn)) PaidArray FROM jos_xpremiums WHERE accounts_id = $acc->id AND DueDate < '2013-04-01'")->row();
+            $due_and_paid_query = $this->db->query("SELECT GROUP_CONCAT(EXTRACT(YEAR_MONTH FROM DueDate)) DueArray, GROUP_CONCAT(EXTRACT(YEAR_MONTH FROM PaidOn)) PaidArray FROM jos_xpremiums WHERE accounts_id = $acc->id AND DueDate < '2013-04-01' ORDER BY id")->row();
             $due_array=explode(",",$due_and_paid_query->DueArray);
             $paid_array=explode(",",$due_and_paid_query->PaidArray);
+
+            // print_r($due_array);
+            // print_r($paid_array);
             
             $account_premiums=$acc->premiums
             ->where('DueDate < "2013-04-01"')
             ->order_by('id')
             ->get();
 
-            $paid=0;
-            $total_paid=0;
-            $to_forward=0;
-            $i=1;
-            $to_add=0;
+            $i=0;
             foreach($account_premiums as $p){
-                $to_add = count(array_keys($paid_array, date('Ym',strtotime($p->DueDate))));
-                // echo "for ". date('Ym',strtotime($p->DueDate)) . " to add is $to_add and i is $i <br/>";
-                if($to_add > 1){
-                    $to_forward += ($to_add - 1);
-                    $to_add = 1;
+                $paid=0;
+                for($j=0;$j<=$i;$j++){
+                    if(isset($paid_array[$j]) AND $paid_array[$j] <= $due_array[$i]) $paid++;
                 }
-                $paid += $to_add;
-                if($to_add==0 and $to_forward > 0){
-                    $paid++;
-                    $to_forward--;
-                    // echo "for ". date('Ym',strtotime($p->DueDate)) . " used toforward and now to forward is $to_forward <br/>";
-                }
-                $p->Paid = $paid;
-                $total_paid += $paid;
-                $p->save();
+                $p->Paid= $paid;
+                $p->save();                                
                 $i++;
             }
             // ob_flush();
@@ -735,9 +725,47 @@ class test extends CI_Controller {
 
 
     function RDCorrection(){
+        $this->premiumCorrection();
+
+        $b = Branch::getCurrentBranch();
+        $branchid =$b->id;
+        $transactions = new Transaction();
+        $transactions->where('transaction_type_id', 17)->where('created_at','2013-03-31')->where('branch_id', $branchid)->get();
+        //$transactions = Doctrine::getTable("Transactions")->findByVoucher_noAndBranch_id($voucherno, $branchid);
+        //$conn = Doctrine_Manager::connection();
+        try {
+            // $conn->beginTransaction();
+//            if(JFactory::getUser()->gid > 23){
+            $this->db->trans_begin();
+            foreach ($transactions as $t) {
+                $acc = new Account();
+                $acc->where('id', $t->accounts_id)->get();
+                //$acc = Doctrine::getTable("Accounts")->find($t->accounts_id);
+                include(xBANKSCHEMEPATH . "/" . strtolower($acc->scheme->SchemeType) . "/" . strtolower($acc->scheme->SchemeType) . "transactionbeforedeleted.php");
+                include(xBANKSCHEMEPATH . "/" . strtolower($acc->scheme->SchemeType) . "/" . strtolower($acc->scheme->SchemeType) . "transactionafterdeleted.php");
+                $this->db->query("delete from jos_xtransactions where id = $t->id");
+                //$q = "delete from jos_xtransactions where id = $t->id";
+                //executeQuery($q);
+            }
+            
+            $this->db->trans_commit();
+            //redirect("mod_pandl/pandl_cont/accountTransactions/$foraccount");
+            // log::write("Transaction with voucher number $voucherno for account $foraccount done on date $trans_date deleted by staff ".Staff::getCurrentStaff()->id);
+//            re("report_cont.accountTransactions&id=$foraccount","Transaction Deleted Successfully");
+            // re("report_cont.dashboard","Transaction Deleted Successfully");
+//            }
+//            else{
+//                re("com_xbank.index","You are not authorized to delete any transaction. Please contact Head Office Admin for this.","error");
+//            }
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            echo $e->getMessage();
+            return;
+        }
+
         try {
             $this->db->trans_begin();
-            $b=Branch::getCurrentBranch();
+            
 
 
 
