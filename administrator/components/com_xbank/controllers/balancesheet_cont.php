@@ -31,12 +31,12 @@ class balancesheet_cont extends CI_Controller {
                 
                 if(inp('BranchId')=='%') $branch=null;
 
-                $toDate = getNow('Y-m-d');
+                $toDate = nextDate(getNow('Y-m-d'));
                 $fromDate = '1970-01-01';
                 if(inp('fromDate'))
                     $fromDate=inp('fromDate');
                 if(inp('toDate'))
-                    $toDate = inp('toDate');
+                    $toDate = nextDate('toDate');
 
                 $this->session->set_userdata("fromdate", $fromDate);
                 $this->session->set_userdata("todate", $toDate);
