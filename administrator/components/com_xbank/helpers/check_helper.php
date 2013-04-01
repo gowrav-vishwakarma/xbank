@@ -508,3 +508,11 @@ function convert_digit_to_words($no)
                }
         }
     }
+
+    function isSameMonth($date1,$date2){
+        return strtotime(date("Y-m-01",strtotime($date1))) == strtotime(date("Y-m-01",strtotime($date2)));
+    }
+
+    function isMonthAhead($date1,$date2){
+        return strtotime(date("Y-m-01",strtotime($date1))) > strtotime(date('Y-m-01',strtotime($date2)));
+    }

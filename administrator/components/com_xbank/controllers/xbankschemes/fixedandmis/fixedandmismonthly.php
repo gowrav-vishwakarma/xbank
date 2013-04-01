@@ -67,11 +67,11 @@ foreach ($schemes as $sc) {
 //                 echo "</pre>";
 
     $creditAccount = array(
-        $b->Code . SP . INTEREST_PROVISION_ON . $schemeName => round($totals)
+        $b->Code . SP . INTEREST_PROVISION_ON . $schemeName => round($totals,COMMISSION_ROUND_TO)
     );
 
     $debitAccount = array(
-        $b->Code . SP . INTEREST_PAID_ON . $schemeName => round($totals)
+        $b->Code . SP . INTEREST_PAID_ON . $schemeName => round($totals,COMMISSION_ROUND_TO)
     );
 
 //                foreach($accounts as $acc){
@@ -128,7 +128,7 @@ foreach ($schemes as $sc) {
             if($days['days_total'] < 30 && (date("m",strtotime(getNow("Y-m-d"))) - 1 ) !=2)
                 $interest = $acc->RdAmount * $days['days_total'] * $sc->Interest / 36500;
             else
-                $interest = $acc->RdAmount * $sc->Interest / 1200;
+                $interest = round($acc->RdAmount * $sc->Interest / 1200,ROUND_TO);
             $creditAccount = array($acc->AccountNumber => $interest);
 
             $debitAccount = array(

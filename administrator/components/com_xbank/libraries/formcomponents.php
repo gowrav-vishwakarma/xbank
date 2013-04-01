@@ -98,6 +98,7 @@
  	}
  	
   	function dateBox($lable,$attributes){
+  		$html="";
  		$this->first($lable);
  		$id=$this->getAttribute('name',$attributes);
                 $id=$this->id."_".$id;
@@ -150,6 +151,7 @@
  	}
  	
  	function checkBox($lable,$attributes,$checked=false){
+ 		$html="";
  		$this->first($lable);
  		$html .= "<td><div class='input-container'><input type='checkbox' ";
  		if(is_array($attributes)){
