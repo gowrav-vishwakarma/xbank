@@ -528,19 +528,22 @@ class test extends CI_Controller {
     /**
      *
      */
-    function premiumCorrection() {
+    function premiumCorrection_old() {
 
         // Mark wrongly mature rds 
         $q="UPDATE jos_xaccounts a JOIN jos_xschemes s on a.schemes_id=s.id SET a.MaturedStatus=0, a.affectsBalanceSheet=0, a.ActiveStatus=1 WHERE s.SchemeType = '".ACCOUNT_TYPE_RECURRING. "' AND a.id not in (7050,2527,2557,2556) AND a.MaturedStatus = 1";
         $this->db->query($q);
 
         $a=new Account();
-        // $a->where('AccountNumber like', str_replace("-", "%", inp('acc')));
+        $a->where('AccountNumber like', str_replace("-", "%", inp('acc')));
         $a->where_related('scheme', 'SchemeType', ACCOUNT_TYPE_RECURRING);
         // $a->where('scheme','SchemeType',ACCOUNT_TYPE_RECURRING);
         $a->get();
-        // echo "Working on ". $a->count() . " accounts <br/>";
+        $total_accounts = $a->count();
+        $account_count=1;
         foreach ($a as $acc) {
+            // echo "Done " . $account_count++ . " out of " . $total_accounts . "<br/>";
+            // ob_end_flush();
             $this->db->query("UPDATE jos_xpremiums SET Paid=0 WHERE accounts_id = $acc->id");
             $account_premiums=$acc->premiums
             ->where('DueDate < "2013-04-01"')
@@ -551,24 +554,29 @@ class test extends CI_Controller {
             $last_i=1;
             $paid=1;
             $is_first_premium=true;
+            $one_ahead_paid=false;
+            $month_ahead=array();
             foreach ($account_premiums as $p) {
                 if ($is_first_premium) {
                     $last_paid_on=$p->PaidOn;
                 }
-                // echo "working on premium id " . $p->id. " and last paid on is $last_paid_on<br/>";
+                // echo "working on premium id " . $p->id. " and last_i is $last_i<br/>";
                 if (!$is_first_premium and isSameMonth($last_paid_on, $p->DueDate) ) {
                     $this->say("$p->id 1<br/>");
-                    $last_i = $i;
+                    $last_i ++;
                     $paid=$last_i;
-                    $paid--;
+                    // $paid--;
+                    $one_ahead_paid=true;
                     if (isSameMonth($p->PaidOn, $p->DueDate)) {
                         $this->say("$p->id 1.1<br/>");
                         $paid++;
+                        $last_i++;
                     }
                 }
                 elseif (isMonthAhead($p->PaidOn, $p->DueDate)) {
                     $this->say("$p->id 2<br/>");
                     $paid = $last_i;
+                    $month_ahead[date('Ym',strtotime($p->PaidOn))] = isset($month_ahead[date('Ym',strtotime($p->PaidOn))])?$month_ahead[date('Ym',strtotime($p->PaidOn))] + 1 : 1;
                     // echo "For " . $p->DueDate . " setting laset <br/>";
                 }
                 elseif ($p->PaidOn == null) {
@@ -582,11 +590,23 @@ class test extends CI_Controller {
                     }else {
                         $this->say("$p->id 3.2<br/>");
                         $paid=$last_i;
-                        // $last_i++;
-                        if ($last_paid_on == null and $p->PaidOn ==null) {
-                            $this->say("$p->id 3.2.1<br/>");
-                            $paid--;
+                        if(array_key_exists(date('Ym',strtotime($p->DueDate)), $month_ahead)){
+                            // echo "searching".date('Ym',strtotime($p->DueDate));
+                            $paid += $month_ahead[date('Ym',strtotime($p->DueDate))];
+                            $last_i += $month_ahead[date('Ym',strtotime($p->DueDate))];
+                            $month_ahead[date('Ym',strtotime($p->DueDate))]--;
+                            if($month_ahead[date('Ym',strtotime($p->DueDate))] == 0)
+                                unset($month_ahead[date('Ym',strtotime($p->DueDate))]);
                         }
+                        // echo "<br/> one_ahead_paid". $one_ahead_paid . "<br/>";
+                        // if($one_ahead_paid and $last_paid_on==null)
+                        //     $paid--;
+                        // else
+                            // $paid++;
+                        // if ($last_paid_on == null and $p->PaidOn ==null and $one_ahead_paid==true) {
+                        //     $this->say("$p->id 3.2.1<br/>");
+                        //     $paid--;
+                        // }
                     }
                     // $i++;
                 }
@@ -594,6 +614,7 @@ class test extends CI_Controller {
                     $this->say("$p->id 4<br/>");
                     $paid=$i;
                     $last_i = $i;
+                    if($last_paid_on==null) $paid--;
                     // $i++;
                 }
                 $p->Paid=$paid;
@@ -601,7 +622,83 @@ class test extends CI_Controller {
                 $last_paid_on=$p->PaidOn;
                 $i++;
                 $is_first_premium=false;
+                print_r($month_ahead);
             }
+        }
+
+        $p=new Premium();
+        $p->include_related('account', 'AccountNumber');
+        $p->where('accounts_id', $a->id);
+        $p->get();
+
+        $data['report']= getReporttable($p,             //model
+            array("id", 'Amount', "Due Date", 'Paid On', 'Paid'),       //heads
+            array('id', 'Amount', 'DueDate', 'PaidOn', 'Paid', ),       //fields
+            array(),        //totals_array
+            array("Account Number"=>'account_AccountNumber'),        //headers
+            array('sno'=>true),     //options
+            "",     //headerTemplate
+            '',      //tableFooterTemplate
+            ""      //footerTemplate
+        );
+
+        JRequest::setVar("layout", "generalreport");
+        $this->load->view('report.html', $data);
+        $this->jq->getHeader();
+
+    }
+
+    function premiumCorrection() {
+
+        // Mark wrongly mature rds 
+        $q="UPDATE jos_xaccounts a JOIN jos_xschemes s on a.schemes_id=s.id SET a.MaturedStatus=0, a.affectsBalanceSheet=0, a.ActiveStatus=1 WHERE s.SchemeType = '".ACCOUNT_TYPE_RECURRING. "' AND a.id not in (7050,2527,2557,2556) AND a.MaturedStatus = 1";
+        $this->db->query($q);
+
+        $a=new Account();
+        // $a->where('AccountNumber like', str_replace("-", "%", inp('acc'))); //Comment to run on all
+        $a->where_related('scheme', 'SchemeType', ACCOUNT_TYPE_RECURRING);
+        // $a->where('scheme','SchemeType',ACCOUNT_TYPE_RECURRING);
+        $a->get();
+        $total_accounts = $a->count();
+        $account_count=1;
+        foreach ($a as $acc) {
+            // echo "Done " . $account_count++ . " out of " . $total_accounts . "<br/>";
+            // ob_end_flush();
+            $this->db->query("UPDATE jos_xpremiums SET Paid=0 WHERE accounts_id = $acc->id");
+            $due_and_paid_query = $this->db->query("SELECT GROUP_CONCAT(EXTRACT(YEAR_MONTH FROM DueDate)) DueArray, GROUP_CONCAT(EXTRACT(YEAR_MONTH FROM PaidOn)) PaidArray FROM jos_xpremiums WHERE accounts_id = $acc->id AND DueDate < '2013-04-01'")->row();
+            $due_array=explode(",",$due_and_paid_query->DueArray);
+            $paid_array=explode(",",$due_and_paid_query->PaidArray);
+            
+            $account_premiums=$acc->premiums
+            ->where('DueDate < "2013-04-01"')
+            ->order_by('id')
+            ->get();
+
+            $paid=0;
+            $total_paid=0;
+            $to_forward=0;
+            $i=1;
+            $to_add=0;
+            foreach($account_premiums as $p){
+                $to_add = count(array_keys($paid_array, date('Ym',strtotime($p->DueDate))));
+                // echo "for ". date('Ym',strtotime($p->DueDate)) . " to add is $to_add and i is $i <br/>";
+                if($to_add > 1){
+                    $to_forward += ($to_add - 1);
+                    $to_add = 1;
+                }
+                $paid += $to_add;
+                if($to_add==0 and $to_forward > 0){
+                    $paid++;
+                    $to_forward--;
+                    // echo "for ". date('Ym',strtotime($p->DueDate)) . " used toforward and now to forward is $to_forward <br/>";
+                }
+                $p->Paid = $paid;
+                $total_paid += $paid;
+                $p->save();
+                $i++;
+            }
+            // ob_flush();
+            // flush();
         }
 
         // $p=new Premium();
@@ -623,7 +720,7 @@ class test extends CI_Controller {
         // JRequest::setVar("layout", "generalreport");
         // $this->load->view('report.html', $data);
         // $this->jq->getHeader();
-
+        echo "done";
     }
 
 
@@ -633,7 +730,65 @@ class test extends CI_Controller {
      * @param unknown $msg
      */
     function say($msg) {
-        // echo $msg;
+        echo $msg;
+    }
+
+
+    function RDCorrection(){
+        try {
+            $this->db->trans_begin();
+            $b=Branch::getCurrentBranch();
+
+
+
+            $query = "UPDATE jos_xaccounts as a JOIN jos_xschemes as s on a.schemes_id=s.id join (SELECT accounts_id, SUM(Paid*Amount) AS toPost FROM jos_xpremiums WHERE Paid <> 0 AND Skipped =0 And DueDate > '2012-03-31' AND DueDate < '" . getNow("Y-m-d") . "' GROUP BY accounts_id) as p on p.accounts_id=a.id SET a.CurrentInterest=(p.toPost * s.Interest)/1200 WHERE (s.SchemeType='" . ACCOUNT_TYPE_RECURRING . "') and a.ActiveStatus=1 and a.MaturedStatus=0 and a.created_at < '" . getNow("Y-m-d") . "' and a.branch_id=" . $b->id;
+            executeQuery($query);
+
+
+            $schemes = new Scheme();
+            $schemes->where("SchemeType",ACCOUNT_TYPE_RECURRING)->get();
+
+            foreach ($schemes as $sc) {
+                
+                $accounts = $this->db->query("select a.* from jos_xaccounts a where a.schemes_id = $sc->id AND a.CurrentInterest > 0 and a.ActiveStatus=1 and a.MaturedStatus=0 and a.created_at < '" . getNow("Y-m-d") . "' and a.branch_id=" . $b->id);
+                if ($accounts->num_rows() == 0)
+                    continue;
+                // echo "working recurring for " . $sc->Name. "<br/>";
+
+                $totals = 0;
+                $totals = $this->db->query("select sum(a.CurrentInterest) as CurrentInterest from jos_xaccounts a where a.schemes_id = " . $sc->id . " and a.CurrentInterest > 0 and a.ActiveStatus = 1 and a.MaturedStatus=0 and a.created_at < '" . getNow("Y-m-d") . "' and a.branch_id = " . $b->id)->row()->CurrentInterest;
+
+
+                $schemeName = $sc->Name;
+
+    //                 echo "<pre>";
+    //                 print_r($accounts->result_array());
+    //                 echo "</pre>";
+
+                $creditAccount = array();
+
+                $debitAccount = array(
+                    $b->Code . SP . INTEREST_PAID_ON . $schemeName => round($totals,ROUND_TO)
+                );
+
+                foreach ($accounts->result() as $acc) {
+                    $creditAccount += array($acc->AccountNumber => round($acc->CurrentInterest,ROUND_TO));
+                }
+
+                Transaction::doTransaction($debitAccount, $creditAccount, "Interst posting in Recurring Account", TRA_INTEREST_POSTING_IN_RECURRING, Transaction::getNewVoucherNumber(), date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 day")));
+            }
+
+    //             $this->db->query("UPDATE accounts SET CurrentInterest=0");
+    //             $q="UPDATE accounts SET CurrentInterest=0 where branch_id = ".$b->id;
+            $q = "UPDATE jos_xaccounts as a join jos_xschemes as s SET a.CurrentInterest=0 WHERE s.SchemeType='" . ACCOUNT_TYPE_RECURRING . "' and a.ActiveStatus=1 and a.created_at < '" . getNow("Y-m-d") . "' and a.branch_id=" . $b->id;
+            executeQuery($q);
+            $this->db->trans_commit();
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            echo $e->getMessage();
+            return;
+        }
+
     }
 
 
