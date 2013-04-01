@@ -82,7 +82,7 @@ class balancesheet_cont extends CI_Controller {
                 }
 
                 // Calculate and put runtime suspence
-                if(abs($LT_SUM - $RT_SUM) >= 1){
+                if($LT_SUM != $RT_SUM){
                     $arr = array(
                         'Msg' => "<font color='red'>Human Entry Error found</font>",
                         'Title' => 'Msg',
@@ -90,14 +90,12 @@ class balancesheet_cont extends CI_Controller {
                         'amountCr' => $RT_SUM,
                         'Head' => 'Error',
                         'SubtractFrom' => 'Dr'
-                    ); 
-                }else{
-                    $arr=array();
+                    );
                 }
 
                 $run_error=arrayToObject($arr);
 
-                if(abs($LT_SUM - $RT_SUM) > 0){
+                if(abs($LT_SUM - $RT_SUM) > 1){
                     if($LT_SUM < $RT_SUM){
                         $data['balancesteet']['LT'][]=array('Total'=>$run_error,'Detailed'=>array());
                         $LT_SUM += abs($run_error->amountDr - $run_error->amountCr);
