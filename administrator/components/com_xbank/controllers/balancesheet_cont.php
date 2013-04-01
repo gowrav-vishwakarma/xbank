@@ -91,6 +91,8 @@ class balancesheet_cont extends CI_Controller {
                         'Head' => 'Error',
                         'SubtractFrom' => 'Dr'
                     ); 
+                }else{
+                    $arr=array();
                 }
 
                 $run_error=arrayToObject($arr);
