@@ -463,11 +463,11 @@ class report_2_cont extends CI_Controller {
         
         $t->select_func('SUM','[amountCr]','AmountSubmitted');
 
-        $t->select_subquery('(SELECT display_voucher_no FROM jos_xtransactions  WHERE reference_account_id=${parent}.accounts_id AND created_at="'.inp('toDate').' 00:00:00" AND side="DR")','display_voucher_no');
-        $t->select_subquery('(SELECT voucher_no FROM jos_xtransactions  WHERE reference_account_id=${parent}.accounts_id AND created_at="'.inp('toDate').' 00:00:00" AND side="DR")','voucher_no');
-        $t->select_subquery('(SELECT amountDr FROM jos_xtransactions  WHERE reference_account_id=${parent}.accounts_id AND created_at="'.inp('toDate').' 00:00:00" AND side="DR")','Commission');
-        $t->select_subquery('(SELECT amountCr FROM jos_xtransactions  WHERE reference_account_id=${parent}.accounts_id AND created_at="'.inp('toDate').' 00:00:00" AND side="CR" limit 1)','NET');
-        $t->select_subquery('(SELECT amountCr FROM jos_xtransactions  WHERE reference_account_id=${parent}.accounts_id AND created_at="'.inp('toDate').' 00:00:00" AND side="CR" limit 1,1)','TDS');
+        $t->select_subquery('(SELECT GROUP_CONCAT(display_voucher_no) FROM jos_xtransactions  WHERE reference_account_id=${parent}.accounts_id AND created_at="'.inp('toDate').' 00:00:00" AND side="DR" AND branch_id=${parent}.branch_id LIMIT 1)','display_voucher_no');
+        $t->select_subquery('(SELECT GROUP_CONCAT(voucher_no) FROM jos_xtransactions  WHERE reference_account_id=${parent}.accounts_id AND created_at="'.inp('toDate').' 00:00:00" AND side="DR" AND branch_id=${parent}.branch_id LIMIT 1)','voucher_no');
+        $t->select_subquery('(SELECT SUM(amountDr) FROM jos_xtransactions  WHERE reference_account_id=${parent}.accounts_id AND created_at="'.inp('toDate').' 00:00:00" AND side="DR" AND branch_id=${parent}.branch_id  GROUP BY reference_account_id)','Commission');
+        // $t->select_subquery('(SELECT amountCr FROM jos_xtransactions  WHERE reference_account_id=${parent}.accounts_id AND created_at="'.inp('toDate').' 00:00:00" AND side="CR" AND branch_id=${parent}.branch_id limit 1)','NET');
+        // $t->select_subquery('(SELECT amountCr FROM jos_xtransactions  WHERE reference_account_id=${parent}.accounts_id AND created_at="'.inp('toDate').' 00:00:00" AND side="CR" AND branch_id=${parent}.branch_id limit 1,1)','TDS');
         
         $t->include_related('account','AccountNumber');
         $t->include_related('account/scheme','Name');
@@ -488,7 +488,7 @@ class report_2_cont extends CI_Controller {
         $msg="DDS Commission and TDS Report on " . inp('toDate');
         $data['report'] = getReporttable($t,             //model
                 array("Account Number", "Amount Submitted" , "SchemeName" ,"Commission", 'TDS',"Net Amount" ,"Agent Name" , "Voucher_no"),       //heads
-                array('account_AccountNumber','AmountSubmitted','account_scheme_Name' ,'Commission',"TDS",'NET' ,'account_agent_member_Name' ,'display_voucher_no'),       //fields
+                array('account_AccountNumber','AmountSubmitted','account_scheme_Name' ,'Commission',"~(#Commission*10/100)",'~(#Commission - (#Commission*10/100))' ,'account_agent_member_Name' ,'display_voucher_no'),       //fields
                 array(),        //totals_array
                 array(),        //headers
                 array('sno'=>true),     //options
