@@ -725,7 +725,6 @@ class test extends CI_Controller {
 
 
     function RDCorrection(){
-        $this->premiumCorrection();
 
         $b = Branch::getCurrentBranch();
         $branchid =$b->id;
@@ -737,6 +736,7 @@ class test extends CI_Controller {
             // $conn->beginTransaction();
 //            if(JFactory::getUser()->gid > 23){
             $this->db->trans_begin();
+            $this->premiumCorrection();
             foreach ($transactions as $t) {
                 $acc = new Account();
                 $acc->where('id', $t->accounts_id)->get();
