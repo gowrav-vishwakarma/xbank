@@ -31,6 +31,7 @@ class Premium extends DataMapper {
             $agentAccBranch = new Account();
             $agentAccBranch->where("AccountNumber",$agent->AccountNumber)->get();
             if ($agentAccBranch->branch_id != Branch::getCurrentBranch()->id) {
+                // INTERBRANCH TRANSECTION
                 $otherbranch = new Branch($agentAccBranch->branch_id);
 
                 $debitAccount = array(
