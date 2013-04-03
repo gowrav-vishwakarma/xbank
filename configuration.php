@@ -34,6 +34,7 @@ class JConfig {
 	var $host = 'localhost';
 	var $user = 'root';
 	var $db = 'bhawani_softdemo';
+	// var $db = 'bhawani';
 	var $dbprefix = 'jos_';
 	var $mailer = 'mail';
 	var $mailfrom = 'info@xavoc.com';

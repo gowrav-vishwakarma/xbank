@@ -811,7 +811,7 @@ class transaction_cont extends CI_Controller {
         $q = "update `jos_xpremiums` set `PaidOn` = '" . getNow() . "', Paid=1 where Paid = 0 and `accounts_id` =" . $ac->id;
         executeQuery($q);
 
-        $query = "update `jos_xaccounts` set `CurrentInterest` = 0, ActiveStatus=0 where `id` =" . $ac->id;
+        $query = "update `jos_xaccounts` set `CurrentInterest` = 0, ActiveStatus=0, affectsBalanceSheet=1 where `id` =" . $ac->id;
         executeQuery($query);
 
     }
