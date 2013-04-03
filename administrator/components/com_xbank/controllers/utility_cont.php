@@ -135,6 +135,31 @@ class utility_cont extends CI_Controller{
         $data['report']="";
 
         $a=new Account();
+        $a->include_related('scheme','Name');
+        $a->where('ActiveStatus',0);
+        $a->where('affectsBalanceSheet',0);
+        $a->get();
+        $data['report'] .= "<h2>De Activated Accounts Not Effecting Balance Sheet</h2>";
+        $data['report'] .= getReporttable($a,             //model
+                array("Account Number", 'Scheme','Balance','Transactions Count'),       //heads
+                array('AccountNumber','scheme_Name','~((#OpeningBalanceDr+#CurrentBalanceDr) - (#OpeningBalanceCr+#CurrentBalanceCr))','~#transactions->count()'),       //fields
+                array(),        //totals_array
+                array(),        //headers
+                array('sno'=>true),     //options
+                "De Activated Accounts Not Effecting Balance Sheet",     //headerTemplate
+                '',      //tableFooterTemplate
+                "",      //footerTemplate,
+                array('AccountNumber'=>array(
+                                              'task'=>'balancesheet_cont.digin',
+                                              'class'=>'alertinwindow',
+                                              'title'=>'_blank',
+                                              'url_post'=>array('digtype'=>'"AccountNumber"','format'=>'"raw"','digid'=>'#AccountNumber')
+                                              )
+                      )//Links array('field'=>array('task'=>,'class'=>''))
+                );
+
+
+        $a=new Account();
         $a->where_related('member','Name is null');
         $a->get();
         echo "<h2> Accounts with out Member</h2>";
@@ -199,7 +224,7 @@ class utility_cont extends CI_Controller{
             echo "<a href='index.php?format=raw&option=com_xbank&task=report_cont.transactionDetails&vn=".(($aa->voucher_no))."&branch_id=".$aa->branch_id."' class='alertinwindow'> Voucher " .$aa->voucher_no . " (". ($aa->display_voucher_no) .") [" . $aa->branch->Name ."]</a><br/>";
         }        
         
-        echo "<h2>Accounts with (OpCr+TransactionCr - OpDR+TransactionDR) <> (CurrenBalCr - CurrenBalDr) </h2>";
+        $data['report'].= "<h2>Accounts with (OpCr+TransactionCr - OpDR+TransactionDR) <> (CurrenBalCr - CurrenBalDr) </h2>";
         $a=$this->db->query("SELECT
                             a.AccountNumber,
                             a.OpeningBalanceCr + tr.amountCr TransactionCr,
