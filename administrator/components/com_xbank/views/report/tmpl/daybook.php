@@ -41,7 +41,7 @@
                     $newvch = $rs->$field;
                     $tmp = $rs->$field;
         ?>
-                    <td><a class='alertinwindow' href='index.php?option=com_xbank&task=report_cont.transactionDetails&vn=<?php echo $rs->$field ?>&format=raw&tr_type=<?php echo $rs->transaction_type_id ?>'><?php echo $rs->$field ?></a></td>
+                    <td><a class='alertinwindow' href='index.php?option=com_xbank&task=report_cont.transactionDetails&vn=<?php echo $rs->$field ?>&format=raw&tr_type=<?php echo $rs->transaction_type_id ?>'><?php echo ($rs->display_voucher_no != 0 ? $rs->display_voucher_no : $rs->voucher_no) ?></a></td>
         <?php
                 } else{
                     if ($field == "voucher_no"){
