@@ -117,6 +117,7 @@ define('TRA_FD_ACCOUNT_AMOUNT_WITHDRAWL',	'FixedDepositAccountAmountWithdrawl');
 define('TRA_LOAN_ACCOUNT_OPEN',                 'LoanAccountOpen');
 define('TRA_CC_ACCOUNT_OPEN',                   'CCAccountOpen');
 define('TRA_JV_ENTRY',                          'Journal Voucher Entry');
+define('TRA_DEFAULT_ACCOUNT_DEPOSIT_ENTRY',             'Default Account Deposit Enrty');
 define('TRA_NEW_MEMBER_REGISTRATIO_AMOUNT',     'NewMemberRegistrationAmount');
 define('TRA_PENALTY_ACCOUNT_AMOUNT_DEPOSIT',	'PenaltyAccountAmountDeposit');
 define('TRA_FOR_CLOSE_ACCOUNT_AMOUNT_DEPOSIT',	'ForCloseAccountAmountDeposit');
