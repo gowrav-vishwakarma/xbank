@@ -27,7 +27,7 @@
 			<tr><th colspan=2> DEBIT </th></tr>
 		<?php endif;?>
 			<tr>
-				<td><?php echo $dv->account->AccountNumber; ?></td>
+				<td><b>Account Number: </b><?php echo $dv->account->AccountNumber; ?> (<?php echo $dv->account->member->Name?>)</td>
 				<td><?php echo $dv->amountDr; ?></td>
 			</tr>
 		<?php 
@@ -52,7 +52,7 @@
 			<tr><th colspan=2> CREDIT </th></tr>
 		<?php endif;?>
 			<tr>
-				<td><?php echo $cv->account->AccountNumber; ?></td>
+				<td><b>Account Number: </b><?php echo $cv->account->AccountNumber; ?> (<?php echo $dv->account->member->Name?>)</td>
 				<td><?php echo $cv->amountCr; ?></td>
 			</tr>
 		<?php 
