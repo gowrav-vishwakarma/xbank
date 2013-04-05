@@ -52,7 +52,7 @@
 			<tr><th colspan=2> CREDIT </th></tr>
 		<?php endif;?>
 			<tr>
-				<td><b>Account Number: </b><?php echo $cv->account->AccountNumber; ?> (<?php echo $dv->account->member->Name?>)</td>
+				<td><b>Account Number: </b><?php echo $cv->account->AccountNumber; ?> (<?php echo $cv->account->member->Name?>)</td>
 				<td><?php echo $cv->amountCr; ?></td>
 			</tr>
 		<?php 
