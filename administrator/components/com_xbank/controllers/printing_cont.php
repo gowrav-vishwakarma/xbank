@@ -13,7 +13,7 @@ class printing_cont extends CI_Controller {
     	xDeveloperToolBars::onlyCancel("printing_cont.index", "cancel", "Print Vouchers");
     	$this->form->open("accountOpenningForm","index.php?option=com_xbank&task=printing_cont.voucherPrintSelect")
                 ->dateBox("Select Date","name='voucherDate' class='input'")
-                ->submitNoHide("Go");
+                ->submit("Go");
         $data['form']=$this->form->get();
         $this->load->view("formonly.html",$data);
         $this->jq->getHeader(); 
@@ -35,7 +35,7 @@ class printing_cont extends CI_Controller {
     	foreach($t as $tt){
     		$this->form->checkbox($tt->display_voucher_no. "($tt->Narration)","name='v_$tt->id'");
     	}
-    	$this->form->submit('Print');
+    	$this->form->submitNoHide('Print');
     	$data['form']=$this->form->get();
         $this->load->view("formonly.html",$data);
         $this->jq->getHeader();
