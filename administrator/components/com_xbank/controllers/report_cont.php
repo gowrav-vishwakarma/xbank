@@ -2181,17 +2181,18 @@ a.branch_id = $b
         $a= new Account();
 
         $p = $a->premiums;
-        $p_paid = new Premium();
 
         $p->select_func('COUNT', '*', 'count');
         $p->where("PaidOn is null");
         $p->where("DueDate between '".inp("fromDate")."' and '".inp("toDate")."'");
         $p->where_related('account', 'id', '${parent}.id');
 
+        $p_paid = new Premium();
         $p_paid->select_func('COUNT', '*', 'count');
         $p_paid->where("PaidOn is not null");
         $p_paid->where("DueDate between '".inp("fromDate")."' and '".inp("toDate")."'");
         $p_paid->where_related('account', 'id', '${parent}.id');
+        $a->select_subquery($p_paid,'PaidPremiumCount');
 
 
         $a->select('*, id as PaneltyDUE, id as OtherCharges');
@@ -2200,7 +2201,6 @@ a.branch_id = $b
         $a->include_related('agent/member','PhoneNos');
 
         $a->select_subquery($p,'DuePremiumCount');
-        $a->select_subquery($p_paid,'PaidPremiumCount');
         $a->select_subquery('(SELECT MAX(Amount) From jos_xpremiums p WHERE p.accounts_id=${parent}.id)','Amount');
         // $a->select_subquery('(SELECT count(*) * MAX(Amount) From jos_xpremiums p WHERE p.accounts_id=${parent}.id)','Total');
 
@@ -2221,7 +2221,7 @@ a.branch_id = $b
         $data['report']= getReporttable($a,             //model
                 array("Account Number","Opening Date", "Scheme","Member Name","Father Name", "Phone Number","Address","Paid Premiums Count",'Due Premium Count','EMI Amount',"Due Penalty","Legal/Conveyance/Insurance Charge",'Total',"Dealer Name","Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
                 array('AccountNumber', '~date("Y-m-d",strtotime("#created_at"))', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress',"PaidPremiumCount",'DuePremiumCount','Amount','PaneltyDUE','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)",'dealer_DealerName','Nominee','MinorNomineeParentName','RelationWithNominee'),       //fields
-                array('PaneltyDUE','DuePremiumCount','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)"),        //totals_array
+                array('PaneltyDUE','PaidPremiumCount','DuePremiumCount','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)"),        //totals_array
                 array(),        //headers
                 array('sno'=>true),     //options
                 "",     //headerTemplate
@@ -2363,6 +2363,12 @@ premiumcount >= 3 and premiumcount <= 4
         $p->where("DueDate between '".inp("fromDate")."' and '".nextDate("toDate")."'");
         $p->where_related('account', 'id', '${parent}.id');
 
+        $p_paid = new Premium();
+        $p_paid->select_func('COUNT', '*', 'count');
+        $p_paid->where("PaidOn is not null");
+        $p_paid->where("DueDate between '".inp("fromDate")."' and '".inp("toDate")."'");
+        $p_paid->where_related('account', 'id', '${parent}.id');
+        $a->select_subquery($p_paid,'PaidPremiumCount');
 
         $a->select('*, id as PaneltyDUE, id as OtherCharges');
         $a->include_related('dealer','DealerName');
@@ -2389,8 +2395,8 @@ premiumcount >= 3 and premiumcount <= 4
         $a->get();
 //        echo $a->check_last_query();
         $data['report'] =  getReporttable($a,             //model
-                array("Account Number",'Opnned On',"Scheme","Member Name","Father Name", "Phone Number","Address",'Due Premium Count','EMI Amount',"Due Penalty","Legal/Conveyance/Insurance Charge","Total","Dealer Name","Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
-                array('AccountNumber','~date("Y-m-d",strtotime("#created_at"))', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress','DuePremiumCount','Amount','PaneltyDUE','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)",'dealer_DealerName','Nominee','MinorNomineeParentName','RelationWithNominee'),       //fields
+                array("Account Number",'Opnned On',"Scheme","Member Name","Father Name", "Phone Number","Address","Paid Premium Count",'Due Premium Count','EMI Amount',"Due Penalty","Legal/Conveyance/Insurance Charge","Total","Dealer Name","Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
+                array('AccountNumber','~date("Y-m-d",strtotime("#created_at"))', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress',"PaidPremiumCount",'DuePremiumCount','Amount','PaneltyDUE','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)",'dealer_DealerName','Nominee','MinorNomineeParentName','RelationWithNominee'),       //fields
                 array('PaneltyDUE','DuePremiumCount','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)"),        //totals_array
                 array(),        //headers
                 array('sno'=>true),     //options
@@ -2437,6 +2443,13 @@ premiumcount >= 3 and premiumcount <= 4
         $p->where("DueDate between '".inp("fromDate")."' and '".nextDate("toDate")."'");
         $p->where_related('account', 'id', '${parent}.id');
 
+        $p_paid = new Premium();
+        $p_paid->select_func('COUNT', '*', 'count');
+        $p_paid->where("PaidOn is not null");
+        $p_paid->where("DueDate between '".inp("fromDate")."' and '".inp("toDate")."'");
+        $p_paid->where_related('account', 'id', '${parent}.id');
+        $a->select_subquery($p_paid,'PaidPremiumCount');
+
         
         $a->select('*, id as PaneltyDUE, id as OtherCharges');
         //$a->select('*');
@@ -2463,8 +2476,8 @@ premiumcount >= 3 and premiumcount <= 4
         $a->get();
         //echo $a->check_last_query();
         $data['report']= getReporttable($a,             //model
-                array("Account Number",'Openned On',"Scheme","Member Name","Father Name", "Phone Number","Address",'Due Premium Count','EMI Amount',"Due Penalty","Legal/Conveyance/Insurance Charge", 'Total',"Dealer Name","Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
-                array('AccountNumber','~date("Y-m-d",strtotime("#created_at"))', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress','DuePremiumCount','Amount','PaneltyDUE','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)",'dealer_DealerName','Nominee','MinorNomineeParentName','RelationWithNominee'),       //fields
+                array("Account Number",'Openned On',"Scheme","Member Name","Father Name", "Phone Number","Address","Paid Premium Count",'Due Premium Count','EMI Amount',"Due Penalty","Legal/Conveyance/Insurance Charge", 'Total',"Dealer Name","Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
+                array('AccountNumber','~date("Y-m-d",strtotime("#created_at"))', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress',"PaidPremiumCount",'DuePremiumCount','Amount','PaneltyDUE','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)",'dealer_DealerName','Nominee','MinorNomineeParentName','RelationWithNominee'),       //fields
                 array('PaneltyDUE','DuePremiumCount','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)"),        //totals_array
                 array(),        //headers
                 array('sno'=>true),     //options
