@@ -67,7 +67,7 @@ foreach ($accountcount as $st) {
             <td><?php echo $acc->created_at ?></td>
             <td>
 <?php 
-if($st->SchemeType == 'Loan' OR $st->SchemeType == 'Recurring'){
+if($st->SchemeType == 'Loan' OR $st->SchemeType == 'Recurring' OR $st->SchemeType= "FixedAndMis"){
 $total += $acc->RdAmount;
 echo $acc->RdAmount;
 }
