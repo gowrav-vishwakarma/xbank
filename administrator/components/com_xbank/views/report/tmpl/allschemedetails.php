@@ -93,7 +93,7 @@ echo abs($acc->CurrentBalanceCr - $acc->CurrentBalanceDr) ;
 
     <?php
     }
-    echo "<tr ><td>Total</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>$total</td><td></td></tr>"
+    echo "<tr ><td>Total</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>$total</td><td></td></tr>"
     ?>
 </table><br>
 <?php
