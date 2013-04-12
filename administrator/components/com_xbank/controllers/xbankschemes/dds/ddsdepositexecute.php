@@ -3,15 +3,42 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
- $amount = inp("Amount");
-//        $ac->save();
-        $debitAccount = array(
-            $debitToAccount => inp("Amount"),
-        );
-        $creditAccount = array(
-            $ac->AccountNumber => inp("Amount"),
-        );
-        Transaction::doTransaction($debitAccount, $creditAccount, (inp("Narration") ? inp("Narration") : "Initial DDS Amount Deposit in $ac->AccountNumber"), TRA_DDS_ACCOUNT_AMOUNT_DEPOSIT, $voucherNo);
+ 
+$transactiondate = getNow();
+if($ac->branch->id != Branch::getCurrentBranch()->id){
+    $debitAccount = array(
+        $debitToAccount => inp("Amount"),
+    );
+    $creditAccount = array(
+        $ac->branch->Code . SP . BRANCH_AND_DIVISIONS . SP . "for" . SP . Branch::getCurrentBranch()->Code =>  inp("Amount"),
+    );
+    Transaction::doTransaction($debitAccount, $creditAccount, (inp("Narration") ? inp("Narration") : "DDS Amount Deposit in $ac->AccountNumber"), TRA_RECURRING_ACCOUNT_AMOUNT_DEPOSIT, $voucherNo, $transactiondate);
+
+    $debitAccount = array(
+        Branch::getCurrentBranch()->Code . SP . BRANCH_AND_DIVISIONS . SP . "for" . SP . $ac->branch->Code => inp("Amount"),
+    );
+    $creditAccount = array(
+        $ac->AccountNumber => inp('Amount'),
+    );
+    Transaction::doTransaction($debitAccount, $creditAccount, (inp("Narration") ? inp("Narration") : "DDS Amount Deposit in $ac->AccountNumber"), TRA_RECURRING_ACCOUNT_AMOUNT_DEPOSIT, Transaction::getNewVoucherNumber($ac->branch->id), $transactiondate,$ac->branch->id);
+}
+else {
+    $debitAccount = array(
+        $debitToAccount => inp("Amount"),
+    );
+    $creditAccount = array(
+        $ac->AccountNumber => inp("Amount"),
+    );
+    Transaction::doTransaction($debitAccount, $creditAccount, (inp("Narration") ? inp("Narration") : "DDS Amount Deposit in $ac->AccountNumber"), TRA_RECURRING_ACCOUNT_AMOUNT_DEPOSIT, $voucherNo, $transactiondate);
+}
+
+
+
+
+
+
+
+
         if(!SET_COMMISSIONS_IN_MONTHLY){
                 if ($ac->Agents !== null) {
                     $monthDifference = my_date_diff(getNow("Y-m-d"), $ac->created_at);
