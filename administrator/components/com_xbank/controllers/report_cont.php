@@ -2493,6 +2493,66 @@ premiumcount >= 3 and premiumcount <= 4
   
     }
 
+    function loanDebtorsList(){
+      xDeveloperToolBars::onlyCancel("report_cont.new_reports", "cancel", "Loan NPA List");
+      $a= new Account();
+
+        $p = $a->premiums;
+        
+        $p->select_func('COUNT', '*', 'count');
+        $p->where("PaidOn is null");
+        $p->where("DueDate between '".inp("fromDate")."' and '".nextDate("toDate")."'");
+        $p->where_related('account', 'id', '${parent}.id');
+
+        $p_paid = new Premium();
+        $p_paid->select_func('COUNT', '*', 'count');
+        $p_paid->where("PaidOn is not null");
+        $p_paid->where("DueDate between '".inp("fromDate")."' and '".inp("toDate")."'");
+        $p_paid->where_related('account', 'id', '${parent}.id');
+        $a->select_subquery($p_paid,'PaidPremiumCount');
+
+        
+        $a->select('*, id as PaneltyDUE, id as OtherCharges');
+        //$a->select('*');
+        $a->include_related('dealer','DealerName');
+        $a->include_related('agent/member','Name');
+        $a->include_related('agent/member','PhoneNos');
+
+        $a->select_subquery($p,'DuePremiumCount');
+        $a->select_subquery('(SELECT MAX(Amount) From jos_xpremiums p WHERE p.accounts_id=${parent}.id)','Amount');
+        // $a->select_subquery('(SELECT count(*) * MAX(Amount) From jos_xpremiums p WHERE p.accounts_id=${parent}.id)','Total');
+
+        $a->include_related('member','Name');
+        $a->include_related('member','FatherName');
+        $a->include_related('member','PhoneNos');
+        $a->include_related('member','CurrentAddress');
+        $a->include_related('scheme','Name');
+
+        $a->where_related('scheme','SchemeType like' ,'loan');
+        $a->where_related('dealer',"DealerName like '%".inp('DealerName')."%'");
+        $a->where("ActiveStatus",1);
+        $a->having("DuePremiumCount",0);
+        $a->where('ABS((CurrentBalanceCr+OpeningBalanceCr) - (CurrentBalanceDr+OpeningBalanceDr)) > ', 0);
+        $a->where("branch_id",Branch::getCurrentBranch()->id);
+
+        $a->get();
+        //echo $a->check_last_query();
+        $data['report']= getReporttable($a,             //model
+                array("Account Number",'Openned On',"Scheme","Member Name","Father Name", "Phone Number","Address","Paid Premium Count",'Due Premium Count','EMI Amount',"Due Penalty","Legal/Conveyance/Insurance Charge", 'Total',"Dealer Name","Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
+                array('AccountNumber','~date("Y-m-d",strtotime("#created_at"))', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress',"PaidPremiumCount",'DuePremiumCount','Amount','PaneltyDUE','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)",'dealer_DealerName','Nominee','MinorNomineeParentName','RelationWithNominee'),       //fields
+                array('PaneltyDUE','DuePremiumCount','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)"),        //totals_array
+                array(),        //headers
+                array('sno'=>true),     //options
+                "",     //headerTemplate
+                '',      //tableFooterTemplate
+                ""      //footerTemplate
+                );
+
+        JRequest::setVar("layout","generalreport");
+        $this->load->view('report.html', $data);
+        $this->jq->getHeader();
+    }
+
 	    function RDPremiumDueListForm(){
         xDeveloperToolBars::onlyCancel("report_cont.new_reports", "cancel", "RD Premium Due List");
         $this->load->library("form");
