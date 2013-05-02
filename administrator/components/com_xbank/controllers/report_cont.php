@@ -2493,7 +2493,7 @@ premiumcount >= 3 and premiumcount <= 4
   
     }
 
-    function loanDebtorsListForm(){
+    /*function loanDebtorsListForm(){
       xDeveloperToolBars::onlyCancel("report_cont.loanDebtorsListForm", "cancel", "Loan Debtors List");
         $this->load->library("form");
         $this->form->open("pSearch","index.php?option=com_xbank&task=report_cont.loanDebtorsList")
@@ -2567,7 +2567,7 @@ premiumcount >= 3 and premiumcount <= 4
         JRequest::setVar("layout","generalreport");
         $this->load->view('report.html', $data);
         $this->jq->getHeader();
-    }
+    }*/
 
 	    function RDPremiumDueListForm(){
         xDeveloperToolBars::onlyCancel("report_cont.new_reports", "cancel", "RD Premium Due List");

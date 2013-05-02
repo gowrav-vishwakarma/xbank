@@ -242,7 +242,7 @@ class xDeveloperToolBars extends JObject {
         JToolBarHelper::addNewX('report_cont.plEMIDueListForm', 'PL EMI <br/>Due List');
         JToolBarHelper::addNewX('report_cont.loanNPAListForm', 'NPA List');
         JToolBarHelper::addNewX('report_cont.loanHardRecoveryListForm', 'Hard <br/>Recovery List');
-        JToolBarHelper::addNewX('report_cont.loanDebtorsListForm', 'Loan <br/>Debtors List');
+        // JToolBarHelper::addNewX('report_cont.loanDebtorsListForm', 'Loan <br/>Debtors List');
         JToolBarHelper::addNewX('report_cont.loanReceiptReportForm', 'Loan <br/>Dispatch');
         JToolBarHelper::addNewX('report_2_cont.loanDocumentReportForm', 'Loan Document<br/> Report');
         JToolBarHelper::addNewX('report_cont.loanAccountReportForm', 'Loan <br/>Detailed/Premium<br/> Report');
