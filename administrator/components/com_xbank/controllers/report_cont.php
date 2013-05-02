@@ -2493,8 +2493,24 @@ premiumcount >= 3 and premiumcount <= 4
   
     }
 
+    function loanDebtorsListForm(){
+      xDeveloperToolBars::onlyCancel("report_cont.loanDebtorsListForm", "cancel", "Loan Debtors List");
+        $this->load->library("form");
+        $this->form->open("pSearch","index.php?option=com_xbank&task=report_cont.loanDebtorsList")
+                ->setColumns(2)
+                ->lookupDB("Dealer Name","name='DealerName' class='input ui-autocomplete-input'","index.php?option=com_xbank&task=ajax.loan_report_dealer&format=raw",
+                    array("a" => "b"),
+                    array("id","Name","Address"),"Name")
+                ->_()
+                ->submit("Go");
+       
+        $data['contents'] =$this->form->get();
+        $this->load->view('utility.html',$data);
+        $this->jq->getHeader();
+    }
+
     function loanDebtorsList(){
-      xDeveloperToolBars::onlyCancel("report_cont.new_reports", "cancel", "Loan NPA List");
+      xDeveloperToolBars::onlyCancel("report_cont.new_reports", "cancel", "Loan Debtors List");
       $a= new Account();
 
         $p = $a->premiums;
