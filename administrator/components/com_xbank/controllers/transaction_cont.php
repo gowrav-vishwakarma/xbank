@@ -92,11 +92,11 @@ class transaction_cont extends CI_Controller {
             $msg .="falsefalse";
            
         }
-        
-        if(file_exists("/public_html/soft/administrator/components/com_xbank/signatures/sig_".$ac->member->id.".JPG"))
-	            echo $msg . "<br/>Specimen Signature <img src='http://www.bhawanicredit.com/soft" . SIGNATURE_FILE_PATH . "sig_" . $ac->member->id . ".JPG' />";
+        $host=$_SERVER['HTTP_HOST'];
+        if(file_exists("/var/www/xbank/administrator/components/com_xbank/signatures/sig_".$ac->member->id.".JPG"))
+	            echo $msg . "<br/>Specimen Signature <img src='http://$host/xbank" . SIGNATURE_FILE_PATH . "sig_" . $ac->member->id . ".JPG' />";
 	        else
-	        	echo $msg . "<br/>Specimen Signature <img src='http://www.bhawanicredit.com/soft" . SIGNATURE_FILE_PATH . "sig_" . $ac->member->id . ".jpg' />";
+	        	echo $msg . "<br/>Specimen Signature <img src='http://$host/xbank" . SIGNATURE_FILE_PATH . "sig_" . $ac->member->id . ".jpg' />";
         
          echo $msg;
     }
@@ -220,11 +220,13 @@ class transaction_cont extends CI_Controller {
             $msg .= 'falsefalse';
             echo $msg;
         }
-        else
-        	if(file_exists("/public_html/soft/administrator/components/com_xbank/signatures/sig_".$ac->member->id.".JPG"))
-	            echo $msg . "<br/>Specimen Signature <img src='http://www.bhawanicredit.com/soft" . SIGNATURE_FILE_PATH . "sig_" . $ac->member->id . ".JPG' />";
+        else{
+            $host=$_SERVER['HTTP_HOST'];
+        	if(file_exists("/var/www/xbank/administrator/components/com_xbank/signatures/sig_".$ac->member->id.".JPG"))
+	            echo $msg . "<br/>Specimen Signature <img src='http://$host/xbank" . SIGNATURE_FILE_PATH . "sig_" . $ac->member->id . ".JPG' />";
 	        else
-	        	echo $msg . "<br/>Specimen Signature <img src='http://www.bhawanicredit.com/soft" . SIGNATURE_FILE_PATH . "sig_" . $ac->member->id . ".jpg' />";
+	        	echo $msg . "<br/>Specimen Signature <img src='http://$host/xbank" . SIGNATURE_FILE_PATH . "sig_" . $ac->member->id . ".jpg' />";
+        }
     }
 
 
