@@ -1590,7 +1590,7 @@ class accounts_cont extends CI_Controller {
         $list = array();
         $b = Branch::getCurrentBranch()->id;
         //$q="select m.id AS ID, m.Name AS Name, m.PanNo AS PanNo, m.PhoneNos from jos_xmember m join jos_xagents a on a.member_id = m.id where(m.id='%".$this->input->post("term")."%' or m.Name Like '%".$this->input->post("term")."%' )";
-        $q = "select a.*, s.Name, m.Name as MemberName from jos_xaccounts a join jos_xschemes s on a.schemes_id=s.id join jos_xbranch b on a.branch_id=b.id join jos_xmember m on a.member_id=m.id where(a.AccountNumber Like '%" . $this->input->post("term") . "%' AND (s.Name='Bank Accounts' OR s.Name='Cash Account' OR s.Name='Saving Account') or a.id Like '%" . $this->input->post("term") . "%' AND a.branch_id = $b and a.LockingStatus<>1 AND a.ActiveStatus<>0)";
+        $q = "select a.*, s.Name, m.Name as MemberName from jos_xaccounts a join jos_xschemes s on a.schemes_id=s.id join jos_xbranch b on a.branch_id=b.id join jos_xmember m on a.member_id=m.id where(a.AccountNumber Like '%" . $this->input->post("term") . "%' AND ((s.Name='Bank Accounts' OR s.Name='Cash Account' OR s.Name='Saving Account' OR s.Name='Branch & Divisions') or a.id Like '%" . $this->input->post("term") . "%') AND a.branch_id = $b and a.LockingStatus<>1 AND a.ActiveStatus<>0)";
         $result = $this->db->query($q)->result();
         foreach ($result as $dd) {
             $list[] = array('AccountNumber' => $dd->AccountNumber, 'MemberName' => $dd->MemberName);
