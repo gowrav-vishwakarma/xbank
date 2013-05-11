@@ -665,7 +665,7 @@ class test extends CI_Controller {
             // echo "Done " . $account_count++ . " out of " . $total_accounts . "<br/>";
             // ob_end_flush();
             $this->db->query("UPDATE jos_xpremiums SET Paid=0 WHERE accounts_id = $acc->id");
-            $due_and_paid_query = $this->db->query("SELECT GROUP_CONCAT(EXTRACT(YEAR_MONTH FROM DueDate)) DueArray, GROUP_CONCAT(EXTRACT(YEAR_MONTH FROM PaidOn)) PaidArray FROM jos_xpremiums WHERE accounts_id = $acc->id AND DueDate < '2013-05-01' ORDER BY id")->row();
+            $due_and_paid_query = $this->db->query("SELECT GROUP_CONCAT(EXTRACT(YEAR_MONTH FROM DueDate)) DueArray, GROUP_CONCAT(EXTRACT(YEAR_MONTH FROM PaidOn)) PaidArray FROM jos_xpremiums WHERE accounts_id = $acc->id AND PaidOn < '2013-05-01' ORDER BY id")->row();
             $due_array=explode(",",$due_and_paid_query->DueArray);
             $paid_array=explode(",",$due_and_paid_query->PaidArray);
 
@@ -673,7 +673,7 @@ class test extends CI_Controller {
             // print_r($paid_array);
             
             $account_premiums=$acc->premiums
-            ->where('DueDate < "2013-05-01"')
+            ->where('PaidOn < "2013-05-01"')
             ->order_by('id')
             ->get();
 
