@@ -655,7 +655,8 @@ class test extends CI_Controller {
         // $this->db->query($q);
 
         $a=new Account();
-        // $a->where('AccountNumber like', str_replace("-", "%", inp('acc'))); //Comment to run on all
+        if(inp('acc')) 
+                $a->where('AccountNumber like', str_replace("-", "%", inp('acc'))); //Comment to run on all
         $a->where_related('scheme', 'SchemeType', ACCOUNT_TYPE_RECURRING);
         $a->where('branch_id',Branch::getCurrentBranch()->id);
         $a->get();
@@ -665,15 +666,17 @@ class test extends CI_Controller {
             // echo "Done " . $account_count++ . " out of " . $total_accounts . "<br/>";
             // ob_end_flush();
             $this->db->query("UPDATE jos_xpremiums SET Paid=0 WHERE accounts_id = $acc->id");
-            $due_and_paid_query = $this->db->query("SELECT GROUP_CONCAT(EXTRACT(YEAR_MONTH FROM DueDate)) DueArray, GROUP_CONCAT(EXTRACT(YEAR_MONTH FROM PaidOn)) PaidArray FROM jos_xpremiums WHERE accounts_id = $acc->id AND DueDate < '2013-05-01' ORDER BY id")->row();
+            $due_and_paid_query = $this->db->query("SELECT GROUP_CONCAT(EXTRACT(YEAR_MONTH FROM DueDate)) DueArray, GROUP_CONCAT(EXTRACT(YEAR_MONTH FROM PaidOn)) PaidArray FROM jos_xpremiums WHERE accounts_id = $acc->id AND PaidOn < '2013-05-01' ORDER BY id")->row();
             $due_array=explode(",",$due_and_paid_query->DueArray);
             $paid_array=explode(",",$due_and_paid_query->PaidArray);
 
-            // print_r($due_array);
-            // print_r($paid_array);
+            if(inp('acc')){
+                print_r($due_array);
+                print_r($paid_array);
+            }
             
             $account_premiums=$acc->premiums
-            ->where('DueDate < "2013-05-01"')
+            ->where('PaidOn < "2013-05-01"')
             ->order_by('id')
             ->get();
 
@@ -682,6 +685,7 @@ class test extends CI_Controller {
                 $paid=0;
                 for($j=0;$j<=$i;$j++){
                     if(isset($paid_array[$j]) AND $paid_array[$j] <= $due_array[$i]) $paid++;
+                    // if(isset($paid_array[$j]) AND $j==0 AND $paid_array[$j] > $due_array[$i]) $paid++;
                 }
                 $p->Paid= $paid;
                 $p->save();                                
@@ -691,26 +695,30 @@ class test extends CI_Controller {
             // flush();
         }
 
-        // $p=new Premium();
-        // $p->include_related('account', 'AccountNumber');
-        // $p->where('accounts_id', $a->id);
-        // $p->get();
-
-        // $data['report']= getReporttable($p,             //model
-        //     array("id", 'Amount', "Due Date", 'Paid On', 'Paid'),       //heads
-        //     array('id', 'Amount', 'DueDate', 'PaidOn', 'Paid', ),       //fields
-        //     array(),        //totals_array
-        //     array("Account Number"=>'account_AccountNumber'),        //headers
-        //     array('sno'=>true),     //options
-        //     "",     //headerTemplate
-        //     '',      //tableFooterTemplate
-        //     ""      //footerTemplate
-        // );
-
-        // JRequest::setVar("layout", "generalreport");
-        // $this->load->view('report.html', $data);
-        // $this->jq->getHeader();
         echo "done";
+
+        if(inp('acc')){
+            // Comment below to run on all 
+            $p=new Premium();
+            $p->include_related('account', 'AccountNumber');
+            $p->where('accounts_id', $a->id);
+            $p->get();
+
+            $data['report']= getReporttable($p,             //model
+                array("id", 'Amount', "Due Date", 'Paid On', 'Paid'),       //heads
+                array('id', 'Amount', 'DueDate', 'PaidOn', 'Paid', ),       //fields
+                array(),        //totals_array
+                array("Account Number"=>'account_AccountNumber'),        //headers
+                array('sno'=>true),     //options
+                "",     //headerTemplate
+                '',      //tableFooterTemplate
+                ""      //footerTemplate
+            );
+
+            JRequest::setVar("layout", "generalreport");
+            $this->load->view('report.html', $data);
+            $this->jq->getHeader();
+        }
     }
 
 
@@ -852,6 +860,7 @@ class test extends CI_Controller {
 
         foreach ($accounts as $acc) {
         //TODO SET AgentCommissionSent =1 till last month first
+            echo "found $acc->AccountNumber <br/>";
             $q="UPDATE jos_xpremiums p SET AgentCommissionSend=1 WHERE PaidOn < '$paid_after'";
             $this->db->query($q);
 
@@ -863,6 +872,24 @@ class test extends CI_Controller {
         $this->premiumCorrection();
 
         $transactiondate = date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 day"));
+        
+        $q="
+            SELECT
+                a.id,
+                a.AccountNumber,
+                (SELECT COUNT(p.id)  FROM  jos_xpremiums p WHERE  p.Paid <> 0 AND p.AgentCommissionSend=0 AND p.accounts_id= a.id) to_set_commission
+            FROM
+                jos_xaccounts a
+            JOIN jos_xschemes s ON a.schemes_id = s.id
+            WHERE
+                a.branch_id = $branch
+                AND s.SchemeType='Recurring'
+            GROUP BY
+                a.id
+            HAVING to_set_commission > 0
+        ";
+
+        $accounts=$this->db->query($q)->result();
         foreach ($accounts as $ac) {
             $acc = new Account($ac->id);
             $voucherNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $ac->id);
@@ -873,15 +900,17 @@ class test extends CI_Controller {
     public function setCommissions($ac, $voucherNo, $transactiondate) {
         
 
-        $ssddhj = ($ac->id == 5077 ? "sdsds" : "dhdbhj");
+        $ssddhj = ($ac->id == 9558 ? "sdsds" : "dhdbhj");
 
         $CI = & get_instance();
-        $amount = $CI->db->query("select SUM(Amount * AgentCommissionPercentage / 100.00 ) AS Totals from jos_xpremiums where Paid <> 0 AND Skipped = 0 AND AgentCommissionSend = 0 AND accounts_id = $ac->id AND Paid <> 0 ")->row()->Totals;
+        $amount = $CI->db->query("select SUM(Amount * AgentCommissionPercentage / 100.00 ) AS Totals from jos_xpremiums where Paid <> 0 AND Skipped = 0 AND AgentCommissionSend = 0 AND accounts_id = $ac->id")->row()->Totals;
         $scfcsg = $ac->AccountNumber;
         $ag = new Agent($ac->agents_id);
         $agentAccount = $ag->AccountNumber;//get()->AccountNumber;
         $gbngfn =10;
+        echo "For $ac->AccountNumber agent $ag->AccountNumber <br/>";
         if ($agentAccount) {
+            echo " ----- Going in <br/>";
             $agent = new Agent();
             $agent->where("AccountNumber",$agentAccount)->get();
             $schemename = $ac->scheme->Name;
