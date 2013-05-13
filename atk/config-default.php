@@ -8,6 +8,9 @@ $config['url_prefix']='?page=';
 
 $config['logger']['log_dir']='./';
 
+$config['locale']['date']="Y-m-d H:i:s";
+// $config['locale']['date_js']="d/m/y";
+
 date_default_timezone_set('Asia/Calcutta');
 // echo date('H:i:s', time()); 
 
