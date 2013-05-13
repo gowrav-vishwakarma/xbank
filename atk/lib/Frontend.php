@@ -79,7 +79,7 @@ class Frontend extends ApiFrontend {
         $m->addMenuItem('logout')
             ;
           
-        $this->add('H1', null, 'logo')->set("Bhawani Credit Co-Operative Soceity");
+        $this->add('H1', null, 'logo')->set("Bhawani Credit Co-Operative Soceity [".$this->api->auth->model->ref('branch_id')->get('name')."] [".$this->api->auth->model['name']."]");
         $this->add('Text', null, 'footer_text')->setHTML("&copy; copyright");
         $this->addLayout('UserMenu');
         
