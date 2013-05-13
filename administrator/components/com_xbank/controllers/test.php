@@ -685,6 +685,7 @@ class test extends CI_Controller {
                 $paid=0;
                 for($j=0;$j<=$i;$j++){
                     if(isset($paid_array[$j]) AND $paid_array[$j] <= $due_array[$i]) $paid++;
+                    // if(isset($paid_array[$j]) AND $j==0 AND $paid_array[$j] > $due_array[$i]) $paid++;
                 }
                 $p->Paid= $paid;
                 $p->save();                                
