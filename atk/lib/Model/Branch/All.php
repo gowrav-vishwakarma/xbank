@@ -16,6 +16,9 @@ class Model_Branch_All extends Model_Table{
 		$this->hasMany('Stock','branch_id');
 		$this->hasMany('Stock_Purchase','branch_id');
 		$this->hasMany('Stock_Consume','branch_id');
+		$this->hasMany('Holidays','branch_id');
+		$this->hasMany('Employee','branch_id');
+
 
 	}
 }

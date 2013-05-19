@@ -13,6 +13,19 @@ class page_stock_consume extends Page{
 		// $form->addField('dropdown','branch')->setEmptyText('Select Any item')->validateNotNull()->setModel('Branch');
 		$form->addField('line','Quantity')->validateNotNull();
 		$form->addField('DatePicker','date')->validateNotNull()->set(date('Y-m-d'));
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+		// $form->addField('time','date')->validateNotNull()->set(date('Y-m-d H:i:s'));
+=======
+>>>>>>> 2464172d27a3e5ea554f988e4fdcc00793a3dd6a
+=======
+>>>>>>> 2464172d27a3e5ea554f988e4fdcc00793a3dd6a
+=======
+>>>>>>> 2464172d27a3e5ea554f988e4fdcc00793a3dd6a
+=======
+>>>>>>> 2464172d27a3e5ea554f988e4fdcc00793a3dd6a
 		$form->addField('text','Remarks')->validateNotNull();
 		$form->addSubmit('Consume');
 

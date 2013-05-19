@@ -72,6 +72,7 @@ class Frontend extends ApiFrontend {
         
         $m->addMenuItem('index','Welcome');
         $m->addMenuItem('stock','Stock Management');
+        $m->addMenuItem('employee','Emoloyee Management');
 
         // if($pp==1)
         // {
