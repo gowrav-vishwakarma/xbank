@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+    <params>
+        <param name="Closing_mode" type="radio" default="0" label="Closing Mode" description="Closing Mode - whether to close the accounts manually or do it automatically" >
+            <option value="0">Manual</option>
+            <option value="1">Automatic</option>
+        </param>
+    </params>
+</config>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+    <params>
+   <param name="branch_toolbar" type="radio" default="1" label="Show Branch Toolbar" description="Weather to show Branch Toolbar or not">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+        <param name="schemes_toolbar" type="radio" default="1" label="Show Schemes Toolbar" description="Weather to show Schemes Toolbar or not">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+        <param name="member_toolbar" type="radio" default="1" label="Show Member Toolbar" description="Weather to show Member Toolbar or not">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+        <param name="staff_toolbar" type="radio" default="1" label="Show Staff Toolbar" description="Weather to show Staff Toolbar or not">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+        <param name="agent_toolbar" type="radio" default="1" label="Show Agent Toolbar" description="Weather to show Agent Toolbar or not">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+        <param name="accounts_toolbar" type="radio" default="1" label="Show Accounts Toolbar" description="Weather to show Accounts Toolbar or not">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+        
+         <param name="transaction_toolbar" type="radio" default="1" label="Show Transactions Toolbar" description="Weather to show Transactions Toolbar or not">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+         <param name="report_toolbar" type="radio" default="1" label="Show Report Toolbar" description="Weather to show Report Toolbar or not">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+         <param name="setdate_toolbar" type="radio" default="1" label="Show Setdate Toolbar" description="Weather to show Setdate Toolbar or not">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+        </params>
+</config>

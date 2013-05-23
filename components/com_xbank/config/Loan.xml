@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+    <params>
+        <param name="Default_Accounts" type="text" default="" label="Default Accounts" description="Default Accounts to create while creating the new scheme" ></param>
+   
+        <param name="deposit_penalty_in_closing" type="radio" default="0" label="Deposit penalty automatically during closing" description="Deposit Penalty on Loan Account automatically during Closing or Deposit it Manually" >
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+    </params>
+</config>

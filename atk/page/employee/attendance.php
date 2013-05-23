@@ -36,7 +36,7 @@ class page_employee_attendance extends Page{
 						$att_add['Created_At']=$_GET['date'];
 						$att_add['TimeHour']=date('H');
 						$att_add['TimeMinute']=date('i');
-						$att_add['Mode']='A';
+						$att_add['Mode']='P'; //Default Attendance for new rows
 						$att_add['emp_id']=$emp->id;
 						$att_add->save();
 					}

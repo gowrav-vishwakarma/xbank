@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+    <params>
+        <param name="saving_account_interest" type="text" default="4" label="Saving Account Interest Rate" description="Saving Account Interest Rate" ></param>
+
+    </params>
+
+</config>

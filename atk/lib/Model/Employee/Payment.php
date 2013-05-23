@@ -17,8 +17,10 @@ class Model_Employee_Payment extends Model_Table{
 		$this->addField('Deduction');//->display(array("grid"=>"grid/inline","form"=>"line"));
 		$this->addField('Narration');//->display(array("grid"=>"grid/inline","form"=>"line"));
 		$this->addField('Created_At')->type('date')->defaultValue(date('Y-m-d'));
+		$this->addField('branch_id');
 
 		$this->addField('MonthYear')->defaultValue(date('Ym'));
+
 
 		$this->addHook('beforeSave',$this);
 	}
@@ -26,6 +28,8 @@ class Model_Employee_Payment extends Model_Table{
 	function beforeSave(){
 		$emp=$this->add('Model_Employee');
 		$emp->load($this['emp_id']);
+		$this['branch_id']=$emp['branch_id'];
+
 		$this['Salary'] = (($emp['Salary']/$this['TotalWorkingDays'])*($this['PresentDays']+$this['LeavesPaid'])) - $this['Deduction'];
 			
 		$this['PFAmount']=0;

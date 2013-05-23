@@ -1,11 +1,11 @@
 <?php
 class page_employee_payment extends Page{
-	function init() {
-		parent::init();
+	function page_index() {
+		// parent::init();
 
-		$this->api->stickyGET('filter');
-		$this->api->stickyGET('branch');
-		$this->api->stickyGET('date');
+		// $this->api->stickyGET('filter');
+		// $this->api->stickyGET('branch');
+		// $this->api->stickyGET('date');
 
 		$payment=$this->add( 'Model_Employee_Payment' );
 		$payment_for_grid=$this->add( 'Model_Employee_Payment' );
@@ -18,13 +18,13 @@ class page_employee_payment extends Page{
 		
 
 		if ( $_GET['filter'] ) {
-			$emp=$payment->join( 'jos_xatk_employee.id', 'emp_id' );
-			$emp->addField( 'branch_id' );
+			// $emp=$payment->leftJoin( 'jos_xatk_employee.id', 'emp_id' );
+			// $emp->addField( 'branch_id' );
 			$payment->addCondition( 'branch_id', $_GET['branch'] );
 			$payment->addCondition( 'MonthYear', date( 'Ym', strtotime( $_GET['date'] ) ) );
 
-			$emp=$payment_for_grid->join( 'jos_xatk_employee.id', 'emp_id' ,null,'a');
-			$emp->addField( 'branch_id' );
+			// $emp=$payment_for_grid->Join( 'jos_xatk_employee.id', 'emp_id' ,'right','a');
+			// $emp->addField( 'branch_id' );
 			$payment_for_grid->addCondition( 'branch_id', $_GET['branch'] );
 			$payment_for_grid->addCondition( 'MonthYear', date( 'Ym', strtotime( $_GET['date'] ) ) );
 
@@ -36,7 +36,7 @@ class page_employee_payment extends Page{
 				foreach ( $emp as $junk ) {
 					$payment_add_check=$this->add( 'Model_Employee_Payment' );
 					$payment_add_check->addCondition( 'emp_id', $emp->id );
-					$payment_add_check->addCondition( 'MonthYear', $_GET['MonthYear'] );
+					$payment_add_check->addCondition( 'MonthYear', date( 'Ym', strtotime( $_GET['date'] ) ));
 					$payment_add_check->tryLoadAny();
 					if ( !$payment_add_check->loaded() ) {
 						$payment_add=$this->add( 'Model_Employee_Payment' );
@@ -52,7 +52,7 @@ class page_employee_payment extends Page{
 
 			}
 		}else{
-			$payment_for_grid->addCondition('id',-1);
+			if(!$this->api->isAjaxOutput()) $payment_for_grid->addCondition('id',-1);
 		}
 
 		// $payment_for_grid->debug();

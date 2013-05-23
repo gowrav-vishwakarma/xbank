@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+    <params>
+        <param name="MemberRegistrationCharges" type="text" default="0" label="Member Registration Charges" description="Member Registration Charges" ></param>
+        <param name="occupation_entry" type="radio" default="1" label="Occupation Entry" description="Whether to Enter member occupation manually or select from dropdown">
+            <option value="0">Manual</option>
+            <option value="1">Dropdown</option>
+        </param>
+        <param name="occupation_dropdown_list" type="text" label="Occupation Dropdown List" description="Give various Occupations here" ></param>
+         <param name="relation_entry" type="radio" default="1" label="Relation Entry" description="Whether to Enter Relation occupation manually or select from dropdown">
+            <option value="0">Manual</option>
+            <option value="1">Dropdown</option>
+        </param>
+         <param name="relation_dropdown_list" type="text" label="Relation Dropdown List" description="Give various Relations here" ></param>
+    </params>
+
+</config>

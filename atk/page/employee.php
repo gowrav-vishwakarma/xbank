@@ -10,5 +10,6 @@ class page_employee extends Page{
 		$tabs->addtabUrl('employee_leaves','Leaves');
 		$tabs->addtabUrl('employee_holidays','Holidays');
 		$tabs->addtabUrl('employee_add','Add New Employee');
+		$tabs->addtabUrl('employee_report','Attendance Report');
 	}
 }

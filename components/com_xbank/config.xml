@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+    <!-- Joomla 1.5 uses Params and param tags -->
+    <params>
+        <param name="no_of_branches_allowed" type="text" default="2" label="No Of Branches Allowed" description="No Of Branches including HO"></param>
+        <param name="ACCOUNT_TYPES" type="text" default="Loan,CC,FixedAndMis,Default,SavingAndCurrent,Recurring,DDS" label="ACCOUNT_TYPES Allowed" description="ACCOUNT_TYPES like Loan,CC,FixedAndMis,Default,SavingAndCurrent,Recurring,DDS" ></param>
+        <param name="bank_has_rds" type="radio" default="1" label="Bank Has RD(s)" description="Weather this Bank has Standard Type of RD Schemes">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+        <param name="bank_has_fds" type="radio" default="1" label="Bank Has FD(s)" description="Weather this Bank has Standard Type of FD Schemes">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+        <param name="bank_has_saving_and_current_accounts" type="radio" default="1" label="Bank Has Savings / Current A/Cs" description="Weather this Bank has Saving or Current Account Schemes">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+        <param name="bank_has_loans" type="radio" default="1" label="Bank Has Loans(s)" description="Weather this Bank has Standard Type of Loans Schemes">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+        <param name="bank_has_cc" type="radio" default="1" label="Bank Has CC(s)" description="Weather this Bank has Standard Type of CC Schemes">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+        <param name="bank_has_dds" type="radio" default="1" label="Bank Has DDS(s)" description="Weather this Bank has Standard Type of DDS (Daily Deposit Schemes)  Schemes">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+        <param name="bank_can_design_custom_schemes" type="radio" default="0" label="Bank can design custom schemes" description="There is a Special Custom Scheme Designer other then above ones, Do this bank has access to that">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+        <param name="allow_advanced_schemedesigner_options" type="radio" default="1" label="Bank Has RD(s)" description="Weather this Bank has Standard Type of RD Schemes">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+        <param name="@spacer" type="spacer" default="" label="" description="" />
+
+        <param name="member_has_code" type="radio" default="0" label="Member has Member Code" description="Whether member has special code other than member id">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+        <param name="member_code_auto_generated" type="radio" default="0" label="Member Code Auto Generated" description="Whether member code is auto generated or not">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+        <param name="default_member_code" type="text" label="Member Code Series Starts From" description="Give the starting Code of the series like J00000000"></param>
+        <param name="@spacer" type="spacer" default="" label="" description="" />
+
+        <param name="customer_has_code" type="radio" default="0" label="Customer has Customer Code" description="Whether Customer has special code other than member id">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+        <param name="customer_code_auto_generated" type="radio" default="0" label="Customer Code Auto Generated" description="Whether Customer code is auto generated or not">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+        <param name="default_customer_code" type="text" label="Customer Code Series Starts From" description="Give the starting Code of the series like C00000000"></param>
+        <param name="@spacer" type="spacer" default="" label="" description="" />
+
+
+        <param name="agent_has_code" type="radio" default="0" label="Agent has Agent Code" description="Whether Agent has special code other than member code">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+        <param name="agent_code_auto_generated" type="radio" default="0" label="Agent Code Auto Generated" description="Whether Agent code is auto generated or not">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+        <param name="default_agent_code" type="text" label="Agent Code Series Starts From" description="Give the starting Code of the series like 10001"></param>
+        <param name="@spacer" type="spacer" default="" label="" description="" />
+
+
+        <param name="share_accountnumber_auto_generated" type="radio" default="0" label="Share Account Number Auto Generated" description="Whether Share Account Number is auto generated or not">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+        <param name="default_share_accountnumber" type="text" label="Share Account Number Series Starts From" description="Give the starting Code of the series like SM0000000"></param>
+        <param name="@spacer" type="spacer" default="" label="" description="" />
+
+        <param name="saving_accountnumber_auto_generated" type="radio" default="0" label="Saving Account Number Auto Generated" description="Whether Saving Account Number is auto generated or not">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+        <param name="default_saving_accountnumber" type="text" label="Saving Account Number Series Starts From" description="Give the starting Code of the series like SB0000000"></param>
+        <param name="@spacer" type="spacer" default="" label="" description="" />
+
+        <param name="cc_accountnumber_auto_generated" type="radio" default="0" label="CC Account Number Auto Generated" description="Whether CC Account Number is auto generated or not">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+        <param name="default_cc_accountnumber" type="text" label="CC Account Number Series Starts From" description="Give the starting Code of the series like CC400"></param>
+        <param name="@spacer" type="spacer" default="" label="" description="" />
+
+        <param name="loan_accountnumber_auto_generated" type="radio" default="0" label="Loan Account Number Auto Generated" description="Whether Loan Account Number is auto generated or not">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+        <param name="default_loan_accountnumber" type="text" label="Loan Account Number Series Starts From" description="Give the starting Code of the series like L300"></param>
+        <param name="@spacer" type="spacer" default="" label="" description="" />
+        
+        <param name="other_accountnumber_auto_generated" type="radio" default="0" label="Other Account Numbers Auto Generated" description="Whether Other Account Numbers are auto generated or not">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+        <param name="default_other_accountnumber" type="text" label="Other Account Numbers Series Starts From" description="Give the starting Code of the series like 14100000"></param>
+
+        <param name="@spacer" type="spacer" default="" label="" description="" />
+
+
+
+        <param name="RowsInData" type="text" default="25" label="Pagination Rows in Any Table View" description="How many lines of data in a table you want in any distributor_area views"></param>
+
+    </params>
+     <!-- Joomla 1.6 and above uses Fieldset and field tags -->
+    <fieldset name='Globals' lable='Your Global Configs'>
+        <field name="no_of_branches_allowed" type="text" default="2" label="No Of Branches Allowed" description="No Of Branches including HO"/>
+    </fieldset>
+</config>
