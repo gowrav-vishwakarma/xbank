@@ -15,12 +15,13 @@ class Model_Employee_All extends Model_Table {
 		$this->addField('OtherDetails');
 		$this->addField('Salary');
 		$this->addField('Allownces');
+		$this->addField('isPFApplicable')->type('boolean')->caption('IF PF Applicable');
 		$this->addField('PFSalary');
-		$this->addField('isPFApplicable');
 		$this->addField('PFAmount');
 		$this->addField('TDSAmount');
+		$this->addField('SalaryMode')->enum(array("Bank","Cash","Sb_Acc"));
 		$this->addField('Account_Number');
-		$this->addField('SalaryMode');
+		$this->addField('Bank_Name');
 		$this->addField('is_Active')->type('boolean');
 		$this->hasMany('Employee_Attendance','emp_id');
 		$this->hasMany('Employee_Payment','emp_id');

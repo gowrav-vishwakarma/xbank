@@ -74,6 +74,32 @@ class Premium extends DataMapper {
         }
     }
 
+    function reAdjustPaidValue(){
+        $CI = & get_instance();
+        $CI->db->query("UPDATE jos_xpremiums SET Paid=0 WHERE accounts_id = $this->accounts_id");
+        $due_and_paid_query = $CI->db->query("SELECT GROUP_CONCAT(EXTRACT(YEAR_MONTH FROM DueDate)) DueArray, GROUP_CONCAT(EXTRACT(YEAR_MONTH FROM PaidOn)) PaidArray FROM jos_xpremiums WHERE accounts_id = $this->accounts_id AND PaidOn is not null ORDER BY id")->row();
+        $due_array=explode(",",$due_and_paid_query->DueArray);
+        $paid_array=explode(",",$due_and_paid_query->PaidArray);
+        
+        $account_premiums=new Premium();
+        $account_premiums->where('account_id',$this->accounts_id)
+        ->where('PaidOn is not null')
+        ->order_by('id')
+        ->get();
+
+        $i=0;
+        foreach($account_premiums as $p){
+            $paid=0;
+            for($j=0;$j<=$i;$j++){
+                if(isset($paid_array[$j]) AND $paid_array[$j] <= $due_array[$i]) $paid++;
+                // if(isset($paid_array[$j]) AND $j==0 AND $paid_array[$j] > $due_array[$i]) $paid++;
+            }
+            $p->Paid= $paid;
+            $p->save();                                
+            $i++;
+        }
+    }
+
 }
 
 ?>
