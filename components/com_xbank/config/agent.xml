@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+    <params>
+        <param name="number_of_agent_levels" type="text" default="0" label="Number of Agent Levels" description="Define the number of levels of the Agents for Commission Distribution" ></param>
+
+        <param name="manually_promote_agent" type="radio" default="0" label="Promote an Agent to Next Level Manually" description="Whether to promote an agent manually or the software automatically promotes him">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+
+        <param name="transfer_commission_to_agents_account" type="radio" default="1" label="Transfer the commission on scheme to agent's account" description="Whether to transfer the commission generated on a scheme to agent's account or to keep it in accounts payable">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </param>
+    </params>
+
+
+</config>

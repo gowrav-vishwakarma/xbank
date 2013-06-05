@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+    <params>
+        <param name="delete_transaction" type="radio" default="1" label="Delete Transaction done before last closing Date" description="Whether to Delete Transaction done before last closing Date">
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+        </param>
+    </params>
+
+</config>

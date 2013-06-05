@@ -961,4 +961,66 @@ class test extends CI_Controller {
     }
 
 
+    function Branch_Division_Create(){
+        $other_branches = new Branch();
+        $other_branches->where('id <>',9);
+        $other_branches->get();
+
+        $syra_branch=new Branch();
+        $syra_branch->where('id',9);
+        $syra_branch->get();
+
+        foreach($other_branches as $ob){
+            $m= new Member();
+            $m->where('Name',$ob->Code. " Default");
+            $m->get();
+            $Acc = new Account();
+            $Acc->member_id = $m->id;
+            $Acc->schemes_id = 96;
+
+            $Acc->agents_id = null; // TODO - Can any other Agent give you id or only your own agent can give you this ...
+            $Acc->staff_id = Staff::getCurrentStaff()->id; //Current_Staff::staff()->id;
+            $Acc->branch_id = $ob->id;
+            $Acc->ActiveStatus = 1;
+            $Acc->Nominee = "";  // IMP : used as guarantor for loan accounts
+            $Acc->NomineeAge = "";
+            $Acc->RelationWithNominee = "";
+            $Acc->MinorNomineeDOB =  '' ;
+            $Acc->MinorNomineeParentName = '';   // IMP : used as guarantor Address for loan accounts
+            $Acc->ModeOfOperation = "Self";
+            $Acc->AccountNumber = $syra_branch->Code . SP . BRANCH_AND_DIVISIONS . SP . "for" . SP . $ob->Code;
+            $Acc->RdAmount = 0;
+            $Acc->DefaultAC = 0;
+            $Acc->LastCurrentInterestUpdatedAt = null;
+            $Acc->created_at = getNow();
+            $Acc->save();
+
+            $m= new Member();
+            $m->where('Name',$syra_branch->Code. " Default");
+            $m->get();
+            $Acc = new Account();
+            $Acc->member_id = $m->id;
+            $Acc->schemes_id = 96;
+
+            $Acc->agents_id = null; // TODO - Can any other Agent give you id or only your own agent can give you this ...
+            $Acc->staff_id = Staff::getCurrentStaff()->id; //Current_Staff::staff()->id;
+            $Acc->branch_id = $syra_branch->id;
+            $Acc->ActiveStatus = 1;
+            $Acc->Nominee = "";  // IMP : used as guarantor for loan accounts
+            $Acc->NomineeAge = "";
+            $Acc->RelationWithNominee = "";
+            $Acc->MinorNomineeDOB =  '' ;
+            $Acc->MinorNomineeParentName = '';   // IMP : used as guarantor Address for loan accounts
+            $Acc->ModeOfOperation = "Self";
+            $Acc->AccountNumber = $ob->Code . SP . BRANCH_AND_DIVISIONS . SP . "for" . SP . $syra_branch->Code;
+            $Acc->RdAmount = 0;
+            $Acc->DefaultAC = 0;
+            $Acc->LastCurrentInterestUpdatedAt = null;
+            $Acc->created_at = getNow();
+            $Acc->save();
+
+
+        }
+    }
+
 }

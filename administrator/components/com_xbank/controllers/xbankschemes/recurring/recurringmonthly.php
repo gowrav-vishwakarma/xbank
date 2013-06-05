@@ -23,7 +23,7 @@ if (SET_COMMISSIONS_IN_MONTHLY) {
     foreach ($accounts as $ac) {
         $acc = new Account($ac->id);
         $voucherNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $ac->id);
-         Premium::setCommissions($acc, $voucherNo,$transactiondate);
+        Premium::setCommissions($acc, $voucherNo,$transactiondate);
     }
 }
 

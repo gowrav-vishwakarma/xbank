@@ -103,7 +103,7 @@ $premiumsSubmited = (int) ($AmountForPremiums / $ac->RdAmount);
 
 
 if ($premiumsSubmited > $duePremiums) {
-    $msg .="<h2>Only $duePremiums premiums Due.. Cannot Deposit more amount <h2><br> false";
+    $msg .="<h2>Only $duePremiums premiums Due.. Cannot Deposit more amount <h2><br> falsefalse";
     echo $msg;
     return;
 }
