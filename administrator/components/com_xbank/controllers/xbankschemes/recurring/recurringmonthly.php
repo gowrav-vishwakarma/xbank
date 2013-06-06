@@ -15,12 +15,16 @@ if (SET_COMMISSIONS_IN_MONTHLY) {
 //                    ->where("a.id = t.accounts_id and s.SchemeType ='" . ACCOUNT_TYPE_RECURRING . "' and t.created_at >= DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH) and t.created_at < '" . getNow("Y-m-d") . "' and a.branch_id=" . Branch::getCurrentBranch()->id);
 //    $accounts = $q->execute();
 
-    $CI = & get_instance();
-    $accounts = $CI->db->query("select a.* from jos_xaccounts a join  jos_xtransactions t on a.id=t.accounts_id join jos_xschemes s on a.schemes_id = s.id where a.id = t.accounts_id and s.SchemeType ='" . ACCOUNT_TYPE_RECURRING . "' and t.created_at >= DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH) and t.created_at < '" . getNow("Y-m-d") . "' and a.ActiveStatus = 1 and a.branch_id=" . Branch::getCurrentBranch()->id)->result();
+	// echo 'I am in';
 
+    $CI =& get_instance();
+    $accounts = $CI->db->query("select a.* from jos_xaccounts a join  jos_xtransactions t on a.id=t.accounts_id join jos_xschemes s on a.schemes_id = s.id where s.SchemeType ='" . ACCOUNT_TYPE_RECURRING . "' and t.created_at >= DATE_ADD('" . getNow("Y-m-d") . "',INTERVAL -1 MONTH) and t.created_at < '" . getNow("Y-m-d") . "' and a.ActiveStatus = 1 and a.branch_id=" . Branch::getCurrentBranch()->id)->result();
+
+	// echo count($accounts);
 
     $transactiondate = date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 day"));
     foreach ($accounts as $ac) {
+    	// echo $ac->AccountNumber . "<br/>";
         $acc = new Account($ac->id);
         $voucherNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $ac->id);
         Premium::setCommissions($acc, $voucherNo,$transactiondate);

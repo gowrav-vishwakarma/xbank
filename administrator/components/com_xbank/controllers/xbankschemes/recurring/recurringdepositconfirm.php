@@ -101,6 +101,7 @@ $PremiumAmountAdjusted = $PaidPremiums * $ac->RdAmount;
 $AmountForPremiums = ($ac->CurrentBalanceCr + inp("Amount")) - $PremiumAmountAdjusted - $q->interest;
 $premiumsSubmited = (int) ($AmountForPremiums / $ac->RdAmount);
 
+$this->session->set_userdata('premiums_submitted',$premiumsSubmited);
 
 if ($premiumsSubmited > $duePremiums) {
     $msg .="<h2>Only $duePremiums premiums Due.. Cannot Deposit more amount <h2><br> falsefalse";
