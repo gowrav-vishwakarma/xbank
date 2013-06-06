@@ -96,11 +96,17 @@ $AmountForPremiums = $ac->CurrentBalanceCr + inp("Amount") - $PremiumAmountAdjus
 
 $premiumsSubmited = (int) ($AmountForPremiums / $ac->RdAmount);
 
+if($this->session->userdata('premiums_submitted') != $premiumsSubmited)
+{
+    throw new Exception("Premiums not matched");
+}
+
 /* adjusting the remaining premi	mum for the RD account on the money deposited
  * and the date of premimum deposited should be the current date
  */
-
+// echo "checking";
 if ($premiumsSubmited > 0) {
+    // echo "ckecked";
 //    $q="select p.* from jos_xpremiums p where accounts_id=$ac->id and Paid=0 and Skipped=0 order by id limit $premiumsSubmited";
 //    $q = Doctrine_Query::create()
 //                    ->select("p.*")
@@ -117,19 +123,15 @@ if ($premiumsSubmited > 0) {
     $result->order_by("id");
     $result->limit($premiumsSubmited)->get();
 
+
     foreach ($result as $r) {
-    	if(date("Y",strtotime($r->DueDate)) < date("Y",strtotime($transactiondate)))
-    		$PaidPremiums;
-    	else{
-	    	if( date("m",strtotime($r->DueDate)) < date("m",strtotime($transactiondate)))
-    			$PaidPremiums;
-    		else
-	    		++$PaidPremiums;
-    	}
         $r->PaidOn = $transactiondate;
-        $r->Paid = $PaidPremiums;
+        // $r->Paid = $PaidPremiums; //moved in premium model 
         $r->save();
     }
+
+    $result->reAdjustPaidValue();
+
 }
 if (!SET_COMMISSIONS_IN_MONTHLY) {
     Premium::setCommissions($ac, $voucherNo, getNow("Y-m-d"));

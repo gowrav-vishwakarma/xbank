@@ -282,4 +282,97 @@ class utility_cont extends CI_Controller{
 
     }
 
+    function rdResetPremiumsPage(){
+        $a= new Account();
+        $a->where('ActiveStatus',1);
+        $a->where('branch_id',Branch::getCurrentBranch()->id);
+        $a->where_related('scheme','SchemeType','Recurring');
+        $a->order_by('id');
+        $a->get();
+
+        $data['report'] = getReporttable($a,             //model
+                array("AccountNumber", 'RD Amount'),       //heads
+                array('AccountNumber','RdAmount'),       //fields
+                array(),        //totals_array
+                array(),        //headers
+                array('sno'=>true),     //options
+                "header",     //headerTemplate
+                '',      //tableFooterTemplate
+                "",      //footerTemplate,
+                array('AccountNumber'=>
+                        array(
+                            'task'=>'utility_cont.rdResetPremium',
+                            'class'=>'alertinwindow',
+                            'title'=>'_blank',
+                            'url_post'=>array('format'=>'"raw"','accountid'=>'#id')
+                            )
+                    )//Links array('field'=>array('task'=>,'class'=>''))
+                );        
+
+        JRequest::setVar("layout","generalreport");
+        $this->load->view('report.html', $data);
+
+        $this->jq->getHeader();
+
+    }
+
+    function rdResetPremium(){
+        $acc=new Account(inp('accountid'));
+        $deposit=0;
+        $premiums_paid=0;
+        $transactions = $acc->transactions->where('transaction_type_id',10)->get();
+        $pre=null;
+        foreach($transactions as $tr){
+            echo $tr->id . "<br/>";
+            $deposit += $tr->amountCr;
+            if($deposit >= $acc->RdAmount){
+                $to_pay = (int) ($deposit / $acc->RdAmount);
+
+                    $pre=$acc->premiums->limit(1,$to_pay)->get();
+                    foreach($pre as $pr){
+                        $pr->PaidOn = $tr->created_at;
+                        $pr->save();
+                    }
+                    $premiums_paid += $to_pay;
+                    $deposit = $deposit % $acc->RdAmount;   
+                echo "editing premium $premiums_paid and setting PaidOn on " . $pre->PaidOn . "<br/>";
+            }
+        }
+        if($pre !== null) $pre->reAdjustPaidValue();
+        echo "Done";
+    }
+
+    function rdResetPremiumALL(){
+        $acc1=new Account();
+        $acc1->where_related('scheme','SchemeType','Recurring');
+        $acc1->where('branch_id',Branch::getCurrentBranch()->id);
+        $acc1->get();
+
+        foreach($acc1 as $acc){
+            $deposit=0;
+            $premiums_paid=0;
+            $transactions = $acc->transactions->where('transaction_type_id',10)->get();
+            $pre=null;
+            foreach($transactions as $tr){
+                echo $tr->id . "<br/>";
+                $deposit += $tr->amountCr;
+                if($deposit >= $acc->RdAmount){
+                    
+                    $to_pay = (int) ($deposit / $acc->RdAmount);
+
+                    $pre=$acc->premiums->limit(1,$to_pay)->get();
+                    foreach($pre as $pr){
+                        $pr->PaidOn = $tr->created_at;
+                        $pr->save();
+                    }
+                    $premiums_paid += $to_pay;
+                    $deposit = $deposit % $acc->RdAmount;
+                    echo "editing premium $premiums_paid and setting PaidOn on " . $pre->PaidOn . "<br/>";
+                }
+            }
+            if($pre !== null) $pre->reAdjustPaidValue();
+            echo "Done";
+        }
+    }
+
 }

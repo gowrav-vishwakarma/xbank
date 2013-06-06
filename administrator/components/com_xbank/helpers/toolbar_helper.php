@@ -44,7 +44,7 @@ class xDeveloperToolBars extends JObject {
             if ($xc->getkey('schemes_toolbar'))
                 JToolBarHelper :: customX('schemes_cont.dashboard', 'schemes', 'schemes', 'Schemes', false, false);
             if ($xc->getkey('staff_toolbar'))
-                JToolBarHelper::customX('staff_cont.dashboard', 'staff','staff','Staff',false,false);
+                JToolBarHelper::customX('staff_cont.dashboard', 'staff','staff','Users',false,false);
             if ($xc->getkey('member_toolbar'))
                 JToolBarHelper::customX('member_cont.dashboard', 'member','member',"Member",false,false);
             if ($xc->getkey('agent_toolbar'))
@@ -58,15 +58,15 @@ class xDeveloperToolBars extends JObject {
             if ($xc->getkey('setdate_toolbar'))
                     JToolBarHelper :: customX('setdate_cont.setDateTimeForm', 'setdate', 'setdate', 'SetDate', false, false);
                     
-            JToolBarHelper::addNew('report_cont.new_reports', 'Loan Reports');
-            JToolBarHelper::addNewX('inventory_cont.dashboard', 'Management');
+            JToolBarHelper::customX('report_cont.new_reports','loan','loan', 'Loan Reports',false,false);
+            JToolBarHelper::customX('inventory_cont.dashboard','adduser','adduser', 'Management',false,false);
                     
              if ($u->username != 'admin')
                      JToolBarHelper :: customX('customreport_cont.index', 'config', 'config', 'General Report', false, false);
             if($u->gid >= 24)
                      JToolBarHelper :: customX('documents_cont.documentForm', 'config', 'config', 'Documents', false, false);
 
-            JToolBarHelper :: customX('printing_cont.index', null, null, 'Printing', false, false);
+            JToolBarHelper :: customX('printing_cont.index', 'print', 'print', 'Printing', false, false);
             JToolBarHelper :: customX('utility_cont.index', 'backup', 'backup', 'Utility', false, false);
             JToolBarHelper :: customX('search_cont.dashboard', 'search', 'search', 'Search', false, false);
         }
@@ -106,10 +106,10 @@ class xDeveloperToolBars extends JObject {
     }
 
     function getStaffManagementToolBar() {
-        JToolBarHelper::title('Manage Branch Staff Here', 'generic.png');
-        JToolBarHelper::addNewX('staff_cont.createStaffform', 'New Staff');
-        JToolBarHelper::addNewX('staff_cont.markAttendance', 'Mark Attendance');
-        JToolBarHelper::addNewX('staff_cont.markpaidholidaysForm', 'Mark Paid Holidays');
+        JToolBarHelper::title('Manage Branch Users Here', 'generic.png');
+        JToolBarHelper::addNewX('staff_cont.createStaffform', 'New User');
+        // JToolBarHelper::addNewX('staff_cont.markAttendance', 'Mark Attendance');
+        // JToolBarHelper::addNewX('staff_cont.markpaidholidaysForm', 'Mark Paid Holidays');
         JToolBarHelper::cancel('com_xbank.index', 'cancel');
     }
 
@@ -219,6 +219,7 @@ class xDeveloperToolBars extends JObject {
         if(JFactory::getUser()->gid >= 24)
         	JToolBarHelper::addNewX('report_cont.premiumCrudForm', 'Premiums CRUD');
 //             JToolBarHelper::addNewX('utility_cont.selectRdAccount', 'Adjust RD Premiums');
+        JToolBarHelper::addNewX('utility_cont.rdResetPremiumsPage', 'Reset RD Premiums');
         JToolBarHelper::addNewX('utility_cont.loanEmiChangeForm', 'Change Loan Account EMI');
         JToolBarHelper::addNew('utility_cont.errorReport', 'Bug Finder');
         JToolBarHelper::cancel('com_xbank.index', 'cancel');
