@@ -101,6 +101,8 @@ $PremiumAmountAdjusted = $PaidPremiums * $ac->RdAmount;
 $AmountForPremiums = ($ac->CurrentBalanceCr + inp("Amount")) - $PremiumAmountAdjusted - $q->interest;
 $premiumsSubmited = (int) ($AmountForPremiums / $ac->RdAmount);
 
+// $msg .= $PremiumAmountAdjusted;
+
 $this->session->set_userdata('premiums_submitted',$premiumsSubmited);
 
 if ($premiumsSubmited > $duePremiums) {

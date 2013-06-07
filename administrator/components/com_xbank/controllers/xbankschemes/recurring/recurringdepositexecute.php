@@ -98,7 +98,7 @@ $premiumsSubmited = (int) ($AmountForPremiums / $ac->RdAmount);
 
 if($this->session->userdata('premiums_submitted') != $premiumsSubmited)
 {
-    throw new Exception("Premiums not matched");
+    throw new Exception("Premiums not matched " . $PremiumAmountAdjusted);
 }
 
 /* adjusting the remaining premi	mum for the RD account on the money deposited
