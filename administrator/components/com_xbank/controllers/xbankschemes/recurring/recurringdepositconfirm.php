@@ -22,6 +22,9 @@ $PaidPremiums = $PaidPremiums->result_count();
 
 //--------UPDATING ALL PREMIUMS-----------------------------------
 
+if($PaidPremiums % $ac->RdAmount == 0 ){
+    
+}
 
 $q = $this->db->query("
 SELECT DRTransaction.voucher_no,sum(DRTransaction.amountCr) as interest
@@ -100,6 +103,8 @@ if (($ac->CurrentBalanceCr + inp("Amount") - $q->interest) > ($ac->scheme->Numbe
 $PremiumAmountAdjusted = $PaidPremiums * $ac->RdAmount;
 $AmountForPremiums = ($ac->CurrentBalanceCr + inp("Amount")) - $PremiumAmountAdjusted - $q->interest;
 $premiumsSubmited = (int) ($AmountForPremiums / $ac->RdAmount);
+
+// $msg .= $PremiumAmountAdjusted;
 
 $this->session->set_userdata('premiums_submitted',$premiumsSubmited);
 
