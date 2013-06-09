@@ -22,6 +22,9 @@ $PaidPremiums = $PaidPremiums->result_count();
 
 //--------UPDATING ALL PREMIUMS-----------------------------------
 
+if($PaidPremiums % $ac->RdAmount == 0 ){
+    
+}
 
 $q = $this->db->query("
 SELECT DRTransaction.voucher_no,sum(DRTransaction.amountCr) as interest
