@@ -127,10 +127,19 @@ class balancesheet_cont extends CI_Controller {
 	}
 
         function getPandL($fromDate=null,$toDate=null,$branch=null){
-                if($toDate == null AND inp('toDate') != '') 
-                        $toDate = inp('toDate');
-                else
-                        $toDate = getNow();
+
+                $toDate = getNow('Y-m-d');
+                $fromDate = '1970-01-01';
+                if(inp('fromDate'))
+                    $fromDate=inp('fromDate');
+                if(inp('toDate'))
+                    $toDate = inp('toDate');
+
+                if($branch==null) $branch= Branch::getCurrentBranch()->id;
+
+                $this->session->set_userdata("fromdate", $fromDate);
+                $this->session->set_userdata("todate", $toDate);
+                $this->session->set_userdata("branch", $branch);
 
                 $data['balancesteet']=array();
                 $heads=new BalanceSheet();
@@ -141,13 +150,13 @@ class balancesheet_cont extends CI_Controller {
                 $RT_SUM=0;
 
                 foreach($heads as $h){
-                        $clbs = $h->getClosingBalance($toDate,$branch);
+                        $clbs = $h->getClosingBalance($toDate,$branch,null,true);
                         foreach($clbs as $clb){
                                 $subtract_from = "amount".$h->subtract_from;
                                 $subtract_this = "amount".($h->subtract_from == 'Dr' ? 'Cr': 'Dr');
                                 $subDetails = $h->show_sub;
                                 $subFunction = "get".$subDetails."ViseClosingBalance";
-                                $temp_data=array('Total'=>$clb,'Detailed'=>$h->{$subFunction}($toDate,$branch));
+                                $temp_data=array('Total'=>$clb,'Detailed'=>$h->{$subFunction}($toDate,$branch,null,true));
                                 if(($amt=($clb->$subtract_from - $clb->$subtract_this)) >= 0){
                                         $data['balancesteet'][$h->positive_side][] = $temp_data;
                                         ${$h->positive_side."_SUM"} += abs($amt);
@@ -164,12 +173,15 @@ class balancesheet_cont extends CI_Controller {
                 $data['LT_SUM']=$LT_SUM;
                 $data['RT_SUM']=$RT_SUM;
 
+
                 foreach($data['balancesteet']['LT'] as $viewdata){
+                        $viewdata['is_pandl']=1;
                         JRequest::setVar("layout","head_row");
                         $data['LT'] .= $this->load->view('balancesheet.html',$viewdata,true);
                 }
 
                 foreach($data['balancesteet']['RT'] as $viewdata){
+                        $viewdata['is_pandl']=1;
                         JRequest::setVar("layout","head_row");
                         $data['RT'] .= $this->load->view('balancesheet.html',$viewdata,true);
                 }
@@ -331,11 +343,30 @@ class balancesheet_cont extends CI_Controller {
         }
 
         function diginSchemeName($branch=null){
-            $dateOn = date("Y-m-d", strtotime(date("Y-m-d", strtotime($this->session->userdata('todate'))) . " +1 DAY"));
+            $fromDate=$this->session->userdata('fromdate');
+            $toDate=$this->session->userdata('todate');
+            
+            $is_pandl=false;
+            if(inp('pandl')){
+                $month = date('m',strtotime($fromDate));
+                $year=date('Y',strtotime($fromDate));
+                if($month>=1 and $month <=3){
+                    $year--;
+                }
+                $financialYearStart = "$year-04-01";
+                // echo $financialYearStart . "<br/>";
+                $is_pandl=true;
+            }
+
+
+            $dateOn = date("Y-m-d", strtotime(date("Y-m-d", strtotime($toDate)) . " +1 DAY"));
             $t=new Transaction();
             $t->select("SUM(amountDr) as amountDr, SUM(amountCr) as amountCr");
             $t->include_related('account/scheme/balancesheet','subtract_from');
             $t->include_related('account','AccountNumber');
+            if($is_pandl){
+                $t->where('created_at >=',$financialYearStart);
+            }
             $t->where("created_at <",$dateOn);
             $t->where_related("account/scheme","Name like '%".str_replace(" ", "%", urldecode(inp('digid'))). "%'");
             if($branch!=null)
@@ -432,7 +463,7 @@ class balancesheet_cont extends CI_Controller {
                                               'task'=>'balancesheet_cont.digin',
                                               'class'=>'alertinwindow',
                                               'title'=>'_blank',
-                                              'url_post'=>array('digtype'=>'"AccountNumber"','format'=>'"raw"','digid'=>'#AccountNumberURL')
+                                              'url_post'=>array('digtype'=>'"AccountNumber"','format'=>'"raw"','digid'=>'#AccountNumberURL','pandl'=>"'$is_pandl'")
                                               )
                       )//Links array('field'=>array('task'=>,'class'=>''))
                 );
@@ -445,11 +476,29 @@ class balancesheet_cont extends CI_Controller {
         }
 
         function diginSchemeGroup($branch=null){
+            $fromDate=$this->session->userdata('fromdate');
+            $toDate=$this->session->userdata('todate');
+        
+            $is_pandl=false;
+            if(inp('pandl')){
+                $month = date('m',strtotime($fromDate));
+                $year=date('Y',strtotime($fromDate));
+                if($month>=1 and $month <=3){
+                    $year--;
+                }
+                $financialYearStart = "$year-04-01";
+                // echo $financialYearStart . "<br/>";
+                $is_pandl=true;
+            }
+
             $dateOn = date("Y-m-d", strtotime(date("Y-m-d", strtotime($this->session->userdata('todate'))) . " +1 DAY"));
             $t=new Transaction();
             $t->select("SUM(amountDr) as amountDr, SUM(amountCr) as amountCr");
             $t->include_related('account/scheme/balancesheet','subtract_from');
             $t->include_related('account/scheme','Name');
+            if($is_pandl){
+                $t->where("created_at >=", $financialYearStart);
+            }
             $t->where("created_at <",$dateOn);
             $t->where_related("account/scheme","SchemeGroup",urldecode(inp('digid')));
             if($branch!=null)
@@ -539,7 +588,7 @@ class balancesheet_cont extends CI_Controller {
                                               'task'=>'balancesheet_cont.digin',
                                               'class'=>'alertinwindow',
                                               'title'=>'_blank',
-                                              'url_post'=>array('digtype'=>'"SchemeName"','format'=>'"raw"','digid'=>'#SchemeNameURL')
+                                              'url_post'=>array('digtype'=>'"SchemeName"','format'=>'"raw"','digid'=>'#SchemeNameURL','pandl'=>"'$is_pandl'")
                                               )
                       )//Links array('field'=>array('task'=>,'class'=>''))
                 );
@@ -552,7 +601,18 @@ class balancesheet_cont extends CI_Controller {
         function diginAccountNumber(){
             $fromDate=$this->session->userdata('fromdate');
             $toDate=$this->session->userdata('todate');
-
+        
+            $is_pandl=false;
+            if(inp('pandl')){
+                $month = date('m',strtotime($fromDate));
+                $year=date('Y',strtotime($fromDate));
+                if($month>=1 and $month <=3){
+                    $year--;
+                }
+                $financialYearStart = "$year-04-01";
+                // echo $financialYearStart . "<br/>";
+                $is_pandl=true;
+            }   
             $dateOn = date("Y-m-d", strtotime(date("Y-m-d", strtotime($this->session->userdata('todate'))) . " +1 DAY"));
             $t=new Transaction();
             $t->where_related("account",'AccountNumber',urldecode(inp('digid')));
@@ -564,9 +624,8 @@ class balancesheet_cont extends CI_Controller {
             $a->where('AccountNumber',urldecode(inp('digid')));
             $a->get();
             // echo $a->check_last_query();
-
-            $opb=$a->getOpeningBalance($this->session->userdata('fromdate'));
-            $clb=$a->getOpeningBalance($dateOn);
+            $opb=$a->getOpeningBalance($this->session->userdata('fromdate'),null,'both',$is_pandl);
+            $clb=$a->getOpeningBalance($dateOn,null,'both',$is_pandl);
             $subtract_from = strtoupper($a->scheme->balancesheet->subtract_from);
 
             $opb_val=$opb[$subtract_from] - $opb[($subtract_from=='DR'?'CR':'DR')];

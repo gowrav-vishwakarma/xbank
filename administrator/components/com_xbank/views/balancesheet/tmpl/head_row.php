@@ -25,10 +25,10 @@
 				?>
 				<tr>
 					<td width='70%'>
-						<a title='Dig in to <?php echo $dt->{$dt->Title}?>' href='index.php?option=com_xbank&format=raw&task=balancesheet_cont.digin&digtype=<?php echo $dt->Title?>&digid=<?php echo urlencode($dt->{$dt->Title})?>' class='alertinwindow'><?php echo $dt->{$dt->Title}; ?></a>
+						<a title='Dig in to <?php echo $dt->{$dt->Title}?>' href='index.php?option=com_xbank&format=raw&task=balancesheet_cont.digin&digtype=<?php echo $dt->Title?>&digid=<?php echo urlencode($dt->{$dt->Title})?>&pandl=<?php echo isset($is_pandl)?1:0;?>' class='alertinwindow'><?php echo $dt->{$dt->Title}; ?></a>
 					</td>
 					<td width='30%'>
-						<a href='index.php?option=com_xbank&task=balancesheet_cont.digin&digtype=<?php echo $dt->Title?>&digid=<?php echo urlencode($dt->{$dt->Title})?>' target='_blank'><?php echo "<font color='$color'>".abs($amt). " ". $postfix. "</font>";	 ?></a>
+						<a href='index.php?option=com_xbank&task=balancesheet_cont.digin&digtype=<?php echo $dt->Title?>&digid=<?php echo urlencode($dt->{$dt->Title})?>&pandl=<?php echo isset($is_pandl)?1:0;?>' target='_blank'><?php echo "<font color='$color'>".abs($amt). " ". $postfix. "</font>";	 ?></a>
 					</td>
 				</tr>
 			<?php endforeach;?>
