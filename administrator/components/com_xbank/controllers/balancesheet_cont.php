@@ -150,13 +150,13 @@ class balancesheet_cont extends CI_Controller {
                 $RT_SUM=0;
 
                 foreach($heads as $h){
-                        $clbs = $h->getClosingBalance($toDate,$branch,null,true);
+                        $clbs = $h->getClosingBalance($toDate,$branch,null,true,$fromDate);
                         foreach($clbs as $clb){
                                 $subtract_from = "amount".$h->subtract_from;
                                 $subtract_this = "amount".($h->subtract_from == 'Dr' ? 'Cr': 'Dr');
                                 $subDetails = $h->show_sub;
                                 $subFunction = "get".$subDetails."ViseClosingBalance";
-                                $temp_data=array('Total'=>$clb,'Detailed'=>$h->{$subFunction}($toDate,$branch,null,true));
+                                $temp_data=array('Total'=>$clb,'Detailed'=>$h->{$subFunction}($toDate,$branch,null,true,$fromDate));
                                 if(($amt=($clb->$subtract_from - $clb->$subtract_this)) >= 0){
                                         $data['balancesteet'][$h->positive_side][] = $temp_data;
                                         ${$h->positive_side."_SUM"} += abs($amt);
@@ -167,6 +167,24 @@ class balancesheet_cont extends CI_Controller {
                                 }
 
                         }
+                }
+
+
+                $loss_profit=new stdClass;
+                if(($LT_SUM - $RT_SUM) < 0 ){
+                    $loss_profit->Title = "Profit";
+                    $loss_profit->Loss = "Profit";
+                    $loss_profit->amountCr = $RT_SUM;
+                    $loss_profit->amountDr = $LT_SUM;
+                    $data['balancesteet']['LT'][]=array('Total'=>$loss_profit,'Detailed'=>array());
+                    $LT_SUM += abs($LT_SUM - $RT_SUM);
+                }else{
+                    $loss_profit->Title = "Loss";
+                    $loss_profit->Loss = "Loss";
+                    $loss_profit->amountCr = $RT_SUM;
+                    $loss_profit->amountDr = $LT_SUM;
+                    $data['balancesteet']['RT'][]=array('Total'=>$loss_profit,'Detailed'=>array());
+                    $RT_SUM += abs($RT_SUM - $LT_SUM);
                 }
 
                 $data['LT']=$data['RT']="";
@@ -187,13 +205,39 @@ class balancesheet_cont extends CI_Controller {
                 }
 
                 $data['form']=$this->pandlSheetForm();
-
+                $data['report_name']="Profit and Loss  Sheet";
                 JRequest::setVar("layout","balancesheet");
                 $this->load->view('balancesheet.html',$data);
                 $this->jq->getHeader();
         }
 
         function getPandLClosingValue($dateFrom=null,$dateOn=null,$branch=null){
+
+
+                $opt= new stdClass;
+                $opt->amountCr=0;
+                $opt->amountDr=0;
+                // $month = date('m',strtotime($dateFrom));
+                // $year=date('Y',strtotime($dateFrom));
+                // if($month>=1 and $month <=3){
+                //     $year--;
+                // }
+                // $financialYearStart = "$year-04-01";
+
+                // $opt=new Transaction();
+                // $opt->select("SUM(amountDr) as amountDr, SUM(amountCr) as amountCr");
+                // $opt->include_related('account/scheme/balancesheet','Head');
+                // $opt->include_related('account/scheme/balancesheet','subtract_from');
+                // $opt->where("created_at >=",$financialYearStart);
+                // $opt->where("created_at <",$dateFrom);
+                // $opt->where_related("account/scheme/balancesheet","is_pandl",1);
+                // if($branch!='')
+                //     $opt->where("branch_id",$branch);
+                // $opt->group_start();
+                // $opt->where_related("account","ActiveStatus","1");
+                // $opt->or_where_related("account","affectsBalanceSheet","1");
+                // $opt->group_end();
+                // $opt->get();
 
                 $dateOn = date("Y-m-d", strtotime(date("Y-m-d", strtotime($dateOn)) . " +1 DAY"));    
                 $t=new Transaction();
@@ -211,7 +255,7 @@ class balancesheet_cont extends CI_Controller {
                 $t->group_end();
                 $t->get();
 
-                if(($t->amountDr - $t->amountCr) < 0)
+                if((($t->amountDr + $opt->amountDr) - ($t->amountCr + $opt->amountCr)) < 0)
                     $title="Net Profit";
                 else
                     $title="Net Loss";
@@ -219,8 +263,8 @@ class balancesheet_cont extends CI_Controller {
                 $arr = array(
                     'PandL' => $title,
                     'Title' => 'PandL',
-                    'amountDr' => $t->amountDr,
-                    'amountCr' => $t->amountCr,
+                    'amountDr' => $t->amountDr + $opt->amountDr,
+                    'amountCr' => $t->amountCr + $opt->amountCr,
                     'Head' => 'aaa',
                     'SubtractFrom' => $t->account_scheme_balancesheet_subtract_from
 
@@ -633,6 +677,14 @@ class balancesheet_cont extends CI_Controller {
 
             $clb_val=$clb[$subtract_from] - $clb[($subtract_from=='DR'?'CR':'DR')];
             $clb_side = ($clb_val<0? ($subtract_from=='DR'?'CR':'DR') : $subtract_from );
+            if($is_pandl){
+                $opb="--";
+                $clb="--";
+                $opb_val="--";
+                $opb_side="--";
+                $clb_val="--";
+                $clb_side="--";
+            }
 
             $data['report'] = getReporttable($t,             //model
                 array('Date',"Narration", 'amountDr','amountCr'),       //heads

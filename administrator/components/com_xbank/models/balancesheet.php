@@ -10,17 +10,17 @@ class BalanceSheet extends DataMapper {
         )
         );
 
-    function getClosingBalance($dateOn=null,$branch=null,$head=null,$forPandL=false){
+    function getClosingBalance($dateOn=null,$branch=null,$head=null,$forPandL=false,$fromDate=null){
         if($head==null) $head=$this->id;
         if($dateOn == null) $dateOn = getNow();
 
         if($forPandL){
-            $month = date('m',strtotime($dateOn));
-            $year=date('Y',strtotime($dateOn));
-            if($month>=1 and $month <=3){
-                $year--;
-            }
-            $financialYearStart = "$year-04-01";
+            // $month = date('m',strtotime($dateOn));
+            // $year=date('Y',strtotime($dateOn));
+            // if($month>=1 and $month <=3){
+            //     $year--;
+            // }
+            // $financialYearStart = "$year-04-01";
             // echo $financialYearStart . "<br/>";
         }
 
@@ -29,7 +29,7 @@ class BalanceSheet extends DataMapper {
         $t->select("SUM(amountDr) as amountDr, SUM(amountCr) as amountCr");
         $t->include_related('account/scheme/balancesheet','Head');
         if($forPandL){
-            $t->where("created_at >=",$financialYearStart);
+            $t->where("created_at >=",$fromDate);
         }
         $t->where("created_at <",$dateOn);
         $t->where_related("account/scheme/balancesheet","id",$head);
@@ -369,10 +369,11 @@ class BalanceSheet extends DataMapper {
 
     }
 
-    function getAccountsViseClosingBalance($dateOn=null,$branch=null,$head=null,$forPandL=false){
+    function getAccountsViseClosingBalance($dateOn=null,$branch=null,$head=null,$forPandL=false,$fromDate=null){
         if($head==null) $head=$this->id;
         if($dateOn == null) $dateOn = getNow();
 
+        $dateOnOrig=$dateOn;
         $dateOn = date("Y-m-d", strtotime(date("Y-m-d", strtotime($dateOn)) . " +1 DAY"));
         $t=new Transaction();
         $t->select("SUM(amountDr) as amountDr, SUM(amountCr) as amountCr");
@@ -380,13 +381,13 @@ class BalanceSheet extends DataMapper {
         $t->include_related('account/scheme/balancesheet','Head');
         $t->include_related('account/scheme/balancesheet','subtract_from');
         if($forPandL){
-            $month = date('m',strtotime($dateOn));
-            $year=date('Y',strtotime($dateOn));
-            if($month>=1 and $month <=3){
-                $year--;
-            }
-            $financialYearStart = "$year-04-01";
-            $t->where("created_at >=",$financialYearStart);
+            // $month = date('m',strtotime($dateOnOrig));
+            // $year=date('Y',strtotime($dateOnOrig));
+            // if($month>=1 and $month <=3){
+            //     $year--;
+            // }
+            // $financialYearStart = "$year-04-01";
+            $t->where("created_at >=",$fromDate);
         }
         $t->where("created_at <",$dateOn);
         $t->where_related("account/scheme/balancesheet","id",$head);
