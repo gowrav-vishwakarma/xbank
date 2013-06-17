@@ -833,6 +833,24 @@ class test extends CI_Controller {
 
     }
 
+
+    function deactivatePassedRDAccounts(){
+
+        $a= new Account();
+        $a->where_related('scheme','SchemeType','Recurring');
+        $a->select_subquery('(SELECT MAX(DueDate) From jos_xpremiums p WHERE p.accounts_id=${parent}.id)','LastEmiDate');
+        // $a->where('ActiveStatus',1);
+        $a->having('LastEmiDate < "2013-05-01"');
+        $a->where('branch_id',Branch::getCurrentBranch()->id);
+        $a->get();
+        foreach($a as $aa){
+            echo $aa->AccountNumber . "(". $aa->LastEmiDate .")"."<br/>";
+            $aa->ActiveStatus = 0;
+            // $aa->save();
+        }
+    }
+
+
     function amountSubmittedButNotPaidInPremiumsTable(){
         
         try {
@@ -877,15 +895,18 @@ class test extends CI_Controller {
             // TODO- SET PaidOn Date in Premiums table
             }
 
+
+            // ============  Premium Paid Correction
             $this->premiumCorrection();
 
             $transactiondate = date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 day"));
             
+            // ============ All Unpaid Commission Premiums
             $q="
                 SELECT
                     a.id,
                     a.AccountNumber,
-                    (SELECT COUNT(p.id)  FROM  jos_xpremiums p WHERE  p.Paid <> 0 AND p.AgentCommissionSend=0 AND p.accounts_id= a.id) to_set_commission
+                    (SELECT COUNT(p.id)  FROM  jos_xpremiums p WHERE  p.Paid <> 0 AND p.AgentCommissionSend=0 AND p.accounts_id= a.id AND p.PaidOn < '$paid_before') to_set_commission
                 FROM
                     jos_xaccounts a
                 JOIN jos_xschemes s ON a.schemes_id = s.id
@@ -905,15 +926,104 @@ class test extends CI_Controller {
             }
 
             $this->db->trans_commit();
+            echo "done success";
             return;
         } catch (Exception $e) {
             $this->db->trans_rollback();
             echo $e->getMessage();
-            echo "done";
+            echo "done failed";
             return;
         }
 
     }
+
+
+    function amountSubmittedButNotPaidInPremiumsTableTILLDATE(){
+        
+        try {
+            $this->db->trans_begin();
+
+            $paid_after='2013-06-01';
+            $paid_before=nextDate(getNow('Y-m-d'));
+            $transaction_type=10; //RDamountdeposit
+
+            $branch= Branch::getCurrentBranch()->id;
+
+            $q="SELECT
+                    a.id,
+                    a.AccountNumber,
+                    (SELECT COUNT(p.id)  FROM  jos_xpremiums p WHERE  p.PaidOn BETWEEN '$paid_after' AND '$paid_before' AND p.accounts_id= a.id) cpaid_in_time,
+                    t.created_at PaidDate
+                FROM
+                    jos_xaccounts a
+                JOIN jos_xtransactions t ON a.id = t.accounts_id
+                JOIN jos_xschemes s ON a.schemes_id = s.id
+                WHERE
+                        t.created_at BETWEEN '$paid_after' AND '$paid_before'
+                    AND t.branch_id = $branch
+                    AND t.transaction_type_id = 10
+                    AND s.SchemeType='Recurring'
+                GROUP BY
+                    a.id
+                HAVING cpaid_in_time = 0
+
+            ";
+            // echo $q;
+            $accounts=$this->db->query($q)->result();
+
+            foreach ($accounts as $acc) {
+            //TODO SET AgentCommissionSent =1 till last month first
+                echo "found $acc->AccountNumber <br/>";
+                $q="UPDATE jos_xpremiums p SET AgentCommissionSend=1 WHERE PaidOn < '$paid_after'";
+                $this->db->query($q);
+
+                $q="UPDATE jos_xpremiums p SET PaidOn = '$acc->PaidDate' WHERE p.accounts_id = $acc->id AND PaidOn is null Order By id limit 1";
+                $this->db->query($q);
+            // TODO- SET PaidOn Date in Premiums table
+            }
+
+
+            // ============  Premium Paid Correction
+            $this->premiumCorrection();
+
+            $transactiondate = date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 day"));
+            
+            // ============ All Unpaid Commission Premiums
+            $q="
+                SELECT
+                    a.id,
+                    a.AccountNumber,
+                    (SELECT COUNT(p.id)  FROM  jos_xpremiums p WHERE  p.Paid <> 0 AND p.AgentCommissionSend=0 AND p.accounts_id= a.id AND p.PaidOn is not null) to_set_commission
+                FROM
+                    jos_xaccounts a
+                JOIN jos_xschemes s ON a.schemes_id = s.id
+                WHERE
+                    a.branch_id = $branch
+                    AND s.SchemeType='Recurring'
+                GROUP BY
+                    a.id
+                HAVING to_set_commission > 0
+            ";
+
+            $accounts=$this->db->query($q)->result();
+            foreach ($accounts as $ac) {
+                $acc = new Account($ac->id);
+                $voucherNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $ac->id);
+                $this->setCommissions($acc, $voucherNo,$transactiondate);
+            }
+
+            $this->db->trans_commit();
+            echo "done success";
+            return;
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            echo $e->getMessage();
+            echo "done failed";
+            return;
+        }
+
+    } 
+
 
     public function setCommissions($ac, $voucherNo, $transactiondate) {
         

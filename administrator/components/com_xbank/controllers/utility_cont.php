@@ -328,7 +328,7 @@ class utility_cont extends CI_Controller{
             if($deposit >= $acc->RdAmount){
                 $to_pay = (int) ($deposit / $acc->RdAmount);
 
-                    $pre=$acc->premiums->limit(1,$to_pay)->get();
+                    $pre=$acc->premiums->limit($to_pay, $premiums_paid)->get();
                     foreach($pre as $pr){
                         $pr->PaidOn = $tr->created_at;
                         $pr->save();
@@ -360,7 +360,7 @@ class utility_cont extends CI_Controller{
                     
                     $to_pay = (int) ($deposit / $acc->RdAmount);
 
-                    $pre=$acc->premiums->limit(1,$to_pay)->get();
+                    $pre=$acc->premiums->limit($to_pay, $premiums_paid)->get();
                     foreach($pre as $pr){
                         $pr->PaidOn = $tr->created_at;
                         $pr->save();
