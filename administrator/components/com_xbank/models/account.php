@@ -227,6 +227,7 @@ class Account extends DataMapper {
         }
 
         $trans = $CI->db->query("select sum(amountDr) as Dr,sum(amountCr) as Cr from jos_xtransactions where accounts_id = $this->id and $forPandL_query created_at < '" . $date . "'")->row();
+        // $this->check_last_query();
         // echo "select sum(amountDr) as Dr,sum(amountCr) as Cr from jos_xtransactions where accounts_id = $this->id and $forPandL_query created_at < '" . $date . "'";
         if($side=='both'){
             return array(

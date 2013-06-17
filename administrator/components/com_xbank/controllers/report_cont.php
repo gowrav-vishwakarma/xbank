@@ -248,11 +248,11 @@ class report_cont extends CI_Controller {
         //Staff::accessibleTo(USER);
         //setInfo("PROFIT & LOSS ACCOUNT", "");
         $this->load->library("form");
-        $form = $this->form->open("pandl", "index.php?option=com_xbank&task=report_cont.pandl_report")
+        $form = $this->form->open("pandl", "index.php?option=com_xbank&task=balancesheet_cont.getPandL")
                         ->setColumns(2)
                         ->dateBox("P & L From", "name='fromDate' class='input'")
-                        ->dateBox("P & L till", "name='toDate' class='input'")
-                        ->checkbox("Print To PDF", "name='printToPDF' value=1");
+                        ->dateBox("P & L till", "name='toDate' class='input'");
+                        // ->checkbox("Print To PDF", "name='printToPDF' value=1");
         if (Branch::getCurrentBranch()->Code == "DFL") {
             //                    $branchNames=$this->db->query("select Name from branch")->result();
             $form = $form->select("Select Branch", "name='BranchId'", Branch::getAllBranchNames())

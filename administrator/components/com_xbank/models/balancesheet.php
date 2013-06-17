@@ -10,14 +10,27 @@ class BalanceSheet extends DataMapper {
         )
         );
 
-    function getClosingBalance($dateOn=null,$branch=null,$head=null){
+    function getClosingBalance($dateOn=null,$branch=null,$head=null,$forPandL=false,$fromDate=null){
         if($head==null) $head=$this->id;
         if($dateOn == null) $dateOn = getNow();
+
+        if($forPandL){
+            // $month = date('m',strtotime($dateOn));
+            // $year=date('Y',strtotime($dateOn));
+            // if($month>=1 and $month <=3){
+            //     $year--;
+            // }
+            // $financialYearStart = "$year-04-01";
+            // echo $financialYearStart . "<br/>";
+        }
 
     	$dateOn = date("Y-m-d", strtotime(date("Y-m-d", strtotime($dateOn)) . " +1 DAY"));
         $t=new Transaction();
         $t->select("SUM(amountDr) as amountDr, SUM(amountCr) as amountCr");
         $t->include_related('account/scheme/balancesheet','Head');
+        if($forPandL){
+            $t->where("created_at >=",$fromDate);
+        }
         $t->where("created_at <",$dateOn);
         $t->where_related("account/scheme/balancesheet","id",$head);
         if($branch!=null)
@@ -97,9 +110,19 @@ class BalanceSheet extends DataMapper {
 
     }
 
-    function getSchemeGroupViseClosingBalance($dateOn=null,$branch=null,$head=null){
+    function getSchemeGroupViseClosingBalance($dateOn=null,$branch=null,$head=null,$forPandL=false){
         if($head==null) $head=$this->id;
         if($dateOn == null) $dateOn = getNow();
+        
+        if($forPandL){
+            $month = date('m',strtotime($dateOn));
+            $year=date('Y',strtotime($dateOn));
+            if($month>=1 and $month <=3){
+                $year--;
+            }
+            $financialYearStart = "$year-04-01";
+            // echo $financialYearStart . "<br/>";
+        }
 
         $dateOn = date("Y-m-d", strtotime(date("Y-m-d", strtotime($dateOn)) . " +1 DAY"));
         $t=new Transaction();
@@ -107,6 +130,15 @@ class BalanceSheet extends DataMapper {
         $t->include_related('account/scheme','SchemeGroup');
         $t->include_related('account/scheme/balancesheet','Head');
         $t->include_related('account/scheme/balancesheet','subtract_from');
+        if($forPandL){
+            $month = date('m',strtotime($dateOn));
+            $year=date('Y',strtotime($dateOn));
+            if($month>=1 and $month <=3){
+                $year--;
+            }
+            $financialYearStart = "$year-04-01";
+            $t->where("created_at >=",$financialYearStart);
+        }
         $t->where("created_at <",$dateOn);
         $t->where_related("account/scheme/balancesheet","id",$head);
         if($branch!=null)
@@ -337,16 +369,26 @@ class BalanceSheet extends DataMapper {
 
     }
 
-    function getAccountsViseClosingBalance($dateOn=null,$branch=null,$head=null){
+    function getAccountsViseClosingBalance($dateOn=null,$branch=null,$head=null,$forPandL=false,$fromDate=null){
         if($head==null) $head=$this->id;
         if($dateOn == null) $dateOn = getNow();
 
+        $dateOnOrig=$dateOn;
         $dateOn = date("Y-m-d", strtotime(date("Y-m-d", strtotime($dateOn)) . " +1 DAY"));
         $t=new Transaction();
         $t->select("SUM(amountDr) as amountDr, SUM(amountCr) as amountCr");
         $t->include_related('account','AccountNumber');
         $t->include_related('account/scheme/balancesheet','Head');
         $t->include_related('account/scheme/balancesheet','subtract_from');
+        if($forPandL){
+            // $month = date('m',strtotime($dateOnOrig));
+            // $year=date('Y',strtotime($dateOnOrig));
+            // if($month>=1 and $month <=3){
+            //     $year--;
+            // }
+            // $financialYearStart = "$year-04-01";
+            $t->where("created_at >=",$fromDate);
+        }
         $t->where("created_at <",$dateOn);
         $t->where_related("account/scheme/balancesheet","id",$head);
         if($branch!=null)
@@ -357,7 +399,7 @@ class BalanceSheet extends DataMapper {
         $t->group_end();
         $t->group_by('account_AccountNumber');
         $t->get();
-
+        // echo $t->check_last_query();
         $a=new Account();
         $a->select('SUM(OpeningBalanceDr) as OpeningBalanceDr');
         $a->select('SUM(OpeningBalanceCr) as OpeningBalanceCr');
