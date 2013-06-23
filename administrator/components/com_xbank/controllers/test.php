@@ -666,7 +666,7 @@ class test extends CI_Controller {
             // echo "Done " . $account_count++ . " out of " . $total_accounts . "<br/>";
             // ob_end_flush();
 
-            $tilldate= '2013-06-01';
+            echo $tilldate= nextDate(null,true);
 
             $this->db->query("UPDATE jos_xpremiums SET Paid=0 WHERE accounts_id = $acc->id");
             $due_and_paid_query = $this->db->query("SELECT GROUP_CONCAT(EXTRACT(YEAR_MONTH FROM DueDate)) DueArray, GROUP_CONCAT(EXTRACT(YEAR_MONTH FROM PaidOn)) PaidArray FROM jos_xpremiums WHERE accounts_id = $acc->id AND (PaidOn < '$tilldate' OR DueDate < '$tilldate') ORDER BY id")->row();
@@ -974,7 +974,7 @@ class test extends CI_Controller {
             foreach ($accounts as $acc) {
             //TODO SET AgentCommissionSent =1 till last month first
                 echo "found $acc->AccountNumber <br/>";
-                $q="UPDATE jos_xpremiums p SET AgentCommissionSend=1 WHERE PaidOn < '$paid_after'";
+                $q="UPDATE jos_xpremiums p SET AgentCommissionSend=1 WHERE PaidOn < '$paid_after' Or DueDate < '$paid_after'";
                 $this->db->query($q);
 
                 $q="UPDATE jos_xpremiums p SET PaidOn = '$acc->PaidDate' WHERE p.accounts_id = $acc->id AND PaidOn is null Order By id limit 1";
@@ -986,7 +986,7 @@ class test extends CI_Controller {
             // ============  Premium Paid Correction
             $this->premiumCorrection();
 
-            $transactiondate = date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 day"));
+            // $transactiondate = date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 day"));
             
             // ============ All Unpaid Commission Premiums
             $q="
@@ -1149,6 +1149,38 @@ class test extends CI_Controller {
 
 
         }
+    }
+
+    function rdPremiumCommissionCorrection2(){
+        $a = new Account();
+        $a->select('*');
+        $a->select_subquery('(SELECT SUM(p.AgentCommissionSend) From jos_xpremiums p WHERE p.accounts_id=${parent}.id)','CommissionSent');
+        $a->select_subquery('(SELECT COUNT(id) From jos_xtransactions t WHERE t.reference_account_id=${parent}.id AND t.Narration LIKE "%RD Premium Commission%" And amountDr > 0 )','CommissionPaidActually');
+        $a->include_related('agent','AccountNumber');
+
+        $a->where('ActiveStatus',1);
+        $a->where('branch_id',Branch::getCurrentBranch()->id);
+        $a->where_related('scheme','SchemeType','Recurring');
+        $a->having('CommissionPaidActually <> CommissionSent');
+        $a->get(10);
+
+
+        $data['report'] = getReporttable($a, //model
+            array("Account Number", "CommissionSent","CommissionPaidActually" ,"agent_AccountNumber"), //heads
+            array('AccountNumber', 'CommissionSent',"CommissionPaidActually","agent_AccountNumber"), //fields
+            array(), //totals_array
+            array(), //headers
+            array('sno' => true), //options
+            "<b>----------</b>", //headerTemplate
+            '', //tableFooterTemplate
+            "", //footerTemplate,
+            array()
+        );
+
+        JRequest::setVar("layout", "generalreport");
+        $this->load->view('report.html', $data);
+        $this->jq->getHeader();
+
     }
 
 }
