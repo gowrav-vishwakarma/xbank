@@ -666,10 +666,10 @@ class test extends CI_Controller {
             // echo "Done " . $account_count++ . " out of " . $total_accounts . "<br/>";
             // ob_end_flush();
 
-            echo $tilldate= nextDate(null,true);
+            $tilldate= nextDate(null,true);
 
             // $this->db->query("UPDATE jos_xpremiums SET Paid=0 WHERE accounts_id = $acc->id");
-            $this->db->query("UPDATE jos_xpremiums SET  AgentCommissionSend=1 WHERE accounts_id = $acc->id AND (DueDate <'2013-06-01' OR PaidOn < '2013-06-01')");
+            $this->db->query("UPDATE jos_xpremiums SET  AgentCommissionSend=1 WHERE accounts_id = $acc->id AND (PaidOn < '2013-06-01' AND PaidOn is not null)");
             $due_and_paid_query = $this->db->query("SELECT GROUP_CONCAT(EXTRACT(YEAR_MONTH FROM DueDate)) DueArray, GROUP_CONCAT(EXTRACT(YEAR_MONTH FROM PaidOn)) PaidArray FROM jos_xpremiums WHERE accounts_id = $acc->id AND (PaidOn < '$tilldate' OR DueDate < '$tilldate') ORDER BY id")->row();
             $due_array=explode(",",$due_and_paid_query->DueArray);
             $paid_array=explode(",",$due_and_paid_query->PaidArray);
@@ -975,8 +975,6 @@ class test extends CI_Controller {
             foreach ($accounts as $acc) {
             //TODO SET AgentCommissionSent =1 till last month first
                 echo "found $acc->AccountNumber <br/>";
-                $q="UPDATE jos_xpremiums p SET AgentCommissionSend=1 WHERE PaidOn < '$paid_after' Or DueDate < '$paid_after'";
-                $this->db->query($q);
 
                 $q="UPDATE jos_xpremiums p SET PaidOn = '$acc->PaidDate' WHERE p.accounts_id = $acc->id AND PaidOn is null Order By id limit 1";
                 $this->db->query($q);
@@ -985,22 +983,30 @@ class test extends CI_Controller {
 
 
             // ============  Premium Paid Correction
-            $this->premiumCorrection();
+            $q="UPDATE jos_xpremiums p SET AgentCommissionSend=0 WHERE AgentCommissionSend=1 AND PaidOn >= '$paid_after' and PaidOn is not null";
+            $this->db->query($q);
 
-            // $transactiondate = date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 day"));
+            $q="UPDATE jos_xpremiums p SET AgentCommissionSend=1 WHERE PaidOn < '$paid_after' and PaidOn is not null";
+            $this->db->query($q);
+
+            $this->premiumCorrection();
+            
+
+            $transactiondate = date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 day"));
             
             // ============ All Unpaid Commission Premiums
             $q="
                 SELECT
                     a.id,
                     a.AccountNumber,
-                    (SELECT COUNT(p.id)  FROM  jos_xpremiums p WHERE  p.Paid <> 0 AND p.AgentCommissionSend=0 AND p.accounts_id= a.id AND p.PaidOn is not null) to_set_commission
+                    (SELECT COUNT(p.id)  FROM  jos_xpremiums p WHERE  p.AgentCommissionSend=0 AND p.accounts_id= a.id AND PaidOn >= '$paid_after' ) to_set_commission /* AND p.PaidOn is not null condition removed */
                 FROM
                     jos_xaccounts a
                 JOIN jos_xschemes s ON a.schemes_id = s.id
                 WHERE
                     a.branch_id = $branch
                     AND s.SchemeType='Recurring'
+                    AND a.ActiveStatus=1
                 GROUP BY
                     a.id
                 HAVING to_set_commission > 0
@@ -1032,7 +1038,7 @@ class test extends CI_Controller {
         $ssddhj = ($ac->id == 9558 ? "sdsds" : "dhdbhj");
 
         $CI = & get_instance();
-        $amount = $CI->db->query("select SUM(Amount * AgentCommissionPercentage / 100.00 ) AS Totals from jos_xpremiums where Paid <> 0 AND Skipped = 0 AND AgentCommissionSend = 0 AND accounts_id = $ac->id")->row()->Totals;
+        $amount = $CI->db->query("select SUM(Amount * AgentCommissionPercentage / 100.00 ) AS Totals from jos_xpremiums where PaidOn is not null AND AgentCommissionSend = 0 AND accounts_id = $ac->id")->row()->Totals;
         $scfcsg = $ac->AccountNumber;
         $ag = new Agent($ac->agents_id);
         $agentAccount = $ag->AccountNumber;//get()->AccountNumber;
@@ -1083,7 +1089,7 @@ class test extends CI_Controller {
                 );
                 Transaction::doTransaction($debitAccount, $creditAccount, "RD Premium Commission ". $ac->AccountNumber, TRA_PREMIUM_AGENT_COMMISSION_DEPOSIT, $voucherNo, $transactiondate);
             }
-            executeQuery("UPDATE jos_xpremiums SET AgentCommissionSend=1 WHERE Paid <> 0 AND Skipped = 0 AND AgentCommissionSend = 0 AND accounts_id = " . $ac->id);
+            executeQuery("UPDATE jos_xpremiums SET AgentCommissionSend=1 WHERE PaidOn is not null AND AgentCommissionSend = 0 AND accounts_id = " . $ac->id);
 //            $AgentSavingAccount=Accounts::getAccountForCurrentBranch(Branch::getCurrentBranch()->Code."_Agent_SA_". $ac->Agents->member_id,false);
 //            Accounts::updateInterest($agentAccount);
         }
@@ -1152,7 +1158,7 @@ class test extends CI_Controller {
         }
     }
 
-    function rdPremiumCommissionCorrection2(){
+    function rdPremiumAgentCommissionInPremiumVsActualSent(){
         $a = new Account();
         $a->select('*');
         $a->select_subquery('(SELECT SUM(p.AgentCommissionSend) From jos_xpremiums p WHERE p.accounts_id=${parent}.id)','CommissionSent');
@@ -1182,6 +1188,37 @@ class test extends CI_Controller {
         $this->load->view('report.html', $data);
         $this->jq->getHeader();
 
+    }
+
+
+    function rdPremiumPaidInPremiumVsActualPayementSubmitted(){
+        $a= new Account();
+        $a->select('*');
+        $a->select_subquery('(SELECT SUM(amountCr) FROM jos_xtransactions t WHERE t.accounts_id=${parent}.id AND t.transaction_type_id=10)','PaymentSubmittedActual');
+        $a->select_subquery('(SELECT SUM(Amount) FROM jos_xpremiums p WHERE p.accounts_id=${parent}.id AND p.PaidOn is not null)','PaymentSubmittedInPremiumTable');
+
+
+        $a->where_related('scheme','SchemeType','Recurring');
+        $a->where('branch_id',BRanch::getCurrentBranch()->id);
+        $a->where('ActiveStatus',1);
+        $a->having('PaymentSubmittedActual <> PaymentSubmittedInPremiumTable');
+        $a->get();
+
+        $data['report'] = getReporttable($a, //model
+            array("Account Number", "PaymentSubmittedActual","PaymentSubmittedInPremiumTable" ), //heads
+            array('AccountNumber', 'PaymentSubmittedActual',"PaymentSubmittedInPremiumTable"), //fields
+            array(), //totals_array
+            array(), //headers
+            array('sno' => true), //options
+            "<b>----------</b>", //headerTemplate
+            '', //tableFooterTemplate
+            "", //footerTemplate,
+            array()
+        );
+
+        JRequest::setVar("layout", "generalreport");
+        $this->load->view('report.html', $data);
+        $this->jq->getHeader();
     }
 
 }
