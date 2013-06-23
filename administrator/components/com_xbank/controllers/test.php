@@ -666,9 +666,10 @@ class test extends CI_Controller {
             // echo "Done " . $account_count++ . " out of " . $total_accounts . "<br/>";
             // ob_end_flush();
 
-            $tilldate= '2013-06-01';
+            $tilldate= nextDate(null, true);
 
-            $this->db->query("UPDATE jos_xpremiums SET Paid=0 WHERE accounts_id = $acc->id");
+            // $this->db->query("UPDATE jos_xpremiums SET Paid=0 WHERE accounts_id = $acc->id");
+            $this->db->query("UPDATE jos_xpremiums SET  AgentCommissionSend=1 WHERE accounts_id = $acc->id AND (DueDate <'2013-06-01' OR PaidOn < '2013-06-01')");
             $due_and_paid_query = $this->db->query("SELECT GROUP_CONCAT(EXTRACT(YEAR_MONTH FROM DueDate)) DueArray, GROUP_CONCAT(EXTRACT(YEAR_MONTH FROM PaidOn)) PaidArray FROM jos_xpremiums WHERE accounts_id = $acc->id AND (PaidOn < '$tilldate' OR DueDate < '$tilldate') ORDER BY id")->row();
             $due_array=explode(",",$due_and_paid_query->DueArray);
             $paid_array=explode(",",$due_and_paid_query->PaidArray);
@@ -1080,7 +1081,7 @@ class test extends CI_Controller {
                     $agentAccount => ($amount - ($amount * TDS_PERCENTAGE / 100)),
                     Account::getAccountForCurrentBranch(BRANCH_TDS_ACCOUNT)->AccountNumber => ($amount * 10 / 100),
                 );
-                Transaction::doTransaction($debitAccount, $creditAccount, "RD Premium Commission", TRA_PREMIUM_AGENT_COMMISSION_DEPOSIT, $voucherNo, $transactiondate);
+                Transaction::doTransaction($debitAccount, $creditAccount, "RD Premium Commission ". $ac->AccountNumber, TRA_PREMIUM_AGENT_COMMISSION_DEPOSIT, $voucherNo, $transactiondate);
             }
             executeQuery("UPDATE jos_xpremiums SET AgentCommissionSend=1 WHERE Paid <> 0 AND Skipped = 0 AND AgentCommissionSend = 0 AND accounts_id = " . $ac->id);
 //            $AgentSavingAccount=Accounts::getAccountForCurrentBranch(Branch::getCurrentBranch()->Code."_Agent_SA_". $ac->Agents->member_id,false);
