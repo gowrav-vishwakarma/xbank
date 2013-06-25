@@ -1201,6 +1201,7 @@ class test extends CI_Controller {
         $a->where_related('scheme','SchemeType','Recurring');
         $a->where('branch_id',BRanch::getCurrentBranch()->id);
         $a->where('ActiveStatus',1);
+        $a->where('OpeningBalanceCr',0);
         $a->having('PaymentSubmittedActual <> PaymentSubmittedInPremiumTable');
         $a->get();
 
