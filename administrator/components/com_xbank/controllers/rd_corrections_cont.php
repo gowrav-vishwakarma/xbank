@@ -131,7 +131,7 @@ class rd_corrections_cont extends CI_Controller {
 
 		}
 
-		re("rd_Corrections_cont.step2");
+		re("rd_corrections_cont.step2");
 	}
 
 	function step2(){
@@ -215,7 +215,7 @@ class rd_corrections_cont extends CI_Controller {
             $this->jq->getHeader();
         }
     
-    	re('rd_Corrections_cont.step3',"ALL DONE. CHECK COmmissions now.. do not run it again");
+    	re('rd_corrections_cont.step3',"ALL DONE. CHECK COmmissions now.. do not run it again");
 	}
 
 
@@ -249,7 +249,7 @@ class rd_corrections_cont extends CI_Controller {
                 $this->setCommissions($acc, $voucherNo,$transactiondate);
             }
 
-        re('rd_Corrections_cont.step1');
+        re('rd_corrections_cont.step1');
 
 	}
 

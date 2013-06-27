@@ -50,7 +50,7 @@ foreach($transactions as $t){
         <td><?php echo $i++; ?></td>
     	<td ><?php echo $t->created_at; ?></td>
 <!--        <td><?php  ?></td>-->
-        <td ><center><?php echo $t->Narration; ?></center></td>
+        <td ><center><?php echo $t->Narration; ?> [<?php echo $t->referenceaccount; ?> ]</center></td>
         <td><a class='alertinwindow' Title='Transaction type' href="index.php?option=com_xbank&task=report_cont.transactionDetails&vn=<?php echo $t->voucher_no?>&format=raw&tr_type=<?php echo $t->transaction_type_id?>"><?php echo ($t->display_voucher_no ? $t->display_voucher_no : $t->voucher_no) ?></a></td>
         <td><center><?php echo $t->amountDr; ?></center></td>
         <td><center><?php echo $t->amountCr; ?></center></td>
