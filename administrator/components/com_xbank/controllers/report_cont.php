@@ -721,9 +721,9 @@ class report_cont extends CI_Controller {
         if (!$ac->result_count())
             re("report_cont.accountstatementform","The Account Number ".inp("AccountNumber")." does not exist. Try Again","error");
         if (inp("fromDate") && inp("toDate")) {
-            $query = $this->db->query("select * from jos_xtransactions t /*  join jos_xtransaction_type ty on t.transaction_type_id=ty.id */ where t.accounts_id =" . $ac->id . " and created_at between '" . inp("fromDate") . "' and DATE_ADD('" . inp("toDate") . "',INTERVAL +1 DAY) order by created_at, id")->result();
+            $query = $this->db->query("select t.*, (SELECT aa.AccountNumber FROM jos_xaccounts aa WHERE aa.id=t.reference_account_id) referenceaccount from jos_xtransactions t /*  join jos_xtransaction_type ty on t.transaction_type_id=ty.id */ where t.accounts_id =" . $ac->id . " and created_at between '" . inp("fromDate") . "' and DATE_ADD('" . inp("toDate") . "',INTERVAL +1 DAY) order by created_at, id")->result();
         } else {
-            $query = $this->db->query("select * from jos_xtransactions t /*  join jos_xtransaction_type ty on t.transaction_type_id=ty.id */  where t.accounts_id =" . $ac->id . " order by created_at, id")->result();
+            $query = $this->db->query("select t.*, (SELECT aa.AccountNumber FROM jos_xaccounts aa WHERE aa.id=t.reference_account_id) referenceaccount from jos_xtransactions t /*  join jos_xtransaction_type ty on t.transaction_type_id=ty.id */  where t.accounts_id =" . $ac->id . " order by created_at, id")->result();
         }
 
         $openingBalances = $ac->getOpeningBalance(inp("fromDate"));
