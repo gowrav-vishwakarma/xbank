@@ -1222,4 +1222,13 @@ class test extends CI_Controller {
         $this->jq->getHeader();
     }
 
+    function agenctCommissionTillNowCorrect(){
+        $q="UPDATE jos_xpremiums p SET AgentCommissionSend = 0 WHERE PaidON is null  OR PaidOn >= '2013-06-01'";
+        $this->db->query($q);
+
+        $q="UPDATE jos_xpremiums p SET AgentCommissionSend = 1 WHERE  PaidOn < '2013-06-01'";
+        $this->db->query($q);
+
+    }
+
 }

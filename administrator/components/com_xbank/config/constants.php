@@ -193,7 +193,7 @@ define('RATE_PER_SHARE',        100);
 define('TDS_PERCENTAGE',   '10');
 define('xBANKSCHEMEPATH', constant($xCICurrentExtension.'APPPATH')."controllers/xbankschemes");
 
-define('SET_COMMISSIONS_IN_MONTHLY',    false);
+define('SET_COMMISSIONS_IN_MONTHLY',    true);
 define('SET_DATE',                      false);
 
 define("ROUND_TO",      2);

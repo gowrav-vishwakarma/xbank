@@ -20,7 +20,7 @@ class Premium extends DataMapper {
         $amount = $CI->db->query("select SUM(Amount * AgentCommissionPercentage / 100.00 ) AS Totals from jos_xpremiums where PaidOn is not null AND AgentCommissionSend = 0 AND accounts_id = $ac->id ")->row()->Totals;
         $ag = new Agent($ac->agents_id);
         $agentAccount = $ag->AccountNumber;//get()->AccountNumber;
-        if ($agentAccount) {
+        if ($agentAccount and $amount > 0) {
             // echo "-- agent account " . $agentAccount. "<br/>";
             $agent = new Agent();
             $agent->where("AccountNumber",$agentAccount)->get();
@@ -66,8 +66,8 @@ class Premium extends DataMapper {
                 Transaction::doTransaction($debitAccount, $creditAccount, "RD Premium Commission ". $ac->AccountNumber, TRA_PREMIUM_AGENT_COMMISSION_DEPOSIT, $voucherNo, $transactiondate);
             }
             executeQuery("UPDATE jos_xpremiums SET AgentCommissionSend=1 WHERE PaidOn is not null AND AgentCommissionSend = 0 AND accounts_id = " . $ac->id);
-//            $AgentSavingAccount=Accounts::getAccountForCurrentBranch(Branch::getCurrentBranch()->Code."_Agent_SA_". $ac->Agents->member_id,false);
-//            Accounts::updateInterest($agentAccount);
+//          $AgentSavingAccount=Accounts::getAccountForCurrentBranch(Branch::getCurrentBranch()->Code."_Agent_SA_". $ac->Agents->member_id,false);
+//          Accounts::updateInterest($agentAccount);
         }
     }
 
