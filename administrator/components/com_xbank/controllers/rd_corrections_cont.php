@@ -35,11 +35,11 @@ class rd_corrections_cont extends CI_Controller {
 		$p->group_by('accounts_id');
 		$p->get();
 
-		$form = $this->form->open("pandl", "index.php?option=com_xbank&task=rd_Corrections_cont.step1_submitted");
+		$form = $this->form->open("pandl", "index.php?option=com_xbank&task=rd_corrections_cont.step1_submitted");
 
 		$i=1;
 		foreach($p as $pr){
-			$form->text($pr->account_member_Name,"name='account_$i' value='$pr->accounts_id'");
+			$form->hidden($pr->account_member_Name,"name='account_$i' value='$pr->accounts_id'");
 			$form->text($pr->account_AccountNumber,"name='acc_".$pr->accounts_id."' value='$pr->paid_premiums'");
 			$i++;
 		}
@@ -49,17 +49,17 @@ class rd_corrections_cont extends CI_Controller {
 
 		$data['report'] = $form->get(); 
 
-		$data['report'] .= getReporttable($p, //model
-            array("Account Number", "no Of Premiums Paid" ), //heads
-            array('account_AccountNumber', 'paid_premiums'), //fields
-            array(), //totals_array
-            array(), //headers
-            array('sno' => true), //options
-            "<b>----------</b>", //headerTemplate
-            '', //tableFooterTemplate
-            "", //footerTemplate,
-            array()
-        );
+		// $data['report'] .= getReporttable($p, //model
+  //           array("Account Number", "no Of Premiums Paid" ), //heads
+  //           array('account_AccountNumber', 'paid_premiums'), //fields
+  //           array(), //totals_array
+  //           array(), //headers
+  //           array('sno' => true), //options
+  //           "<b>----------</b>", //headerTemplate
+  //           '', //tableFooterTemplate
+  //           "", //footerTemplate,
+  //           array()
+  //       );
 
         JRequest::setVar("layout", "generalreport");
         $this->load->view('report.html', $data);
@@ -131,7 +131,7 @@ class rd_corrections_cont extends CI_Controller {
 
 		}
 
-		re("rd_Corrections_cont.step2");
+		re("rd_corrections_cont.step2");
 	}
 
 	function step2(){
@@ -215,7 +215,7 @@ class rd_corrections_cont extends CI_Controller {
             $this->jq->getHeader();
         }
     
-    	re('rd_Corrections_cont.step3');
+    	re('rd_corrections_cont.step3',"ALL DONE. CHECK COmmissions now.. do not run it again");
 	}
 
 
@@ -249,7 +249,7 @@ class rd_corrections_cont extends CI_Controller {
                 $this->setCommissions($acc, $voucherNo,$transactiondate);
             }
 
-        re('rd_Corrections_cont.step1');
+        re('rd_corrections_cont.step1');
 
 	}
 

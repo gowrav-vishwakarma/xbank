@@ -1201,6 +1201,7 @@ class test extends CI_Controller {
         $a->where_related('scheme','SchemeType','Recurring');
         $a->where('branch_id',BRanch::getCurrentBranch()->id);
         $a->where('ActiveStatus',1);
+        $a->where('OpeningBalanceCr',0);
         $a->having('PaymentSubmittedActual <> PaymentSubmittedInPremiumTable');
         $a->get();
 
@@ -1219,6 +1220,15 @@ class test extends CI_Controller {
         JRequest::setVar("layout", "generalreport");
         $this->load->view('report.html', $data);
         $this->jq->getHeader();
+    }
+
+    function agenctCommissionTillNowCorrect(){
+        $q="UPDATE jos_xpremiums p SET AgentCommissionSend = 0 WHERE PaidON is null  OR PaidOn >= '2013-06-01'";
+        $this->db->query($q);
+
+        $q="UPDATE jos_xpremiums p SET AgentCommissionSend = 1 WHERE  PaidOn < '2013-06-01'";
+        $this->db->query($q);
+
     }
 
 }
