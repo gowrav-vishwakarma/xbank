@@ -173,7 +173,7 @@ class balancesheet_cont extends CI_Controller {
                 $loss_profit=new stdClass;
                 if(($LT_SUM - $RT_SUM) < 0 ){
                     $loss_profit->Title = "Profit";
-                    $loss_profit->Loss = "Profit";
+                    $loss_profit->Profit = "Profit";
                     $loss_profit->amountCr = $RT_SUM;
                     $loss_profit->amountDr = $LT_SUM;
                     $data['balancesteet']['LT'][]=array('Total'=>$loss_profit,'Detailed'=>array());
