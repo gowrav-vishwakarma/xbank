@@ -1,7 +1,17 @@
 <?php
+$tr_type=array();
+
+foreach($transaction_types as $t){
+  $tr_type[$t->Transaction] = $t->Transaction;
+}
+
 $this->load->library("formcomponents");
 $branch=Branch::getCurrentBranch()->id;
 $this->formcomponents->open("frm1","index.php?option=com_xbank&task=transaction_cont.doJV");
+
+if(Staff::getCurrentStaff()->AccessLevel >= BRANCH_ADMIN)
+  $this->formcomponents->select('Type Of JV',"name='transaction_type' class='input'",$tr_type,'Journal Voucher Entry');
+
 ?>
 <table width="100%" border="0">
   <tr>
