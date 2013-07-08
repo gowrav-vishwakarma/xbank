@@ -352,7 +352,10 @@ class transaction_cont extends CI_Controller {
     function jv() {
 //        Staff::accessibleTo(POWER_USER);
         xDeveloperToolBars::onlyCancel("transaction_cont.index", "cancel", "JV Transactions");
+        $tt=new Transaction_type();
+        $tt->get();
         $data["formcomponents"] = $this->load->library("formcomponents");
+        $data["transaction_types"] = $tt;
         JRequest::setVar("layout","jv");
         $this->load->view("transaction.html", $data);
         $this->jq->getHeader();
@@ -370,6 +373,9 @@ class transaction_cont extends CI_Controller {
         $dramount = 0;
         $countcr = 0;
         $countdr = 0;
+
+        echo "<h2>". inp('transaction_type') ."</H2>";
+
         for ($i = 1; $i <= 20; $i++) {
 
             if (inp("DRAccount_$i") != "") {
@@ -454,8 +460,19 @@ class transaction_cont extends CI_Controller {
                 }
             }
 
+            if(inp('transaction_type')){
+                $tr_type=new Transaction_type();
+                $tr_type->where('Transaction',inp('transaction_type'));
+                $tr_type->get();
+
+                $tr_type=inp('transaction_type');
+                $default_narration = $tr_type->Default_Narration. " ";
+            }else{
+                $tr_type = TRA_JV_ENTRY;
+                $default_narration = "";
+            }
 //            $voucherNo=Transactions::getNewVoucherNumber();
-            Transaction::doTransaction($debitAccount, $creditAccount, inp("Naration"), TRA_JV_ENTRY, $voucherNo);
+            Transaction::doTransaction($debitAccount, $creditAccount, $default_narration . inp("Naration"), $tr_type, $voucherNo);
        $this->db->trans_commit();
         } catch (Exception $e) {
             echo $e->getMessage();

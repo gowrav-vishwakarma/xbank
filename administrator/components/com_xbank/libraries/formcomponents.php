@@ -204,27 +204,27 @@
  	function select($label,$attributes,$values,$selected='-1'){
  		$i=1;
  		$this->first($label);
- 		$this->html .= "<td><div class='input-container'><select  ";
+ 		$html = "<div class='input-container'><b>$label</b>: <select  ";
  		if(is_array($attributes)){
 	 		foreach($attributes as $attr=>$val){
-	 			$this->html .= "$attr='$val' ";
+	 			$html .= "$attr='$val' ";
 	 		}
  		}else{
- 			$this->html .= $attributes;
+ 			$html .= $attributes;
  		}
- 		$this->html .=">";
+ 		$html .=">";
  		
 		foreach($values as $key=>$val){
 			if($val!=$selected)
 				$sel="";
 			else
 				$sel="selected";
-			$this->html .="<option value='$val' $sel>$key</option>";
+			$html .="<option value='$val' $sel>$key</option>";
 			$i++;
 		}
-		$this->html .="</select></div></td>";
- 		$this->last();
- 		return $this;
+		$html .="</select></div>";
+ 		// $last();
+ 		echo $html;
  		
  	}
 

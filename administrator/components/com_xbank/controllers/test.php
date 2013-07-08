@@ -1231,4 +1231,52 @@ class test extends CI_Controller {
 
     }
 
+    function createSchemeInterestPostingAccount(){
+        $branch=inp('branch_id');
+        if($branch)
+            $branch=new Branch($branch);
+        else
+            $branch = Branch::getCurrentBranch();
+        
+
+        $schemes = new Scheme();
+        $schemes->get();
+        // $schemes->where("SchemeType",ACCOUNT_TYPE_FIXED);
+        // $schemes->where("InterestToAnotherAccount",0);
+        // $schemes->where("InterestToAnotherAccountPercent",0)->get();
+
+        foreach($schemes as $s){
+            $a= new Account();
+            $a->AccountNumber = $branch->Code . SP . INTEREST_PROVISION_ON . $s->Name;
+            echo $a->AccountNumber . " <br/>";
+            $a->ActiveStatus = 1;
+            $a->ModeOfOperation = 'Self';
+            $a->member_id = Branch::getDefaultMember()->id;
+            $a->DefaultAC = 1;
+            $a->schemes_id = 19 ; // Provision
+            $a->branch_id = $branch->id;
+            $a->staff_id=1;
+            $a->save();
+
+            // echo "Done Provisions now creating Interest Paid On <br/>";
+            // $a= new Account();
+            // $a->AccountNumber = $branch->Code . SP . INTEREST_PAID_ON . $s->Name;
+            // echo $a->AccountNumber . " <br/>";
+            // $a->ActiveStatus = 1;
+            // $a->ModeOfOperation = 'Self';
+            // $a->member_id = Branch::getDefaultMember()->id;
+            // $a->DefaultAC = 1;
+            // $a->schemes_id = 13 ; // Indirect Expenses
+            // $a->branch_id = $branch->id;
+            // $a->staff_id=1;
+            // $a->save();
+
+
+        }
+
+
+
+
+    }
+
 }
