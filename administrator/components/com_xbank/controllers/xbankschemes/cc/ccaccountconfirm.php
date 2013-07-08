@@ -44,6 +44,16 @@ $result = $this->db->query("select a.AccountNumber from jos_xaccounts a  where a
                 $Agents = null; //Branch::getDefaultAgent();
             }
 
+            preg_match('/\d+/', inp('AccountNumber'), $match);
+            $ac_number = $match[0];
+
+            if(inp('AccountNumber')!= Branch::getCurrentBranch()->Code."CC".$ac_number)
+            {
+              $err=true;
+              showError("Your Account Number Pattern is wrong<br/>falsefalse");
+              return;
+            }
+
 $commissionAmount = getComission($sc->AccountOpenningCommission, OPENNING_COMMISSION);
 $processingfee = $sc->ProcessingFees * inp("initialAmount") / 100;
 $creditAccount +=array(Branch::getCurrentBranch()->Code . SP . PROCESSING_FEE_RECEIVED . $sc->Name => $processingfee);

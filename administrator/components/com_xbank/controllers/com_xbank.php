@@ -207,6 +207,7 @@ class com_xbank extends CI_Controller {
         $a->group_start();
         $a->where_related('scheme',"SchemeType",'recurring');
         $a->or_where_related('scheme',"SchemeType",'FixedAndMis');
+        $a->or_where_related('scheme',"SchemeType",'DDS');
         $a->group_end();
         $a->get();
 
@@ -281,6 +282,7 @@ class com_xbank extends CI_Controller {
         $a->group_start();
         $a->where_related('scheme',"SchemeType",'recurring');
         $a->or_where_related('scheme',"SchemeType",'FixedAndMis');
+        $a->or_where_related('scheme',"SchemeType",'DDS');
         $a->group_end();
         $a->get();
 

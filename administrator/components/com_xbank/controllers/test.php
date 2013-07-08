@@ -1274,6 +1274,124 @@ class test extends CI_Controller {
 
         }
 
+    }
+
+
+    function renameAccounts(){
+        $a=new Account();
+        $a->where_related('scheme','SchemeType','Recurring');
+        $a->where('DefaultAC',"<>",0);
+        $a->get();
+
+        foreach($a as $ac){
+            preg_match('/\d+/', $ac->AccountNumber, $match);
+            $ac_number = $match[0];
+
+            echo $ac->AccountNumber. " => ";
+                $ac->AccountNumber = $ac->branch->Code . "RD". $ac_number;
+            echo $ac->AccountNumber. "<br/>";
+
+            $ac->save();
+        }
+
+
+        $a=new Account();
+        $a->where_related('scheme','SchemeType','DDS');
+        $a->where('DefaultAC',"<>",0);
+        $a->get();
+
+        foreach($a as $ac){
+            preg_match('/\d+/', $ac->AccountNumber, $match);
+            $ac_number = $match[0];
+
+            echo $ac->AccountNumber. " => ";
+                $ac->AccountNumber = $ac->branch->Code . "DDS". $ac_number;
+            echo $ac->AccountNumber. "<br/>";
+
+            $ac->save();
+        }
+
+        $a=new Account();
+        $a->where_related('scheme','SchemeType','SavingAndCurrent');
+        $a->where('DefaultAC',"<>",0);
+        $a->get();
+
+        foreach($a as $ac){
+            if(strpos(strtoupper($ac->AccountNumber), "AGENT") !== false ) continue;
+            
+            preg_match('/\d+/', $ac->AccountNumber, $match);
+            $ac_number = $match[0];
+
+            echo $ac->AccountNumber. " => ";
+            if(strpos(strtoupper($ac->AccountNumber), "SB") !== false ) $ac->AccountNumber = $ac->branch->Code . "SB". $ac_number;
+            if(strpos(strtoupper($ac->AccountNumber), "CA") !== false ) $ac->AccountNumber = $ac->branch->Code . "CA". $ac_number;
+            echo $ac->AccountNumber. "<br/>";
+            try{
+                $ac->save();
+            }catch(Exception $e){
+                echo $ac->AccountNumber . " is making problem";
+            }
+        }
+
+        $a=new Account();
+        $a->where_related('scheme','SchemeType','FixedAndMis');
+        $a->where('DefaultAC',"<>",0);
+        $a->get();
+
+        foreach($a as $ac){
+            preg_match('/\d+/', $ac->AccountNumber, $match);
+            $ac_number = $match[0];
+
+            echo $ac->AccountNumber. " => ";
+            if(strpos(strtoupper($ac->AccountNumber), "FD") !== false ) $ac->AccountNumber = $ac->branch->Code . "FD". $ac_number;
+            if(strpos(strtoupper($ac->AccountNumber), "MIS") !== false ) $ac->AccountNumber = $ac->branch->Code . "MIS". $ac_number;
+            echo $ac->AccountNumber. "<br/>";
+            try{
+                $ac->save();
+            }catch(Exception $e){
+                echo $ac->AccountNumber . " is making problem";
+            }
+        }
+
+        $a=new Account();
+        $a->where_related('scheme','SchemeType','Loan');
+        $a->where('DefaultAC',"<>",0);
+        $a->get();
+
+        foreach($a as $ac){
+            preg_match('/\d+/', $ac->AccountNumber, $match);
+            $ac_number = $match[0];
+
+            echo $ac->AccountNumber. " => ";
+            if(strpos(strtoupper($ac->AccountNumber), "VL") !== false ) $ac->AccountNumber = $ac->branch->Code . "VL". $ac_number;
+            if(strpos(strtoupper($ac->AccountNumber), "PL") !== false ) $ac->AccountNumber = $ac->branch->Code . "PL". $ac_number;
+            if(strpos(strtoupper($ac->AccountNumber), "SL") !== false ) $ac->AccountNumber = $ac->branch->Code . "SL". $ac_number;
+            echo $ac->AccountNumber. "<br/>";
+            try{
+                $ac->save();
+            }catch(Exception $e){
+                echo $ac->AccountNumber . " is making problem";
+            }
+        }
+
+        $a=new Account();
+        $a->where_related('scheme','SchemeType','CC');
+        $a->where('DefaultAC',"<>",0);
+        $a->get();
+
+        foreach($a as $ac){
+            preg_match('/\d+/', $ac->AccountNumber, $match);
+            $ac_number = $match[0];
+
+            echo $ac->AccountNumber. " => ";
+            $ac->AccountNumber = $ac->branch->Code . "CC". $ac_number;
+            echo $ac->AccountNumber. "<br/>";
+            try{
+                $ac->save();
+            }catch(Exception $e){
+                echo $ac->AccountNumber . " is making problem";
+            }
+        }
 
 
 

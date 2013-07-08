@@ -2311,6 +2311,15 @@ a.branch_id = $b
 
     function loanNPAListForm(){
         xDeveloperToolBars::onlyCancel("report_cont.new_reports", "cancel", "Loan NPA List");
+
+        $docs= new Document();
+        $docs->where("LoanAccount",1)->get();
+        $docsarr=array();
+        if($docs) $docsarr +=array("None"=>"%");
+        foreach($docs as $h){
+          $docsarr +=array($h->Name => $h->id);
+        }
+
         $this->load->library("form");
         $this->form->open("pSearch","index.php?option=com_xbank&task=report_cont.loanNPAList")
                 ->setColumns(2)
@@ -2320,6 +2329,7 @@ a.branch_id = $b
                 ->_()
                 ->dateBox("Select Date From","name='fromDate' class='input'")
                 ->dateBox("Select Date till","name='toDate' class='input'")
+                ->select("Documents","name='Documents_Submitted'",$docsarr)
                 ->submit("Go");
        
         $data['contents'] =$this->form->get();
@@ -2386,6 +2396,9 @@ premiumcount >= 3 and premiumcount <= 4
         $a->include_related('member','CurrentAddress');
         $a->include_related('scheme','Name');
 
+        $a->select_subquery('(SELECT Description From jos_xdocuments_submitted doc WHERE doc.accounts_id=${parent}.id AND doc.documents_id='.inp('Documents_Submitted').')','Documents');
+
+
         $a->where('ActiveStatus',1);
         $a->where_related('scheme','SchemeType like' ,'loan');
         $a->where_related('dealer',"DealerName like '%".inp('DealerName')."%'");
@@ -2395,8 +2408,8 @@ premiumcount >= 3 and premiumcount <= 4
         $a->get();
 //        echo $a->check_last_query();
         $data['report'] =  getReporttable($a,             //model
-                array("Account Number",'Opnned On',"Scheme","Member Name","Father Name", "Phone Number","Address","Paid Premium Count",'Due Premium Count','EMI Amount',"Due Penalty","Legal/Conveyance/Insurance Charge","Total","Dealer Name","Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
-                array('AccountNumber','~date("Y-m-d",strtotime("#created_at"))', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress',"PaidPremiumCount",'DuePremiumCount','Amount','PaneltyDUE','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)",'dealer_DealerName','Nominee','MinorNomineeParentName','RelationWithNominee'),       //fields
+                array("Account Number",'Opnned On',"Scheme","Member Name","Father Name", "Phone Number","Address","Paid Premium Count",'Due Premium Count','EMI Amount',"Due Penalty","Legal/Conveyance/Insurance Charge","Total","Dealer Name","Guarantor Name","Guarantor Address","Guarantor Phone",'Documents'),       //heads
+                array('AccountNumber','~date("Y-m-d",strtotime("#created_at"))', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress',"PaidPremiumCount",'DuePremiumCount','Amount','PaneltyDUE','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)",'dealer_DealerName','Nominee','MinorNomineeParentName','RelationWithNominee','Documents'),       //fields
                 array('PaneltyDUE','DuePremiumCount','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)"),        //totals_array
                 array(),        //headers
                 array('sno'=>true),     //options
@@ -2414,6 +2427,16 @@ premiumcount >= 3 and premiumcount <= 4
 
     function loanHardRecoveryListForm(){
         xDeveloperToolBars::onlyCancel("report_cont.new_reports", "cancel", "Loan Hard Recovery List");
+
+        $docs= new Document();
+        $docs->where("LoanAccount",1)->get();
+        $docsarr=array();
+        if($docs) $docsarr +=array("None"=>"%");
+        foreach($docs as $h){
+          $docsarr +=array($h->Name => $h->id);
+        }
+
+
         $this->load->library("form");
         $this->form->open("pSearch","index.php?option=com_xbank&task=report_cont.loanHardRecoveryList")
                 ->setColumns(2)
@@ -2423,6 +2446,7 @@ premiumcount >= 3 and premiumcount <= 4
                 ->_()
                 ->dateBox("Select Date From","name='fromDate' class='input'")
                 ->dateBox("Select Date till","name='toDate' class='input'")
+                ->select("Documents","name='Documents_Submitted'",$docsarr)
                 ->submit("Go");
        
         $data['contents'] =$this->form->get();
@@ -2467,6 +2491,8 @@ premiumcount >= 3 and premiumcount <= 4
         $a->include_related('member','CurrentAddress');
         $a->include_related('scheme','Name');
 
+        $a->select_subquery('(SELECT Description From jos_xdocuments_submitted doc WHERE doc.accounts_id=${parent}.id AND doc.documents_id='.inp('Documents_Submitted').')','Documents');
+
         $a->where_related('scheme','SchemeType like' ,'loan');
         $a->where_related('dealer',"DealerName like '%".inp('DealerName')."%'");
         $a->where("ActiveStatus",1);
@@ -2476,8 +2502,8 @@ premiumcount >= 3 and premiumcount <= 4
         $a->get();
         //echo $a->check_last_query();
         $data['report']= getReporttable($a,             //model
-                array("Account Number",'Openned On',"Scheme","Member Name","Father Name", "Phone Number","Address","Paid Premium Count",'Due Premium Count','EMI Amount',"Due Penalty","Legal/Conveyance/Insurance Charge", 'Total',"Dealer Name","Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
-                array('AccountNumber','~date("Y-m-d",strtotime("#created_at"))', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress',"PaidPremiumCount",'DuePremiumCount','Amount','PaneltyDUE','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)",'dealer_DealerName','Nominee','MinorNomineeParentName','RelationWithNominee'),       //fields
+                array("Account Number",'Openned On',"Scheme","Member Name","Father Name", "Phone Number","Address","Paid Premium Count",'Due Premium Count','EMI Amount',"Due Penalty","Legal/Conveyance/Insurance Charge", 'Total',"Dealer Name","Guarantor Name","Guarantor Address","Guarantor Phone",'Documents'),       //heads
+                array('AccountNumber','~date("Y-m-d",strtotime("#created_at"))', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress',"PaidPremiumCount",'DuePremiumCount','Amount','PaneltyDUE','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)",'dealer_DealerName','Nominee','MinorNomineeParentName','RelationWithNominee','Documents'),       //fields
                 array('PaneltyDUE','DuePremiumCount','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)"),        //totals_array
                 array(),        //headers
                 array('sno'=>true),     //options

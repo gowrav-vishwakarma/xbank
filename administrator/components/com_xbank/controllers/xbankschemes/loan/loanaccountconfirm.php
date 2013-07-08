@@ -20,6 +20,22 @@ if ($result->num_rows() > 0)
     showError("This Account Number is Illegal due to existing account <br/><b>" . $result . "</b>falsefalse");
     //$msg .= $this->jq->flashMessages(true);
 }
+
+preg_match('/\d+/', inp('AccountNumber'), $match);
+$ac_number = $match[0];
+
+if(
+    inp('AccountNumber')!= Branch::getCurrentBranch()->Code."VL".$ac_number and 
+    inp('AccountNumber')!= Branch::getCurrentBranch()->Code."PL".$ac_number and
+    inp('AccountNumber')!= Branch::getCurrentBranch()->Code."SL".$ac_number
+)
+{
+  $err=true;
+  showError("Your Account Number Pattern is wrong<br/>falsefalse");
+  return;
+}
+
+
               $u = inp('UserID');
               $m = new Member($u);
 //$m = Doctrine::getTable("Member")->find(inp("UserID"));
@@ -38,6 +54,8 @@ if (!$sc->id) {
 //    $msg .= "falsefalse";
     return;
 }
+
+
                $a = inp('Agents_Id');
                $Agents  = new Agent();
                $Agents->where('member_id', $a)->get();

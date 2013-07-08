@@ -264,7 +264,7 @@ class agent_cont extends CI_Controller {
             $msg .= " till date " . inp('toDate');
         }
         
-        $p->where_related('account','branch_id',Branch::getCurrentBranch()->id);
+        // $p->where_related('account','branch_id',Branch::getCurrentBranch()->id); // REMOVED TO GET ALL ACCOUNTS IN ALL BRANCH
         $p->get();
 
         $msg .= " :: For Agent " . $a->Name;
@@ -306,7 +306,7 @@ class agent_cont extends CI_Controller {
         $fd_tra->where_related('account/scheme','Name','Saving Account');
         $fd_tra->where_in('transaction_type_id',array(6,11,13,2)); //HARD CODED TODO REMOVE HARD CODE
         $fd_tra->where_related("referenceaccount/scheme",'SchemeType','FixedAndMis');
-        $fd_tra->where_related("referenceaccount",'branch_id',Branch::getCurrentBranch()->id);
+        // $fd_tra->where_related("referenceaccount",'branch_id',Branch::getCurrentBranch()->id); // REMOVED TO GET ALL ACCOUNTS IN ALL BRANCH
             
         if(inp('fromDate')){
             $fd_tra->where('created_at >=',inp('fromDate'));
@@ -352,7 +352,7 @@ class agent_cont extends CI_Controller {
         $t->where('created_at >=', inp('fromDate'));
         $t->where('created_at <',nextDate('toDate'));
         $t->where_related('account/agent','id',inp('Agents_Id'));
-        $t->where('branch_id',Branch::getCurrentBranch()->id);
+        // $t->where('branch_id',Branch::getCurrentBranch()->id); // REMOVED TO GET ALL ACCOUNTS IN ALL BRANCH
         // $t->having ('Commission is not null');
         $t->group_by('accounts_id');
 
