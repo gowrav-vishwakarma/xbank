@@ -1290,8 +1290,11 @@ class test extends CI_Controller {
             echo $ac->AccountNumber. " => ";
                 $ac->AccountNumber = $ac->branch->Code . "RD". $ac_number;
             echo $ac->AccountNumber. "<br/>";
-
-            $ac->save();
+            try{
+                $ac->save();
+            }catch(Exception $e){
+                echo $ac->AccountNumber . " is making problem";
+            }
         }
 
 
