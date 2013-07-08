@@ -42,6 +42,20 @@ if (!$sc->id) {
     //$msg .= "false";
     return;
 }
+
+preg_match('/\d+/', inp('AccountNumber'), $match);
+$ac_number = $match[0];
+
+if(
+    inp('AccountNumber')!= Branch::getCurrentBranch()->Code."FD".$ac_number and 
+    inp('AccountNumber')!= Branch::getCurrentBranch()->Code."MIS".$ac_number
+)
+{
+  $err=true;
+  showError("Your Account Number Pattern is wrong<br/>falsefalse");
+  return;
+}
+
 $Agents  = new Agent();
 $Agents ->where('id', inp('Agents_Id'))->get();
 //$Agents = Doctrine::getTable('Agents')->findOneByMember(inp('Agents_Id'));
