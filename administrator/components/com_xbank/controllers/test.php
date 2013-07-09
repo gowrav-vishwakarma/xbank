@@ -944,76 +944,87 @@ class test extends CI_Controller {
         try {
             $this->db->trans_begin();
 
-            $paid_after='2013-06-01';
-            $paid_before=nextDate(getNow('Y-m-d'));
-            $transaction_type=10; //RDamountdeposit
+            // $paid_after='2013-07-01';
+            // $paid_before=nextDate(getNow('Y-m-d'));
+            // $transaction_type=10; //RDamountdeposit
 
-            $branch= Branch::getCurrentBranch()->id;
+            // $branch= Branch::getCurrentBranch()->id;
 
-            $q="SELECT
-                    a.id,
-                    a.AccountNumber,
-                    (SELECT COUNT(p.id)  FROM  jos_xpremiums p WHERE  p.PaidOn BETWEEN '$paid_after' AND '$paid_before' AND p.accounts_id= a.id) cpaid_in_time,
-                    t.created_at PaidDate
-                FROM
-                    jos_xaccounts a
-                JOIN jos_xtransactions t ON a.id = t.accounts_id
-                JOIN jos_xschemes s ON a.schemes_id = s.id
-                WHERE
-                        t.created_at BETWEEN '$paid_after' AND '$paid_before'
-                    AND t.branch_id = $branch
-                    AND t.transaction_type_id = 10
-                    AND s.SchemeType='Recurring'
-                GROUP BY
-                    a.id
-                HAVING cpaid_in_time = 0
+            // $q="SELECT
+            //         a.id,
+            //         a.AccountNumber,
+            //         (SELECT COUNT(p.id)  FROM  jos_xpremiums p WHERE  p.PaidOn BETWEEN '$paid_after' AND '$paid_before' AND p.accounts_id= a.id) cpaid_in_time,
+            //         t.created_at PaidDate
+            //     FROM
+            //         jos_xaccounts a
+            //     JOIN jos_xtransactions t ON a.id = t.accounts_id
+            //     JOIN jos_xschemes s ON a.schemes_id = s.id
+            //     WHERE
+            //             t.created_at BETWEEN '$paid_after' AND '$paid_before'
+            //         AND t.branch_id = $branch
+            //         AND t.transaction_type_id = 10
+            //         AND s.SchemeType='Recurring'
+            //     GROUP BY
+            //         a.id
+            //     HAVING cpaid_in_time = 0
 
-            ";
-            // echo $q;
-            $accounts=$this->db->query($q)->result();
+            // ";
+            // // echo $q;
+            // $accounts=$this->db->query($q)->result();
 
-            foreach ($accounts as $acc) {
-            //TODO SET AgentCommissionSent =1 till last month first
-                echo "found $acc->AccountNumber <br/>";
+            // foreach ($accounts as $acc) {
+            // //TODO SET AgentCommissionSent =1 till last month first
+            //     echo "found $acc->AccountNumber <br/>";
 
-                $q="UPDATE jos_xpremiums p SET PaidOn = '$acc->PaidDate' WHERE p.accounts_id = $acc->id AND PaidOn is null Order By id limit 1";
-                $this->db->query($q);
-            // TODO- SET PaidOn Date in Premiums table
-            }
+            //     $q="UPDATE jos_xpremiums p SET PaidOn = '$acc->PaidDate' WHERE p.accounts_id = $acc->id AND PaidOn is null Order By id limit 1";
+            //     $this->db->query($q);
+            // // TODO- SET PaidOn Date in Premiums table
+            // }
 
 
-            // ============  Premium Paid Correction
-            $q="UPDATE jos_xpremiums p SET AgentCommissionSend=0 WHERE AgentCommissionSend=1 AND PaidOn >= '$paid_after' and PaidOn is not null";
-            $this->db->query($q);
+            // // ============  Premium Paid Correction
+            // $q="UPDATE jos_xpremiums p SET AgentCommissionSend=0 WHERE AgentCommissionSend=1 AND PaidOn >= '$paid_after' and PaidOn is not null";
+            // $this->db->query($q);
 
-            $q="UPDATE jos_xpremiums p SET AgentCommissionSend=1 WHERE PaidOn < '$paid_after' and PaidOn is not null";
-            $this->db->query($q);
+            // $q="UPDATE jos_xpremiums p SET AgentCommissionSend=1 WHERE PaidOn < '$paid_after' and PaidOn is not null";
+            // $this->db->query($q);
 
-            $this->premiumCorrection();
+            // $this->premiumCorrection();
             
+
+            
+            // // ============ All Unpaid Commission Premiums
+            // $q="
+            //     SELECT
+            //         a.id,
+            //         a.AccountNumber,
+            //         (SELECT COUNT(p.id)  FROM  jos_xpremiums p WHERE  p.AgentCommissionSend=0 AND p.accounts_id= a.id AND PaidOn >= '$paid_after' ) to_set_commission /* AND p.PaidOn is not null condition removed */
+            //     FROM
+            //         jos_xaccounts a
+            //     JOIN jos_xschemes s ON a.schemes_id = s.id
+            //     WHERE
+            //         a.branch_id = $branch
+            //         AND s.SchemeType='Recurring'
+            //         AND a.ActiveStatus=1
+            //     GROUP BY
+            //         a.id
+            //     HAVING to_set_commission > 0
+            // ";
+            // $accounts=$this->db->query($q)->result();
+
+            $accounts=new Account();
+            $accounts->where_related('premiums','PaidOn is not null');
+            $accounts->where_related('premiums','AgentCommissionSend',0);
+            $accounts->where('branch_id',Branch::getCurrentBranch()->id);
+            $accounts->distinct();
+            $accounts->get();
 
             $transactiondate = date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " -1 day"));
-            
-            // ============ All Unpaid Commission Premiums
-            $q="
-                SELECT
-                    a.id,
-                    a.AccountNumber,
-                    (SELECT COUNT(p.id)  FROM  jos_xpremiums p WHERE  p.AgentCommissionSend=0 AND p.accounts_id= a.id AND PaidOn >= '$paid_after' ) to_set_commission /* AND p.PaidOn is not null condition removed */
-                FROM
-                    jos_xaccounts a
-                JOIN jos_xschemes s ON a.schemes_id = s.id
-                WHERE
-                    a.branch_id = $branch
-                    AND s.SchemeType='Recurring'
-                    AND a.ActiveStatus=1
-                GROUP BY
-                    a.id
-                HAVING to_set_commission > 0
-            ";
 
-            $accounts=$this->db->query($q)->result();
             foreach ($accounts as $ac) {
+                echo " found account " . $ac->AccountNumber. "<br/>";
+                continue;
+
                 $acc = new Account($ac->id);
                 $voucherNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $ac->id);
                 $this->setCommissions($acc, $voucherNo,$transactiondate);
@@ -1310,8 +1321,11 @@ class test extends CI_Controller {
             echo $ac->AccountNumber. " => ";
                 $ac->AccountNumber = $ac->branch->Code . "DDS". $ac_number;
             echo $ac->AccountNumber. "<br/>";
-
-            $ac->save();
+            try{
+                $ac->save();
+            }catch(Exception $e){
+                echo $ac->AccountNumber . " did problem <br/>";
+            }
         }
 
         $a=new Account();
@@ -1326,7 +1340,19 @@ class test extends CI_Controller {
             $ac_number = $match[0];
 
             echo $ac->AccountNumber. " => ";
-            if(strpos(strtoupper($ac->AccountNumber), "SB") !== false ) $ac->AccountNumber = $ac->branch->Code . "SB". $ac_number;
+            if(strpos(strtoupper($ac->AccountNumber), "SB") !== false ) {
+                $ag = new Agent();
+                $ag->where('AccountNumber',$ac->AccountNumber);
+                $ag->get();
+                
+                $ac->AccountNumber = $ac->branch->Code . "SB". $ac_number;
+
+                if($ag->result_count() > 0){
+                    $ag->AccountNumber = $ac->AccountNumber;
+                    $ag->save();
+                }
+                
+            }
             if(strpos(strtoupper($ac->AccountNumber), "CA") !== false ) $ac->AccountNumber = $ac->branch->Code . "CA". $ac_number;
             echo $ac->AccountNumber. "<br/>";
             try{
