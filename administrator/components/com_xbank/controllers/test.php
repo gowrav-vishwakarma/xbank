@@ -1015,6 +1015,8 @@ class test extends CI_Controller {
             $accounts=new Account();
             $accounts->where_related('premiums','PaidOn is not null');
             $accounts->where_related('premiums','AgentCommissionSend',0);
+            $accounts->where_related('scheme','SchemeType','Recurring');
+            
             $accounts->where('branch_id',Branch::getCurrentBranch()->id);
             $accounts->distinct();
             $accounts->get();
@@ -1023,7 +1025,7 @@ class test extends CI_Controller {
 
             foreach ($accounts as $ac) {
                 echo " found account " . $ac->AccountNumber. "<br/>";
-                continue;
+                // continue;
 
                 $acc = new Account($ac->id);
                 $voucherNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $ac->id);

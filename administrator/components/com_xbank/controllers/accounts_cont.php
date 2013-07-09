@@ -1669,7 +1669,7 @@ class accounts_cont extends CI_Controller {
 
     function accountsDetails($id='') {
         $id = JRequest::getVar("id");
-        $a = $this->db->query("select a.id, a.AccountNumber,m.Name,DATE_ADD(a.created_at,INTERVAL s.MaturityPeriod MONTH) as MaturityDate, (a.CurrentBalanceCr - a.CurrentBalanceDr) as CurrentBalance from jos_xaccounts a join jos_xmember m on a.member_id=m.id join jos_xschemes s on a.schemes_id=s.id where (s.SchemeType='" . ACCOUNT_TYPE_BANK . "' or s.SchemeType='" . ACCOUNT_TYPE_FIXED . "' or s.SchemeType='" . ACCOUNT_TYPE_RECURRING . "') and a.branch_id=" . Branch::getCurrentBranch()->id . " and  a.member_id=" . $id . " and a.ActiveStatus=1 and a.LockingStatus=0")->result();
+        $a = $this->db->query("select a.id, a.AccountNumber,m.Name,DATE_ADD(a.created_at,INTERVAL s.MaturityPeriod MONTH) as MaturityDate, (a.CurrentBalanceCr - a.CurrentBalanceDr) as CurrentBalance from jos_xaccounts a join jos_xmember m on a.member_id=m.id join jos_xschemes s on a.schemes_id=s.id where (s.SchemeType='" . ACCOUNT_TYPE_BANK . "' or s.SchemeType='" . ACCOUNT_TYPE_FIXED . "' or s.SchemeType='" . ACCOUNT_TYPE_RECURRING . "' or s.SchemeType='".ACCOUNT_TYPE_DDS."') and a.branch_id=" . Branch::getCurrentBranch()->id . " and  a.member_id=" . $id . " and a.ActiveStatus=1 and a.LockingStatus=0")->result();
         if (!$a) {
             $this->jq->addError($id . ": ", "Oops Not Found");
             $this->jq->flashMessages();
