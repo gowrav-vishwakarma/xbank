@@ -66,7 +66,7 @@ if (!$Agents->result_count()) {
 
 $chkAcc = 0;
 If (inp("SecurityAccount") != "") {
-    $q=$this->db->query("select a.id from jos_xaccounts a join jos_xmember m on a.member_id=m.id join jos_xschemes s on a.schemes_id=s.id where(s.SchemeType='".ACCOUNT_TYPE_BANK."' or s.SchemeType='" . ACCOUNT_TYPE_FIXED . "' or s.SchemeType='" . ACCOUNT_TYPE_RECURRING . "') and a.branch_id=" . Branch::getCurrentBranch()->id . " and  a.member_id=" . inp("UserID") . " and a.ActiveStatus=1 and a.LockingStatus=0");
+    $q=$this->db->query("select a.id from jos_xaccounts a join jos_xmember m on a.member_id=m.id join jos_xschemes s on a.schemes_id=s.id where(s.SchemeType='".ACCOUNT_TYPE_BANK."' or s.SchemeType='" . ACCOUNT_TYPE_FIXED . "' or s.SchemeType='" . ACCOUNT_TYPE_RECURRING . "' or s.SchemeType='".ACCOUNT_TYPE_DDS."') and a.branch_id=" . Branch::getCurrentBranch()->id . " and  a.member_id=" . inp("UserID") . " and a.ActiveStatus=1 and a.LockingStatus=0");
 //    $q = Doctrine_Query::create()
 //                        ->select(" a.id ")
 //                        ->from("accounts a")
