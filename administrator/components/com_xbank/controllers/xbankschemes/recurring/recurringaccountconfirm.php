@@ -11,6 +11,13 @@ if (!defined('BASEPATH'))
 //                            ->from("Accounts a")
 //                            ->where('a.AccountNumber like ?', '____' . inp('AccountNumber'))
 //                            ->orWhere('a.AccountNumber = ?', inp('AccountNumber'));
+
+if(inp('initialAmount')!=''){
+  $err=true;
+  showError( "You Cannot Fill Initial Amount here now, Deposit this amount instead <br/>falsefalse");
+  return;
+}
+
 $result = $this->db->query("select a.AccountNumber from jos_xaccounts a  where a.AccountNumber like '%" . inp('AccountNumber') . "%' or a.AccountNumber='%" . inp('AccountNumber')."%'")->row();
 //            $result = $q->execute();
             //if ($result->count() > 0) {

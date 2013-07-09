@@ -17,7 +17,7 @@ else {
 $form = $form->_()->lookupDB("Member ID", "name='UserID' class='input req-string' onblur='javascript:jQuery(\"#memberDetailsRD\").load(\"index.php?option=com_xbank&task=accounts_cont.memberDetails&format=raw&id=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.CustomerID&format=raw", array("a" => "b"), array("id", "Name", "FatherName", "BranchName"), "id")
                         ->div("memberDetailsRD", "", $member)
                         ->selectAjax("Account Under", "name='AccountType' class='req-string not-req' not-req-val='Select_Account_Type'", Branch::getAllSchemesForCurrentBranchOfType(ACCOUNT_TYPE_RECURRING))
-                        ->text("Initial Opening Amount", "name='initialAmount' class='input req-numeric'")
+                        ->text("Initial Opening Amount", "name='initialAmount' class='input req-numeric' value='0'")
                         ->lookupDB("Agent's Member ID", "name='Agents_Id' class='input'  onblur='javascript:jQuery(\"#agentDetailsRD\").load(\"index.php?option=com_xbank&task=accounts_cont.agentDetails&format=raw&aid=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.AgentMemberID&format=raw", array("a"=>"b"), array("id", "Name", "PanNo"), "id")
                         ->div("agentDetailsRD", "", $defaultAgent)
                         ->text("RECURRING amount (premium)", "name='rdamount' class='input req-string'")
