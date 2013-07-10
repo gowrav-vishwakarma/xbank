@@ -1802,6 +1802,7 @@ a.branch_id = $b
         else {
             $q .= " group by s.SchemeType";
         }
+        // echo $q;
         $a['accountcount'] = $this->db->query($q)->result();
         $a['schemeTypes'] = explode(",", ACCOUNT_TYPES);
         JRequest::setVar("layout","allschemedetails");
