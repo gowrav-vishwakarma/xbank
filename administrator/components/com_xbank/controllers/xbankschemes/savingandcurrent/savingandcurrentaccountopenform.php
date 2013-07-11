@@ -26,7 +26,12 @@ $form = $this->form->open("NewBankAccount", 'index.php?option=com_xbank&task=acc
                         ->div("agentDetailsS", "", $defaultAgent)
                         ->select("Active Status", "name='ActiveStatus'", array("Active" => '1', "DeActive" => '0'))
                         ->selectAjax("Operation Mode", "name='ModeOfOperation' class='not-req req-string' not-req-val='Select_Mode'", array("Select_Mode" => '-1', "Self" => 'Self', "Joint" => 'Joint', "Any One" => 'Any', "Otehr" => 'Other'))
-                        ->hidden("", "name='CurrentScheme' value='$currentFolder'");
+                        ->lookupDB("Member ID 2 (For Joint Accounts)", "name='UserID_2' class='input' onblur='javascript:jQuery(\"#memberDetailsS1\").load(\"index.php?option=com_xbank&format=raw&task=accounts_cont.memberDetails&id=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.MemberID&format=raw", array("a"=>"b"), array("id", "Name", "FatherName", "BranchName"), "id")
+                        ->div("memberDetailsS1", "", $member)
+                        ->lookupDB("Member ID 3 (For Joint Accounts)", "name='UserID_3' class='input' onblur='javascript:jQuery(\"#memberDetailsS2\").load(\"index.php?option=com_xbank&format=raw&task=accounts_cont.memberDetails&id=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.MemberID&format=raw", array("a"=>"b"), array("id", "Name", "FatherName", "BranchName"), "id")
+                        ->div("memberDetailsS2", "", $member)
+                        ->hidden("", "name='CurrentScheme' value='$currentFolder'")
+                        ;
 
         // Documents to be submitted
         foreach ($documents as $d) {

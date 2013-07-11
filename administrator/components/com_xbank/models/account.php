@@ -54,6 +54,12 @@ class Account extends DataMapper {
             'join_table' => 'jos_xtransactions',
             'other_field' => 'account'
         ),
+        'jointmembers' => array(
+            'class' => 'jointmembers',
+            'join_self_as' => 'accounts',
+            'join_table' => 'jos_xjointmembers',
+            'other_field' => 'account'
+        ),
         'referencetransactions' => array(
             'class' => 'transaction',
             'join_self_as' => 'reference_account',
@@ -282,6 +288,23 @@ class Account extends DataMapper {
             $documents[] = $d->join_Description;
         }
         return implode(", ", $documents);
+    }
+
+    function addMember($memberID){
+        if(!$memberID) return;
+        if($this->member_id == $memberID) return;
+
+        $jm = new JointMembers();
+        $jm->where('accounts_id',$this->id);
+        $jm->where('member_id',$memberID);
+        $jm->get();
+        if($jm->result_count()>0) return;
+
+        $jm = new JointMembers();
+        $jm->accounts_id=$this->id;
+        $jm->member_id=$memberID;
+        $jm->save();
+
     }
 
 }
