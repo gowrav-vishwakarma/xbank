@@ -204,6 +204,7 @@ class xDeveloperToolBars extends JObject {
         }
 
         JToolBarHelper::addNewX('report_2_cont.closingBalanceForm', 'Closing Balance<br/>Of Account');
+        JToolBarHelper::addNewX('report_cont.pandlForm', 'P and L<br/> Sheet');
         JToolBarHelper::addNewX('report_cont.balanceSheetForm', 'Balance<br/> Sheet');
         JToolBarHelper::addNewX('report_cont.accountstatementform', 'Account<br/> Statement');
         JToolBarHelper::addNewX('report_cont.trialbalanceForm', 'Trial<br/> Balance');

@@ -35,10 +35,6 @@ class Member_cont extends CI_Controller {
         return;
         
 
-
-
-
-
         global $com_params;
         $m = new Member();
         $m->limit(10,JRequest::getVar("limitstart",0));
@@ -139,6 +135,14 @@ class Member_cont extends CI_Controller {
 //        $m = new Member();
 //        $m->where('PanNo', inp('PanNo'))->get();
 //        $m->where('PanNo <>',NULL)->get();
+        preg_match('/\d+/', inp('SavingAccountNumber'), $match);
+        $ac_number = $match[0];
+        if(inp('SavingAccountNumber') != Branch::getCurrentBranch()->Code."SB".$ac_number )
+        {
+          echo "<h2>Your Account Number Pattern is wrong</h2>falsefalse";
+          return;
+        }
+
         $q = $this->db->query("select PanNo from jos_xmember where PanNo ='" . inp("PanNo") . "' and PanNo is not null");
         if ($q->num_rows() > 0 && inp("FilledForm60") == false) {
             echo "<h2>Pan Number is a unique value you cannot repeat it ..</h2>falsefalse";
@@ -149,6 +153,8 @@ class Member_cont extends CI_Controller {
             echo "<h2>Please fill the Pan Number or check the check box for FilledForm60 if Pan Number not there</h2>falsefalse";
             return;
         }
+
+
 
         if (inp("hasShareAccount") == 1) {
             if (inp("shareAccountAmount") == "" || !is_numeric(inp("shareAccountAmount"))) {

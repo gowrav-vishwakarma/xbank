@@ -135,7 +135,7 @@ class balancesheet_cont extends CI_Controller {
                 if(inp('toDate'))
                     $toDate = inp('toDate');
 
-                if($branch==null) $branch= Branch::getCurrentBranch()->id;
+                if($branch==null and Branch::getCurrentBranch()->Code != 'DFL') $branch= Branch::getCurrentBranch()->id;
 
                 $this->session->set_userdata("fromdate", $fromDate);
                 $this->session->set_userdata("todate", $toDate);
