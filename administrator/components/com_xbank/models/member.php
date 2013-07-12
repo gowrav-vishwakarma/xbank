@@ -34,6 +34,12 @@ class Member extends DataMapper {
             'join_self_as' => 'member',
             'join_table' => 'jos_xaccounts',
             'other_field' => 'member'
+        ),
+        'jointedinaccounts' => array(
+            'class' => 'jointmembers',
+            'join_self_as' => 'member',
+            'join_table' => 'jos_xjointmembers',
+            'other_field' => 'member'
         )
     );
 

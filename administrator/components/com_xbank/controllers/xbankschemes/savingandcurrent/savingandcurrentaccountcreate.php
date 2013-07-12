@@ -52,4 +52,7 @@ $voucherNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referance
                         Transaction::doTransaction($debitAccount, $creditAccount, "Agent Account openning commision Transaction", TRA_ACCOUNT_OPEN_AGENT_COMMISSION, $voucherNo);
                     }
                 }
+
+                // CREATE JOINT MEMBERS RECORDS IF ACCOUNT OPERATION MODE IS 'JOINT'
+                
 ?>

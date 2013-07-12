@@ -258,6 +258,14 @@ class accounts_cont extends CI_Controller {
                     break;
             }
 
+            // CHECK FOR JOINT ACCOUNT ENTRIES
+            if(inp('ModeOfOperation') != 'Self'){
+                    $Ac->addMember(inp('UserID_2'));
+                    $Ac->addMember(inp('UserID_3'));
+                    // throw new Exception("Error Processing Request", 1);
+                    
+            }
+
 
             log_message('error', __FILE__ . " " . __FUNCTION__ . " $Ac->AccountNumber with id $Ac->id created from " . $this->input->ip_address());
 
