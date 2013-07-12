@@ -135,12 +135,14 @@ class Member_cont extends CI_Controller {
 //        $m = new Member();
 //        $m->where('PanNo', inp('PanNo'))->get();
 //        $m->where('PanNo <>',NULL)->get();
-        preg_match('/\d+/', inp('SavingAccountNumber'), $match);
-        $ac_number = $match[0];
-        if(inp('SavingAccountNumber') != Branch::getCurrentBranch()->Code."SB".$ac_number )
-        {
-          echo "<h2>Your Account Number Pattern is wrong</h2>falsefalse";
-          return;
+        if(inp('SavingAccountNumber')){
+            preg_match('/\d+/', inp('SavingAccountNumber'), $match);
+            $ac_number = $match[0];
+            if(inp('SavingAccountNumber') != Branch::getCurrentBranch()->Code."SB".$ac_number )
+            {
+              echo "<h2>Your Account Number Pattern is wrong</h2>falsefalse";
+              return;
+            }
         }
 
         $q = $this->db->query("select PanNo from jos_xmember where PanNo ='" . inp("PanNo") . "' and PanNo is not null");
