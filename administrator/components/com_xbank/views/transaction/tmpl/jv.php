@@ -9,9 +9,15 @@ $this->load->library("formcomponents");
 $branch=Branch::getCurrentBranch()->id;
 $this->formcomponents->open("frm1","index.php?option=com_xbank&task=transaction_cont.doJV");
 
-if(Staff::getCurrentStaff()->AccessLevel >= BRANCH_ADMIN)
+if(Staff::getCurrentStaff()->AccessLevel >= BRANCH_ADMIN){
   $this->formcomponents->select('Type Of JV',"name='transaction_type' class='input'",$tr_type,'Journal Voucher Entry');
-
+  echo "<br/><br/><br/> <div align='left'><div style='float:left'>Reference Account: </div>";
+  $this->formcomponents->lookupDB(" Referance Account Number","name='ReferanceAccount' class='input ui-autocomplete-input'","index.php?option=com_xbank&task=transaction_cont.lookupForJV&format=raw",
+      array("a"=>"b"),array("AccountNumber","Name","PanNo","Scheme"),"AccountNumber");
+  echo "</div>";
+  echo "<br/><br/><br/>";
+  $this->formcomponents->checkBox('Zero Time','name="zerotime" value="1" class="input"');
+}
 ?>
 <table width="100%" border="0">
   <tr>

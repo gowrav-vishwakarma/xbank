@@ -152,8 +152,8 @@
  	
  	function checkBox($lable,$attributes,$checked=false){
  		$html="";
- 		$this->first($lable);
- 		$html .= "<td><div class='input-container'><input type='checkbox' ";
+ 		// $this->first($lable);
+ 		$html .= "<div class='input-container'><lable>$lable <input type='checkbox' ";
  		if(is_array($attributes)){
 	 		foreach($attributes as $attr=>$val){
 	 			$html .= "$attr='$val' ";
@@ -162,8 +162,8 @@
  			$html .= $attributes;
  		}
  		$html .= ($checked) ? 'checked': '';
- 		$html .="/></div></td>";
- 		$this->last();
+ 		$html .="/></lable></div>";
+ 		// $this->last();
  		echo $html;
  	}
  	

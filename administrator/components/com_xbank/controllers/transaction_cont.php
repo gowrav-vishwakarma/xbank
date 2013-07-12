@@ -375,6 +375,11 @@ class transaction_cont extends CI_Controller {
         $countdr = 0;
 
         echo "<h2>". inp('transaction_type') ."</H2>";
+        if(inp('zerotime'))
+            echo "<h2> Transaction for date: ".getNow("Y-m-d 00:00:00") ."</h2>";
+        else
+            echo "<h2> Transaction for date: ".getNow() ."</h2>";
+
 
         for ($i = 1; $i <= 20; $i++) {
 
@@ -413,8 +418,6 @@ class transaction_cont extends CI_Controller {
                 $countcr = $i;
             }
 
-
-
             if ($err) {
                 $msg .="falsefalse";
             }
@@ -445,7 +448,6 @@ class transaction_cont extends CI_Controller {
             $debitAccount = array();
             $creditAccount = array();
 
-            $voucherNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => NULL);
 //            $voucherNo=Transactions::getNewVoucherNumber();
 
             for ($i = 1; $i <= 20; $i++) {
@@ -471,8 +473,16 @@ class transaction_cont extends CI_Controller {
                 $tr_type = TRA_JV_ENTRY;
                 $default_narration = "";
             }
-//            $voucherNo=Transactions::getNewVoucherNumber();
-            Transaction::doTransaction($debitAccount, $creditAccount, $default_narration . inp("Naration"), $tr_type, $voucherNo);
+            $referanceAccount=null;
+            if(inp('ReferanceAccount')) $referanceAccount = inp('ReferanceAccount');
+            $voucherNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $referanceAccount);
+            if(inp('zerotime'))
+                $transactionTime = getNow("Y-m-d 00:00:00");
+            else
+                $transactionTime = getNow();
+
+            Transaction::doTransaction($debitAccount, $creditAccount, $default_narration . inp("Naration"), $tr_type, $voucherNo, $transactionTime);
+            
        $this->db->trans_commit();
         } catch (Exception $e) {
             echo $e->getMessage();
