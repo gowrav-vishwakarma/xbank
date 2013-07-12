@@ -474,7 +474,12 @@ class transaction_cont extends CI_Controller {
                 $default_narration = "";
             }
             $referanceAccount=null;
-            if(inp('ReferanceAccount')) $referanceAccount = inp('ReferanceAccount');
+            if(inp('ReferanceAccount')) {
+                $at=new Account();
+                $at->where('AccountNumber',inp('ReferanceAccount'));
+                $at->get(); 
+                $referanceAccount = $at->id;
+            }
             $voucherNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $referanceAccount);
             if(inp('zerotime'))
                 $transactionTime = getNow("Y-m-d 00:00:00");
