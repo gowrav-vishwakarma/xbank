@@ -2282,13 +2282,13 @@ a.branch_id = $b
         $a->where('ActiveStatus',1);
         $a->where('branch_id',Branch::getCurrentBranch()->id);
         $a->group_start();
-        $a->where('AccountNumber like "pl%"');
-        $a->or_where('AccountNumber like "sl%"');
+        $a->where('AccountNumber like "'.Branch::getCurrentBranch()->Code.'PL%"');
+        $a->or_where('AccountNumber like "'.Branch::getCurrentBranch()->Code.'SL%"');
         $a->group_end();
         // $a->where("branch_id",Branch::getCurrentBranch()->id);
         $a->having("DuePremiumCount > 0");
         $a->get();
-//        echo $a->check_last_query();
+       echo $a->check_last_query();
         $data['report']= getReporttable($a,             //model
                 array("Account Number",'Openned ON',"Scheme","Member Name","Father Name", "Phone Number","Address",'Due Premium Count','EMI Amount',"Due Penalty","Legal/Conveyance/Insurance Charge",'Total',"Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
                 array('AccountNumber','~date("Y-m-d",strtotime("#created_at"))', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress','DuePremiumCount','Amount','PaneltyDUE','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)",'Nominee','MinorNomineeParentName','RelationWithNominee'),       //fields
