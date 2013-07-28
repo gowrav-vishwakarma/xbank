@@ -1,3 +1,7 @@
 recurring yearly paidon date hard coded
 
 premium set in deposit amount 
+
+recurring deposit execute ... first transaction have $voucher varialble.. wher it is coming from...
+
+More then one transaction in a shot will get same new voucher numbers .... 

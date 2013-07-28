@@ -23,5 +23,8 @@
   }
   ?>
 </table>
-<a class="alertinwindow" title="Delete Transaction" href="index.php?option=com_xbank&task=report_cont.confirmTransactionDelete&vn=<?php echo $r['Voucher_tech'] ?>&id=<?php echo $accountID; ?>&format=raw"  >DELETE</a>
-<a class="alertinwindow" title="Edit Transaction" href="index.php?option=com_xbank&task=report_cont.confirmTransactionEdit&vn=<?php echo $r['Voucher_tech'] ?>&id=<?php echo $accountID; ?>&format=raw"  >EDIT TRANSACTION</a>
+<p>
+  <?php echo $Narration?>
+</p>
+<a class="alertinwindow" title="Delete Transaction" href="index.php?option=com_xbank&task=report_cont.confirmTransactionDelete&vn=<?php echo $r['Voucher_tech'] ?>&d_vn=<?php echo $r['DisplayVoucher']?>&id=<?php echo $accountID; ?>&format=raw"  >DELETE</a>
+<a class="alertinwindow" title="Edit Transaction" href="index.php?option=com_xbank&task=report_cont.confirmTransactionEdit&vn=<?php echo $r['Voucher_tech'] ?>&d_vn=<?php echo $r['DisplayVoucher']?>&id=<?php echo $accountID; ?>&format=raw"  >EDIT TRANSACTION</a>
