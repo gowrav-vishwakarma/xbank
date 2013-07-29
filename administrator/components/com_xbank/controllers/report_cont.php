@@ -209,12 +209,14 @@ class report_cont extends CI_Controller {
         //function transactionDetails($voucher, $foraccount) {
         
         $voucher = JRequest::getVar("vn");
+        $d_voucher = JRequest::getVar("d_vn",false);
         $foraccount = JRequest::getVar("id");
         $transaction_type_id = JRequest::getVar('tr_type','is null');
         $arr = array();
         $Transactions = new Transaction();
         $Transactions->include_related('transaction_type', 'Transaction');
         $Transactions->where('voucher_no', $voucher);
+        if($d_voucher) $Transactions->where('display_voucher_no', $d_voucher);
         // $Transactions->where('transaction_type_id', $transaction_type_id);
         $Transactions->where('branch_id', (JRequest::getVar('branch_id',false) == false ? Branch::getCurrentBranch()->id : inp('branch_id')))->get();
         // echo $Transactions->check_last_query();
@@ -224,11 +226,12 @@ class report_cont extends CI_Controller {
             $account = new Account($t->accounts_id);
 //            $account->where('id',$t->accounts_id)->get();
             $data['accountID'] = $account->id;
-            $arr[] = array("Sno" => $i++,"Voucher_tech"=>$t->voucher_no, "Voucher" => ($t->display_voucher_no==0 ? $t->voucher_no: $t->display_voucher_no), "Account" => $account->AccountNumber, "DR" => $t->amountDr, "CR" => $t->amountCr);
+            $arr[] = array("Sno" => $i++,"Voucher_tech"=>$t->voucher_no, "Voucher" => ($t->display_voucher_no==0 ? $t->voucher_no: $t->display_voucher_no),'DisplayVoucher'=>$t->display_voucher_no, "Account" => $account->AccountNumber, "DR" => $t->amountDr, "CR" => $t->amountCr);
         }
         $data['foraccount'] = $foraccount;
         $data['results'] = $arr;
         $data['tr_type'] = $t->transaction_type_Transaction;
+        $data['Narration'] = $t->Narration;
 //        $data['backURL'] = "index.php?//mod_pandl/pandl_cont/accountTransactions/" . $this->session->userdata("Account");
         JRequest::setVar("layout", "pandl_transactionDetails");
         $data['contents'] = $this->load->view('report.html', $data, true);
@@ -905,7 +908,10 @@ class report_cont extends CI_Controller {
         $foraccount = JRequest::getVar("id");
         $date = "";
         $transaction = new Transaction();
-        $transaction->where('voucher_no', $voucherno)->where('branch_id', Branch::getCurrentBranch()->id)->get();
+        $transaction->where('voucher_no', $voucherno)->where('branch_id', Branch::getCurrentBranch()->id);
+        $d_voucherno = JRequest::getVar("d_vn",false);
+        if($d_voucherno) $transaction->where('display_voucher_no',$d_voucherno);
+        $transaction->get();
         //$transaction = Doctrine::getTable("Transactions")->findByVoucher_noAndBranch_id($voucherno, Branch::getCurrentBranch()->id);
         $msg = "";
         $debitbeforeAccount = array();
@@ -940,7 +946,7 @@ class report_cont extends CI_Controller {
         $msg .= "<h3>Account Position after transaction deletion</h3>";
         $msg .=formatDrCr($debitafterAccount, $creditafterAccount);
         echo $msg;
-        $html = "<form method='post' action='index.php?option=com_xbank&task=report_cont.TransactionDelete&vn=" . $voucherno . "&id=$foraccount'>";
+        $html = "<form method='post' action='index.php?option=com_xbank&task=report_cont.TransactionDelete&vn=" . $voucherno . "&id=$foraccount&d_vn=$d_voucherno'>";
         $html .="<table>";
         $html .="<input type='submit' value='DELETE' >";
         $html .="<input type='hidden' value='$date' name='transdate'>";
@@ -971,7 +977,10 @@ class report_cont extends CI_Controller {
 //                re("com_xbank.index","You cannot delete a transaction done before last closing date. Last closing date is $closing->daily .","error");
         //$closing = Doctrine::getTable("Closings")->findOneByBranch_id($branchid);
         $transactions = new Transaction();
-        $transactions->where('voucher_no', $voucherno)->where('branch_id', $branchid)->get();
+        $transactions->where('voucher_no', $voucherno)->where('branch_id', $branchid);
+        $d_voucherno = JRequest::getVar("d_vn",false);
+        if($d_voucherno) $transactions->where('display_voucher_no',$d_voucherno);
+        $transactions->get();
         //$transactions = Doctrine::getTable("Transactions")->findByVoucher_noAndBranch_id($voucherno, $branchid);
         //$conn = Doctrine_Manager::connection();
         try {
@@ -1009,12 +1018,15 @@ class report_cont extends CI_Controller {
     function confirmTransactionEdit() {
         Staff::accessibleTo(BRANCH_ADMIN);
         $voucherno = JRequest::getVar("vn");
+        $d_voucherno = JRequest::getVar("d_vn",false);
         $foraccount = JRequest::getVar("id");
         $transaction = new Transaction();
-        $transaction->where('voucher_no', $voucherno)->where('branch_id', Branch::getCurrentBranch()->id)->get();
+        $transaction->where('voucher_no', $voucherno)->where('branch_id', Branch::getCurrentBranch()->id);
+        if($d_voucherno) $transaction->where('display_voucher_no',$d_voucherno);
+        $transaction->get();
         //$transaction = Doctrine::getTable("Transactions")->findByVoucher_noAndBranch_id($voucherno, Branch::getCurrentBranch()->id);
         $html = "";
-        $html .="<form method='post' action='index.php?option=com_xbank&task=report_cont.TransactionEdit&vn=" . $voucherno . "&id=$foraccount'>";
+        $html .="<form method='post' action='index.php?option=com_xbank&task=report_cont.TransactionEdit&vn=" . $voucherno . "&id=$foraccount&d_vn=$d_voucherno'>";
         $html .="<table>";
         $html .="<th>Voucher No.</th><th>Narration</th><th>Date</th><th>Account Number</th><th>DR</th><th>CR</th><th></th>";
         $i = 1;
@@ -1055,7 +1067,10 @@ class report_cont extends CI_Controller {
         $voucherno = JRequest::getVar("vn");
         $foraccount=JRequest::getVar("id");
         $transaction = new Transaction();
-        $transaction->where('voucher_no', $voucherno)->where('branch_id', Branch::getCurrentBranch()->id)->get();
+        $transaction->where('voucher_no', $voucherno)->where('branch_id', Branch::getCurrentBranch()->id);
+        $d_voucherno = JRequest::getVar("d_vn",false);
+        if($d_voucherno) $transaction->where('display_voucher_no',$d_voucherno);
+        $transaction->get();
 
         $closing = new Closing();
         $closing->where('branch_id', Branch::getCurrentBranch()->id)->get();
@@ -1151,7 +1166,7 @@ class report_cont extends CI_Controller {
                                     join jos_xaccounts a on t.accounts_id=a.id
                                     where t.branch_id=" . $b . "  and
                                     t.created_at like '" . $date . "%'
-                                    ORDER BY voucher_no")->result();
+                                    ORDER BY t.id, voucher_no")->result();
         $data['OpeningBalance'] = $this->db->query("select (a.OpeningBalanceDr - a.OpeningBalanceCr) as OpeningBalance from jos_xaccounts a join jos_xschemes s on s.id=a.schemes_id where s.`Name`='" . CASH_ACCOUNT_SCHEME . "' and a.branch_id=$b")->row()->OpeningBalance;
         $data['transactionOpeningBalance'] = $this->db->query("select IF((select(sum(t.amountDr) - sum(t.amountCr)) from jos_xtransactions t
                                                     join jos_xaccounts a on t.accounts_id=a.id
