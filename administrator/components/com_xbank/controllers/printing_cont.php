@@ -58,13 +58,15 @@ class printing_cont extends CI_Controller {
     			$voucher_data['voucher_date'] = date("d-M-Y",strtotime($tt->created_at));
     			$dr_v=new TRansaction();
     			$dr_v->where('voucher_no',$tt->voucher_no);
-    			$dr_v->where('branch_id',$tt->branch_id);
+                $dr_v->where('branch_id',$tt->branch_id);
+    			$dr_v->where('created_at',$tt->created_at);
     			$dr_v->where('amountDr <>',0);
     			$dr_v->get();
     			
     			$cr_v=new TRansaction();
     			$cr_v->where('voucher_no',$tt->voucher_no);
-    			$cr_v->where('branch_id',$tt->branch_id);
+                $cr_v->where('branch_id',$tt->branch_id);
+    			$cr_v->where('created_at',$tt->created_at);
     			$cr_v->where('amountCr <>',0);
     			$cr_v->get();
 
