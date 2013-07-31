@@ -25,7 +25,8 @@ class printing_cont extends CI_Controller {
     	$t->where('created_at >= "' .inp('voucherDate').'"');
     	$t->where('created_at <"' . nextDate('voucherDate').'"');
     	$t->where('branch_id',Branch::getCurrentBranch()->id);
-    	$t->group_by('voucher_no');
+        $t->group_by('voucher_no');
+    	$t->group_by('display_voucher_no');
     	$t->get();
     	
     	$this->form->open("accountOpenningForm","index.php?option=com_xbank&task=printing_cont.voucherPrint&format=raw","target='blank'")
@@ -48,7 +49,8 @@ class printing_cont extends CI_Controller {
     	$t->where('created_at >= "' .inp('voucherDate').'"');
     	$t->where('created_at <"' . nextDate('voucherDate').'"');
     	$t->where('branch_id',Branch::getCurrentBranch()->id);
-    	$t->group_by('voucher_no');
+        $t->group_by('voucher_no');
+    	$t->group_by('display_voucher_no');
     	$t->get();
     	JRequest::setVar('layout','voucher');
     	

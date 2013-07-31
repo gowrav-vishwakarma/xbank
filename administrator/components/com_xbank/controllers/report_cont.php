@@ -1159,6 +1159,15 @@ class report_cont extends CI_Controller {
         $date = $this->session->userdata("daybook");
         xDeveloperToolBars::onlyCancel("report_cont.dayBookForm", "cancel", "DayBook of :" . inp('dateFrom'));
         $b = Branch::getCurrentBranch()->id;
+        // echo "select t.Narration, t.amountDr, t.amountCr , t.transaction_type_id,
+        //                             t.created_at, t.voucher_no,t.display_voucher_no, a.AccountNumber,
+        //                             a.CurrentBalanceCr, a.CurrentBalanceDr
+        //                             from jos_xtransactions t
+        //                             join jos_xaccounts a on t.accounts_id=a.id
+        //                             where t.branch_id=" . $b . "  and
+        //                             t.created_at like '" . $date . "%'
+        //                             ORDER BY t.id, t.voucher_no, t.display_voucher_no";
+                                    
         $result = $this->db->query("select t.Narration, t.amountDr, t.amountCr , t.transaction_type_id,
                                     t.created_at, t.voucher_no,t.display_voucher_no, a.AccountNumber,
                                     a.CurrentBalanceCr, a.CurrentBalanceDr
@@ -1166,7 +1175,7 @@ class report_cont extends CI_Controller {
                                     join jos_xaccounts a on t.accounts_id=a.id
                                     where t.branch_id=" . $b . "  and
                                     t.created_at like '" . $date . "%'
-                                    ORDER BY t.id, voucher_no")->result();
+                                    ORDER BY t.id, t.voucher_no, t.display_voucher_no")->result();
         $data['OpeningBalance'] = $this->db->query("select (a.OpeningBalanceDr - a.OpeningBalanceCr) as OpeningBalance from jos_xaccounts a join jos_xschemes s on s.id=a.schemes_id where s.`Name`='" . CASH_ACCOUNT_SCHEME . "' and a.branch_id=$b")->row()->OpeningBalance;
         $data['transactionOpeningBalance'] = $this->db->query("select IF((select(sum(t.amountDr) - sum(t.amountCr)) from jos_xtransactions t
                                                     join jos_xaccounts a on t.accounts_id=a.id

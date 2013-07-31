@@ -22,14 +22,19 @@
 
     <?php
         $newvch = 0;
+        $newvch_d = 0;
         $prevvch = 0;
+        $prevvch_d = 0;
         $tmp = 0;
+        $tmp_d = 0;
         foreach ($results as $rs) {
             $insert_row = "";
             $newvch = $rs->voucher_no;
-            if ($newvch != $prevvch) {
+            $newvch_d = $rs->display_voucher_no;
+            if ($newvch != $prevvch OR $newvch_d != $prevvch_d) {
                 $insert_row = "<tr><td colspan=5 align='center'>&nbsp;</td></tr>";
                 $prevvch = $newvch;
+                $prevvch_d = $newvch_d;
             }
             echo $insert_row;
     ?>
@@ -37,9 +42,11 @@
         <?php
             foreach (array_keys($keyandvalues) as $field) {
                 $field = trim($field);
-                if ($field == "voucher_no" && $rs->$field != $tmp) {
+                if ($field == "voucher_no" && $rs->$field != $tmp or $rs->display_voucher_no != $tmp_d) {
                     $newvch = $rs->$field;
+                    $newvch_d = $rs->display_voucher_no;
                     $tmp = $rs->$field;
+                    $tmp_d = $rs->display_voucher_no;
         ?>
                     <td><a class='alertinwindow' href='index.php?option=com_xbank&task=report_cont.transactionDetails&vn=<?php echo $rs->$field ?>&d_vn=<?php echo $rs->display_voucher_no ?>&format=raw&tr_type=<?php echo $rs->transaction_type_id ?>'><?php echo ($rs->display_voucher_no != 0 ? $rs->display_voucher_no : $rs->voucher_no) ?></a></td>
         <?php
