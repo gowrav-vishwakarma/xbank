@@ -36,6 +36,10 @@ if (SET_COMMISSIONS_IN_MONTHLY) {
     $accounts = $CI->db->query($q)->result();
 
     foreach ($accounts as $ac) {
+        
+        // $ac is actually transaction not account ... variable name taken wrong
+
+
 //        $acc = Doctrine::getTable("Accounts")->findOneById($ac->accounts_id);
         $acc = new Account($ac->accounts_id);
         $voucherNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $acc->id);
