@@ -4,8 +4,9 @@ class page_stock_transfer extends Page{
 		parent::init();
 
 			$stock_transfer=$this->add('Model_Stock_Transfer');
-
-			$stock_transfer->addCondition('from_id',$this->api->auth->model['branch_id']);
+			$tb=$this->api->auth->model['branch_id'];
+			// $stock_transfer->addCondition('from_id',$this->api->auth->model['branch_id']);
+			$stock_transfer->_dsql()->where(array(array('from_id',$tb),array('to_id',$tb)));
 			$stock_transfer->_dsql()->order('date','desc');
 			$form=$this->add('Form');
 			// $from_field=$this->addField('dropdown','from_id')->setEmptyText('----')->setModel('Branch');
@@ -18,8 +19,9 @@ class page_stock_transfer extends Page{
 
 			$crud=$this->add('CRUD',array('allow_add'=>false,"allow_edit"=>false));
 			if(!$crud->isEditing()){
-			$crud->grid->addPaginator(50);
-		}
+				$crud->grid->addPaginator(50);
+				$crud->grid->addQuickSearch(array('item', 'to','from','remarks'));
+			}
 			$crud->setModel($stock_transfer);
 
 			if($form->isSubmitted()){
