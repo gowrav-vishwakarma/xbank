@@ -7,7 +7,7 @@ if (!defined('BASEPATH'))
  * and open the template in the editor.
  */
 
-if (SET_COMMISSIONS_IN_MONTHLY) {
+if (SET_COMMISSIONS_IN_MONTHLY_FOR_DDS) {
 
     /*
       $q = Doctrine_Query::create()

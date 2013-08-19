@@ -194,6 +194,7 @@ define('TDS_PERCENTAGE',   '10');
 define('xBANKSCHEMEPATH', constant($xCICurrentExtension.'APPPATH')."controllers/xbankschemes");
 
 define('SET_COMMISSIONS_IN_MONTHLY',    false);
+define('SET_COMMISSIONS_IN_MONTHLY_FOR_DDS',    true);
 define('SET_DATE',                      false);
 
 define("ROUND_TO",      2);

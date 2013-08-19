@@ -1,7 +1,7 @@
 <?php
     if(JRequest::getVar("format") != "raw"){
 ?>
-<a href="index.php?option=com_xbank&task=report_cont.shareCertificate&format=raw" target="bdvvgd">Print Share Certificate</a>
+<a href="index.php?option=com_xbank&task=printing_cont.fdPrint&format=raw" target="bdvvgd">Print FD Receipt</a>
 <?php }
 ?>
 
@@ -23,7 +23,7 @@ td {
 </head>
 
 <body>
-<table width="800" height="600" border="0" align="center" background="components/com_xbank/images/certificate.jpg">
+<table width="1024" height="600" border="0" align="center" background="components/com_xbank/images/fd_receipt.jpg" style="background: url('components/com_xbank/images/fd_receipt.jpg') no-repeat;">
   <tr>
     <td valign="top"><table width="100%" border="0" cellpadding="0" cellspacing="0">
       <tr>
@@ -33,13 +33,13 @@ td {
         <td height="34"><table width="100%"  height="100%" border="0" cellpadding="0" cellspacing="0">
           <tr>
             <td width="14%" height="19">&nbsp;</td>
-            <td width="13%" align="center"><?php echo 'BCCS '.trim($sm->AccountNumber,'SM'); ?></td>
+            <td width="13%" align="center"><?php echo 'BCCS '.trim($fd->AccountNumber,'SM'); ?></td>
             <td width="7%">&nbsp;</td>
-            <td width="13%" valign="middle"><?php echo $sm->AccountNumber; ?></td>
+            <td width="13%" valign="middle"><?php echo $fd->AccountNumber; ?></td>
             <td width="7%">&nbsp;</td>
-            <td width="12%" align="center" valign="middle"><?php echo date("Y-m-d",strtotime($sm->created_at)); ?></td>
+            <td width="12%" align="center" valign="middle"><?php echo date("Y-m-d",strtotime($fd->created_at)); ?></td>
             <td width="8%">&nbsp;</td>
-            <td width="12%" align="center" valign="middle"><?php echo $sm->CurrentBalanceCr/RATE_PER_SHARE; ?></td>
+            <td width="12%" align="center" valign="middle"><?php echo $fd->CurrentBalanceCr/RATE_PER_SHARE; ?></td>
             <td width="14%">&nbsp;</td>
           </tr>
         </table></td>
@@ -51,7 +51,7 @@ td {
         <td height="38"><table width="100%" height="100%" border="0" cellpadding="0" cellspacing="0">
           <tr>
             <td width="36%" height="47">&nbsp;</td>
-            <td width="64%" valign="bottom"><?php echo $sm->member->Name;?></td>
+            <td width="64%" valign="bottom"><?php echo $fd->member->Name;?></td>
           </tr>
         </table></td>
       </tr>
@@ -59,7 +59,7 @@ td {
         <td height="37"><table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
           <tr>
             <td width="37%" height="41">&nbsp;</td>
-            <td width="63%" valign="bottom"><?php echo $sm->CurrentBalanceCr/RATE_PER_SHARE; ?></td>
+            <td width="63%" valign="bottom"><?php echo $fd->CurrentBalanceCr/RATE_PER_SHARE; ?></td>
           </tr>
         </table></td>
       </tr>

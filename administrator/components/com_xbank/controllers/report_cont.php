@@ -420,7 +420,7 @@ class report_cont extends CI_Controller {
         // Staff::accessibleTo(USER);
         //setInfo("TRIAL BALANCE", "");
         $this->load->library("form");
-        $form = $this->form->open("trialbalance", "index.php?option=com_xbank&task=report_cont.trialbalance")
+        $form = $this->form->open("trialbalance", "index.php?option=com_xbank&task=balancesheet_cont.getTrialBalance")
                         ->setColumns(2)
                         ->dateBox("Trial Balance From", "name='fromDate' class='input'")
                         ->dateBox("Trial Balance Till", "name='toDate' class='input'")

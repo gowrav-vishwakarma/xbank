@@ -272,6 +272,8 @@ class xDeveloperToolBars extends JObject {
 
     function getPrintingToolBar(){
         JToolBarHelper::title('Printing Area', 'generic.png');
+        JToolBarHelper::addNewX('printing_cont.fdPrintForm', 'FD Receipt');
+        JToolBarHelper::addNewX('report_cont.shareCertificateForm', 'Share Certificate Print');
         JToolBarHelper::addNewX('printing_cont.voucherPrintForm', 'Voucher Print');
         JToolBarHelper::cancel('com_xbank.index', 'cancel');
     }
