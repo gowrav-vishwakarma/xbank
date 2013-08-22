@@ -2264,7 +2264,7 @@ a.branch_id = $b
 
 
     function plEMIDueListForm(){
-        xDeveloperToolBars::onlyCancel("report_cont.new_reports", "cancel", "PL EMI Due List");
+        xDeveloperToolBars::onlyCancel("report_cont.new_reports", "cancel",  "PL EMI Due List");
         $this->load->library("form");
         $this->form->open("pSearch","index.php?option=com_xbank&task=report_cont.plEMIDueList")
                 ->setColumns(2)
@@ -2961,7 +2961,7 @@ premiumcount >= 3 and premiumcount <= 4
          $t->include_related('account/dealer','DealerName');
          $t->include_related('account/member','FatherName');
          // $t->group_start();
-         $t->where_related('account','AccountNumber not like "vl%"');
+         $t->where_related('account','AccountNumber not like "'.Branch::getCurrentBranch()->Code.'vl%"');
          // $t->or_where_related('account/dealer','DealerName is null');
          // $t->group_end();
          $t->where_related("account","branch_id",Branch::getCurrentBranch()->id);
