@@ -344,7 +344,7 @@ class balancesheet_cont extends CI_Controller {
         $data['form']="";//$this->balanceSheetForm();
         $data['totals'] = array('dr'=>$dr_sum,'cr'=>$cr_sum);
 
-        $data['report_name'] = "Trial Balance";
+        $data['report_name'] = "Trial Balance" ;
         JRequest::setVar( "layout", "trialbalance" );
         $this->load->view( 'balancesheet.html', $data );
         $this->jq->getHeader();
