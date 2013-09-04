@@ -65,7 +65,7 @@ if($schemes->result_count()>0){
                 $creditAccount += array($acc->AccountNumber => $acc->CurrentInterest);
             }
 
-            Transaction::doTransaction($debitAccount, $creditAccount, "Interst posting in DDS Account", TRA_INTEREST_POSTING_IN_DDS, Transactions::getNewVoucherNumber(), date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " +0 day")));
+            Transaction::doTransaction($debitAccount, $creditAccount, "Interst posting in DDS Account", TRA_INTEREST_POSTING_IN_DDS, Transaction::getNewVoucherNumber(), date("Y-m-d", strtotime(date("Y-m-d", strtotime(getNow("Y-m-d"))) . " +0 day")));
         }
 
 //             $this->db->query("UPDATE accounts SET CurrentInterest=0");

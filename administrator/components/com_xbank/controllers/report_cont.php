@@ -1289,7 +1289,7 @@ class report_cont extends CI_Controller {
           from jos_xaccounts a 
             left join jos_xbranch b on a.branch_id=b.id 
             inner join jos_xmember m on a.member_id=m.id 
-            left join jos_xdocuments_submitted ds on ds.accounts_id = a.id
+            left join jos_xdocuments_submitted ds on a.id=ds.accounts_id 
           where 
             (
               a.AccountNumber Like '%" . $this->input->post("term") . "%' 
@@ -1297,11 +1297,11 @@ class report_cont extends CI_Controller {
               or ds.Description like '%".$this->input->post("term")."%'
               ) 
             and (b.id='$b')
-            and 
+            /*and 
               (
                 ds.documents_id=1
                 or ds.documents_id is null
-              )
+              )*/
           limit 10";
         $result = $this->db->query($q)->result();
         foreach ($result as $dd) {
