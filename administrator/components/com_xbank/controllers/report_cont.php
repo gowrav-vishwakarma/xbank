@@ -2710,8 +2710,8 @@ premiumcount >= 3 and premiumcount <= 4
 
 //        $a->check_last_query();
         $data['report'] = getReporttable($a,             //model
-                array("Account Number","Account Opening Date","Member Name","Father Name","Address", "Scheme","Phone Number",'Loan Amount',"No Of EMI","EMI", "Total"),       //heads
-                array('AccountNumber','created_at','member_Name','member_FatherName','member_CurrentAddress', 'scheme_Name','member_PhoneNos','RdAmount','scheme_NumberOfPremiums','Amount', 'Total'),       //fields
+                array("Account Number","Account Opening Date","Member Name","Father Name","Address", "Scheme","Phone Number",'Loan Amount',"No Of EMI","EMI", "Total","Dealer"),       //heads
+                array('AccountNumber','created_at','member_Name','member_FatherName','member_CurrentAddress', 'scheme_Name','member_PhoneNos','RdAmount','scheme_NumberOfPremiums','Amount', 'Total','dealer_DealerName'),       //fields
                 array('RdAmount','Total'),        //totals_array
                 array(),        //headers
                 array('sno'=>true),     //options
