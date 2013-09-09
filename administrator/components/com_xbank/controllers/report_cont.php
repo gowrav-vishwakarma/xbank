@@ -2508,6 +2508,7 @@ premiumcount >= 3 and premiumcount <= 4
 
         $a->select_subquery($p,'DuePremiumCount');
         $a->select_subquery('(SELECT MAX(Amount) From jos_xpremiums p WHERE p.accounts_id=${parent}.id)','Amount');
+        $a->select_subquery('(SELECT MAX(DueDate) From jos_xpremiums p WHERE p.accounts_id=${parent}.id)','lastPremium');
         // $a->select_subquery('(SELECT count(*) * MAX(Amount) From jos_xpremiums p WHERE p.accounts_id=${parent}.id)','Total');
 
         $a->include_related('member','Name');
@@ -2521,6 +2522,7 @@ premiumcount >= 3 and premiumcount <= 4
         $a->where_related('scheme','SchemeType like' ,'loan');
         $a->where_related('dealer',"DealerName like '%".inp('DealerName')."%'");
         $a->where("ActiveStatus",1);
+        $a->having("lastPremium >= '".getNow('Y-m-d')."'");
         $a->having("DuePremiumCount >=",5);
         $a->where("branch_id",Branch::getCurrentBranch()->id);
 
