@@ -87,7 +87,7 @@ class printing_cont extends CI_Controller {
     function fdPrintForm(){
         xDeveloperToolBars::onlyCancel("printing_cont.index", "cancel", "FD Receipt Print");
         $this->form->open("fdprintingForm","index.php?option=com_xbank&task=printing_cont.fdPrint")
-                ->lookupDB("Account number : ", "name='AccountId' class='input req-string'", "index.php?option=com_xbank&task=report_cont.AccountNumber&format=raw", array("a" => "b"), array("id", "AccountNumber", "MName",'VehicleNumber'), "AccountNumber")
+                ->lookupDB("Account number : ", "name='AccountId' class='input req-string'", "index.php?option=com_xbank&task=report_cont.AccountNumber&format=raw", array("a" => "b"), array("id", "AccountNumber", "MName",'VehicleNumber'), "id")
                 ->submit("Go");
         $data['form']=$this->form->get();
         $this->load->view("formonly.html",$data);
@@ -98,6 +98,7 @@ class printing_cont extends CI_Controller {
         if(inp('AccountId'))
             $acc = $this->session->set_userdata('account',inp('AccountId'));
         $acc = $this->session->userdata("account");
+        if(!$acc) re('printing_cont.fdPrintForm');
         $data['fd'] = new Account($acc);
         JRequest::setVar('layout','fdreceipt');
         $this->load->view("report.pdf",$data);
