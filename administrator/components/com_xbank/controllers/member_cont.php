@@ -140,7 +140,7 @@ class Member_cont extends CI_Controller {
             $ac_number = $match[0];
             if(inp('SavingAccountNumber') != Branch::getCurrentBranch()->Code."SB".$ac_number )
             {
-              echo "<h2>Your Account Number Pattern is wrong</h2>falsefalse " . inp('SavingAccountNumber');
+              echo "<h2>Your Account Number Pattern is wrong</h2>falsefalse";
               return;
             }
         }
@@ -386,13 +386,11 @@ class Member_cont extends CI_Controller {
 
 //            $conn->commit();
         } catch (Exception $e) {
-            $this->db->trans_rollback();
-            throw $e;
             $msg = $e->getMessage();
             $rollback = true;
         }
         if ($this->db->trans_status() === false or $rollback == true) {
-            throw $e;
+            $this->db->trans_rollback();
             re("member_cont.addmemberform", " Member Not Added ". $msg , "error");
         }
         $this->db->trans_commit();
