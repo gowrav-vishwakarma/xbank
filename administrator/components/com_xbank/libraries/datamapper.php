@@ -1709,7 +1709,7 @@ class DataMapper implements IteratorAggregate {
                 if(( ! empty($result) && ! in_array(FALSE, $result)))
                     return TRUE;
                 else
-                    Throw new Exception ("Data Not Saved");
+                    Throw new Exception ("Data Not Saved" . get_class($this));
 	}
 
 	// --------------------------------------------------------------------

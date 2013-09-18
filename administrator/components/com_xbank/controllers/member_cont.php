@@ -140,7 +140,7 @@ class Member_cont extends CI_Controller {
             $ac_number = $match[0];
             if(inp('SavingAccountNumber') != Branch::getCurrentBranch()->Code."SB".$ac_number )
             {
-              echo "<h2>Your Account Number Pattern is wrong</h2>falsefalse";
+              echo "<h2>Your Account Number Pattern is wrong</h2>falsefalse " . inp('SavingAccountNumber');
               return;
             }
         }
