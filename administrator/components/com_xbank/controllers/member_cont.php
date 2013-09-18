@@ -386,11 +386,13 @@ class Member_cont extends CI_Controller {
 
 //            $conn->commit();
         } catch (Exception $e) {
+            $this->db->trans_rollback();
+            throw $e;
             $msg = $e->getMessage();
             $rollback = true;
         }
         if ($this->db->trans_status() === false or $rollback == true) {
-            $this->db->trans_rollback();
+            throw $e;
             re("member_cont.addmemberform", " Member Not Added ". $msg , "error");
         }
         $this->db->trans_commit();
