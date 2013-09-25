@@ -5572,6 +5572,8 @@ class DataMapper implements IteratorAggregate {
 				if ($this->id != $row->id)
 				{
 					// Then it is not unique
+					throw new Exception("Not Unique", 1);
+					
 					return FALSE;
 				}
 			}

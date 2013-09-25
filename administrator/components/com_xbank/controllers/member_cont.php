@@ -342,6 +342,7 @@ class Member_cont extends CI_Controller {
                 $shareacc->updated_at = getNow();
                 $shareacc->DefaultAC = '0';
                 $shareacc->LastCurrentInterestUpdatedAt = getNow();
+                // echo $accnum;
                 $shareacc->save();
 
                 $voucherNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $shareacc->id);
@@ -363,12 +364,13 @@ class Member_cont extends CI_Controller {
                 $sbacc->schemes_id = $s->id;
                 $sbacc->staff_id = Staff::getCurrentStaff()->id;
                 $sbacc->branch_id = Branch::getCurrentBranch()->id;
-//			$Ac->OpeningBalance=inp('OpenningBalance');
+//          $Ac->OpeningBalance=inp('OpenningBalance');
                 $sbacc->ActiveStatus = 1;
                 $sbacc->AccountNumber = inp("SavingAccountNumber");
 
                 $sbacc->DefaultAC = '0';
                 $sbacc->LastCurrentInterestUpdatedAt = getNow();
+                
                 $sbacc->save();
 
                 if (inp("SavingAccountAmount") > 0) {
@@ -391,6 +393,8 @@ class Member_cont extends CI_Controller {
         }
         if ($this->db->trans_status() === false or $rollback == true) {
             $this->db->trans_rollback();
+            // echo $msg;
+            // return;
             re("member_cont.addmemberform", " Member Not Added ". $msg , "error");
         }
         $this->db->trans_commit();
