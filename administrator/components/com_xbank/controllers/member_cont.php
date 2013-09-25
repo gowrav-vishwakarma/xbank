@@ -945,7 +945,39 @@ class Member_cont extends CI_Controller {
         re('member_cont.dealerform',inp("dealername")." - Dealer Added Successfully.");
     }
 
+    function deleteMemberConfirm(){
+        $error ="";
+        if(!inp('id')){
+            echo "<h2>No ID Found</h2>";
+            $error = "falsefalse";
+        }
 
+        $m=new Member(inp('id'));
+        if($m->accounts->count() > 0)
+            echo "<h2>This Member Has Accounts Left</h2>";
+            $error = "falsefalse";
+
+        echo $error;
+
+        if($error=""){
+            echo "Confirm !!!";
+        }
+    }
+
+    function deleteMember(){
+        if(!inp('id')){
+            re('search_cont.searchMember','Could Not Delete Member','error');
+        }
+
+        $m=new Member(inp('id'));
+        if($m->accounts->count() > 0)
+            re('search_cont.searchMember','Member has Accounts','error');
+
+        $m->delete();
+
+        re('search_cont.searchMember','Memebr deleted');
+
+    }
 
 
     function test() {

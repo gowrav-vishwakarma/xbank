@@ -12,6 +12,7 @@
     <td>Phone Numbers</td>
 <!--    <td>Share Account</td>-->
     <td>Edit</td>
+    <td>Delete</td>
   </tr>
     <?php
     if($members){
@@ -28,6 +29,7 @@
     <td><?php echo $m->PhoneNos; ?></td>
 <!--    <td><?php echo $m->AccountNumber; ?></td>-->
     <td class="title" align="center"><a class="" title="Edit member <?php echo $m->Name; ?>" href="index.php?option=com_xbank&task=member_cont.editMemberForm&id=<?php echo $m->id; ?>"  hrefok="index.php?option=com_xbank&task=member_cont.editMemberForm&id=<?php echo $m->id; ?>&format=raw" >Edit</a></td>
+    <td class="title" align="center"><a class="alertinwindow" title="Delete Member <?php echo $m->Name . " ( ".$m->id.")"; ?>" href="index.php?option=com_xbank&task=member_cont.deleteMemberConfirm&id=<?php echo $m->id; ?>&format=raw"  hrefok="index.php?option=com_xbank&task=member_cont.deleteMember&id=<?php echo $m->id; ?>&format=raw" >Delete</a></td>
 
 
   </tr>
