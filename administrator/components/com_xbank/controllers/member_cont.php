@@ -953,9 +953,10 @@ class Member_cont extends CI_Controller {
         }
 
         $m=new Member(inp('id'));
-        if($m->accounts->count() > 0)
+        if($m->accounts->count() > 0){
             echo "<h2>This Member Has Accounts Left</h2>";
             $error = "falsefalse";
+        }
 
         echo $error;
 
@@ -966,16 +967,19 @@ class Member_cont extends CI_Controller {
 
     function deleteMember(){
         if(!inp('id')){
-            re('search_cont.searchMember','Could Not Delete Member','error');
+            echo "<h2 style='color:red'>No ID Found.. Not deleting Anything</font>";
+            return;
         }
 
         $m=new Member(inp('id'));
-        if($m->accounts->count() > 0)
-            re('search_cont.searchMember','Member has Accounts','error');
+        if($m->accounts->count() > 0){
+            echo "<h2 style='color:red'>Member Has Accounts Cannot Delete</font>";
+            return;
+        }
 
         $m->delete();
 
-        re('search_cont.searchMember','Memebr deleted');
+        echo "<H2>Member Deleted Sucessfully</H2>";
 
     }
 
