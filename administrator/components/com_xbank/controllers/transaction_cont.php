@@ -917,7 +917,7 @@ class transaction_cont extends CI_Controller {
     
    function AmountTransferredtoAccount() {
         $list = array();
-        $q="select a.*,s.`Name`,m.`Name` as MemberName from jos_xaccounts a join jos_xschemes s on a.schemes_id=s.id join jos_xbranch b on a.branch_id=b.id join jos_xmember m on a.member_id=m.id where a.AccountNumber like '%" . $this->input->post("term") . "%' and (s.`Name`='Bank Accounts' or s.`Name`='Cash Account' or s.`Name` = 'Saving Account') and b.id like '".Branch::getCurrentBranch()->id."' and (a.LockingStatus<>1 and a.ActiveStatus<>0) limit 10";
+        $q="select a.*,s.`Name`,m.`Name` as MemberName from jos_xaccounts a join jos_xschemes s on a.schemes_id=s.id join jos_xbranch b on a.branch_id=b.id join jos_xmember m on a.member_id=m.id where a.AccountNumber like '%" . $this->input->post("term") . "%' and (s.`Name`='Bank Accounts' or s.`Name`='Cash Account' or s.`Name` = 'Saving Account' or s.`Name` = 'Branch & Divisions') and b.id like '".Branch::getCurrentBranch()->id."' and (a.LockingStatus<>1 and a.ActiveStatus<>0) limit 10";
         $result = $this->db->query($q)->result();
         foreach ($result as $dd) {
             $list[] = array('AccountNumber' => $dd->AccountNumber,'MemberName'=>$dd->MemberName);
