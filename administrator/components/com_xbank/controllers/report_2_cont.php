@@ -301,6 +301,21 @@ class report_2_cont extends CI_Controller {
         $a->select_subquery('(SELECT SUM(amountDr) From jos_xtransactions t WHERE t.accounts_id=${parent}.id)','TotalDrTransactions');
         $a->select_subquery('(SELECT SUM(amountCr) From jos_xtransactions t WHERE t.accounts_id=${parent}.id)','TotalCrTransactions');
 
+        $p_paid = new Premium();
+        $p_paid->select_func('COUNT', '*', 'count');
+        $p_paid->where("PaidOn is not null");
+        // $p_paid->where("DueDate between '".inp("fromDate")."' and '".inp("toDate")."'");
+        $p_paid->where_related('account', 'id', '${parent}.id');
+        $a->select_subquery($p_paid,'PaidPremiumCount');
+
+        $p = $a->premiums;
+        $p->select_func('COUNT', '*', 'count');
+        $p->where("PaidOn is null");
+        // $p->where("DueDate between '".inp("fromDate")."' and '".inp("toDate")."'");
+        $p->where_related('account', 'id', '${parent}.id');
+
+        $a->select_subquery($p,'DuePremiumCount');
+
         $a->include_related('member','Name');
         $a->include_related('member','FatherName');
         $a->include_related('member','PhoneNos');
@@ -317,8 +332,8 @@ class report_2_cont extends CI_Controller {
         $a->get();
         //echo $a->check_last_query();
         $data['report']= getReporttable($a,             //model
-                array("Account Openning Date",'Last Premium',"Account Number","Scheme","Member Name","Father Name", "Phone Number","Address",'EMI Amount', 'Total',"Dealer Name","Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
-                array('~date("Y-m-d",strtotime("#created_at"))','~date("Y-m-d",strtotime("#lastPremium"))','AccountNumber', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress','Amount',"~(#OpeningBalanceDr + #TotalDrTransactions - #TotalCrTransactions)",'dealer_DealerName','Nominee','MinorNomineeParentName','RelationWithNominee'),       //fields
+                array("Account Openning Date",'Last Premium',"Account Number","Scheme","Member Name","Father Name", "Phone Number","Address","Paid Premium Count","Due Premium Count",'EMI Amount', 'Total',"Dealer Name","Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
+                array('~date("Y-m-d",strtotime("#created_at"))','~date("Y-m-d",strtotime("#lastPremium"))','AccountNumber', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress',"PaidPremiumCount","DuePremiumCount", 'Amount',"~(#OpeningBalanceDr + #TotalDrTransactions - #TotalCrTransactions)",'dealer_DealerName','Nominee','MinorNomineeParentName','RelationWithNominee'),       //fields
                 array('~(#OpeningBalanceDr + #TotalDrTransactions - #TotalCrTransactions)'),        //totals_array
                 array(),        //headers
                 array('sno'=>true),     //options

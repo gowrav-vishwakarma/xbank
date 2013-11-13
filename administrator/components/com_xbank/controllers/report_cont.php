@@ -2205,13 +2205,14 @@ a.branch_id = $b
 
         $a= new Account();
 
-        $p = $a->premiums;
 
-        $p->select_func('COUNT', '*', 'count');
-        $p->where("PaidOn is null");
-        $p->where("DueDate between '".inp("fromDate")."' and '".inp("toDate")."'");
-        $p->where_related('account', 'id', '${parent}.id');
 
+
+        $a->select('*, id as PaneltyDUE, id as OtherCharges');
+        $a->include_related('dealer','DealerName');
+        $a->include_related('agent/member','Name');
+        $a->include_related('agent/member','PhoneNos');
+        
         $p_paid = new Premium();
         $p_paid->select_func('COUNT', '*', 'count');
         $p_paid->where("PaidOn is not null");
@@ -2219,11 +2220,11 @@ a.branch_id = $b
         $p_paid->where_related('account', 'id', '${parent}.id');
         $a->select_subquery($p_paid,'PaidPremiumCount');
 
-
-        $a->select('*, id as PaneltyDUE, id as OtherCharges');
-        $a->include_related('dealer','DealerName');
-        $a->include_related('agent/member','Name');
-        $a->include_related('agent/member','PhoneNos');
+        $p = $a->premiums;
+        $p->select_func('COUNT', '*', 'count');
+        $p->where("PaidOn is null");
+        $p->where("DueDate between '".inp("fromDate")."' and '".inp("toDate")."'");
+        $p->where_related('account', 'id', '${parent}.id');
 
         $a->select_subquery($p,'DuePremiumCount');
         $a->select_subquery('(SELECT MAX(Amount) From jos_xpremiums p WHERE p.accounts_id=${parent}.id)','Amount');
