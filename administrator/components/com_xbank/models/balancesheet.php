@@ -458,6 +458,96 @@ class BalanceSheet extends DataMapper {
 
     }
 
+    function getGroupedAccountsViseClosingBalance($dateOn=null,$branch=null,$head=null,$forPandL=false,$fromDate=null){
+        if($head==null) $head=$this->id;
+        if($dateOn == null) $dateOn = getNow();
+        
+        $dateOnOrig=$dateOn;
+        $dateOn = date("Y-m-d", strtotime(date("Y-m-d", strtotime($dateOn)) . " +1 DAY"));
+        $t=new Transaction();
+        $t->select("SUM(amountDr) as amountDr, SUM(amountCr) as amountCr");
+        $t->include_related('account','AccountNumber');
+        $t->include_related('account','PAndLGroup');
+        $t->include_related('account/scheme/balancesheet','Head');
+        $t->include_related('account/scheme/balancesheet','subtract_from');
+        if($forPandL){
+            // $month = date('m',strtotime($dateOnOrig));
+            // $year=date('Y',strtotime($dateOnOrig));
+            // if($month>=1 and $month <=3){
+            //     $year--;
+            // }
+            // $financialYearStart = "$year-04-01";
+            $t->where("created_at >=",$fromDate);
+        }
+        $t->where("created_at <",$dateOn);
+        $t->where_related("account/scheme/balancesheet","id",$head);
+        if($branch!=null)
+            $t->where("branch_id",$branch);
+        $t->group_start();
+        $t->where_related("account","ActiveStatus","1");
+        $t->or_where_related("account","affectsBalanceSheet","1");
+        $t->group_end();
+        $t->group_by('account_PAndLGroup');
+        $t->get();
+        // echo $t->check_last_query();
+        $a=new Account();
+        $a->select('SUM(OpeningBalanceDr) as OpeningBalanceDr');
+        $a->select('SUM(OpeningBalanceCr) as OpeningBalanceCr');
+        $a->select('PAndLGroup');
+        $a->include_related('scheme/balancesheet','Head');
+        $a->include_related('scheme/balancesheet','subtract_from');
+        if($branch!=null)
+            $a->where("branch_id",$branch);
+        $a->group_start();
+        $a->where("ActiveStatus","1");
+        $a->or_where("affectsBalanceSheet","1");
+        $a->group_end();
+        $a->where_related('scheme/balancesheet','id',$head);
+        $a->group_by('PAndLGroup');
+        $a->get();
+        // $a->check_last_query();
+
+        $arr=array();
+        $accounts_found_in_tr=array();
+        foreach($t as $tt){
+            $dr=$cr=0;
+            foreach($a as $aa)
+                if($aa->PAndLGroup === $tt->account_PAndLGroup){
+                    $dr=$tt->amountDr + $aa->OpeningBalanceDr;
+                    $cr=$tt->amountCr + $aa->OpeningBalanceCr;
+                    $accounts_found_in_tr[] = $aa->PAndLGroup;
+                }
+            if($dr-$cr != 0)
+            $arr[] = array(
+                    'PAndLGroup' => $tt->account_PAndLGroup,
+                    'Title' => 'PAndLGroup',
+                    'amountDr' => $dr,
+                    'amountCr' => $cr,
+                    'Head' => $tt->account_scheme_balancesheet_Head,
+                    'SubtractFrom' => $tt->account_scheme_balancesheet_subtract_from
+
+                );
+        }
+
+        foreach($a as $aa){
+            if(array_search($aa->PAndLGroup, $accounts_found_in_tr)===false){
+                if($aa->OpeningBalanceDr !=0 and $aa->OpeningBalanceCr!=0)
+                    $arr[] = array(
+                        'PAndLGroup' => ($aa->PAndLGroup),
+                        'Title' => 'PAndLGroup',
+                        'amountDr' => $aa->OpeningBalanceDr,
+                        'amountCr' => $aa->OpeningBalanceCr,
+                        'Head' => $aa->scheme_balancesheet_Head,
+                        'SubtractFrom' => $aa->scheme_balancesheet_subtract_from
+                    );
+            }
+        }
+
+
+        return arrayToObject($arr);
+
+    }
+
     function getAllBalanceSheetHeads($dateFrom,$dateTo,$branch=''){
         $dateTo = date("Y-m-d", strtotime(date("Y-m-d", strtotime($dateTo)) . " +1 DAY"));
         // Transaction Sum of all heads

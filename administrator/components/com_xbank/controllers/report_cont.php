@@ -271,6 +271,32 @@ class report_cont extends CI_Controller {
         $this->jq->getHeader();
     }
 
+      function pandlFormNew() {
+        xDeveloperToolBars::onlyCancel("report_cont.dashboard", "cancel", "View PandL Reports");
+        //Staff::accessibleTo(USER);
+        //setInfo("PROFIT & LOSS ACCOUNT", "");
+        $this->load->library("form");
+        $form = $this->form->open("pandl", "index.php?option=com_xbank&task=balancesheet_cont.getPandLNew")
+                        ->setColumns(2)
+                        ->dateBox("P & L From", "name='fromDate' class='input'")
+                        ->dateBox("P & L till", "name='toDate' class='input'");
+                        // ->checkbox("Print To PDF", "name='printToPDF' value=1");
+        if (Branch::getCurrentBranch()->Code == "DFL") {
+            //                    $branchNames=$this->db->query("select Name from branch")->result();
+            $form = $form->select("Select Branch", "name='BranchId'", Branch::getAllBranchNames())
+                            ->_();
+        } else {
+            $b = Branch::getCurrentBranch()->id;
+            $form = $form->hidden("", "name='BranchId' value='$b'");
+        }
+        $form = $form->submit("Go");
+        $data['contents'] = $this->form->get();
+        //JRequest::setVar('layout','pandl');
+        $this->load->view('report.html', $data);
+        $this->jq->getHeader();
+    }
+
+
     /**
      * Actual Profit & Loss A/c is generated here
      *
@@ -2431,7 +2457,10 @@ premiumcount >= 3 and premiumcount <= 4
         $a->where('ActiveStatus',1);
         $a->where_related('scheme','SchemeType like' ,'loan');
         $a->where_related('dealer',"DealerName like '%".inp('DealerName')."%'");
-        $a->where("branch_id",Branch::getCurrentBranch()->id);
+        
+        if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
+          $a->where("branch_id",Branch::getCurrentBranch()->id);
+
         $a->having("lastPremium >= '".getNow('Y-m-d')."'");
 
         $a->having("DuePremiumCount >= 3 AND DuePremiumCount <= 4 ");
@@ -2529,7 +2558,8 @@ premiumcount >= 3 and premiumcount <= 4
         $a->where("ActiveStatus",1);
         $a->having("lastPremium >= '".getNow('Y-m-d')."'");
         $a->having("DuePremiumCount >=",5);
-        $a->where("branch_id",Branch::getCurrentBranch()->id);
+        if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
+          $a->where("branch_id",Branch::getCurrentBranch()->id);
 
         $a->get();
         //echo $a->check_last_query();

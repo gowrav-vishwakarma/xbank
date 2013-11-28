@@ -327,7 +327,8 @@ class report_2_cont extends CI_Controller {
         $a->where("ActiveStatus",1);
         $a->where("((OpeningBalanceDr + CurrentBalanceDr)-(OpeningBalanceCr + CurrentBalanceCr)) <>",0);
         $a->having("lastPremium < '".getNow('Y-m-d')."'");
-        $a->where("branch_id",Branch::getCurrentBranch()->id);
+        if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
+            $a->where("branch_id",Branch::getCurrentBranch()->id);
 
         $a->get();
         //echo $a->check_last_query();
