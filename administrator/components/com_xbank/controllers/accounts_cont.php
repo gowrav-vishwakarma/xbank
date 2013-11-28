@@ -985,6 +985,7 @@ class accounts_cont extends CI_Controller {
                             ->lookupDB("Agent's Member ID", "name='Agents_Id' class='input' value='$acc->agents_id'  onblur='javascript:jQuery(\"#agentDetailsO\").load(\"index.php?option=com_xbank&task=accounts_cont.agentDetails&format=raw&aid=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.AgentMemberID&format=raw", array("a"=>"b"), array("id", "Name", "PanNo"), "id")
                             ->div("agentDetailsO", "", $defaultAgent)
                             ->select("Active Status", "name='ActiveStatus'", array("Active" => '1', "DeActive" => '0'), $acc->ActiveStatus);
+                            
             $form = $form->select("Operation Mode", "name='ModeOfOperation'", array("Select_Mode" => '-1', "Self" => 'Self', "Joint" => 'Joint', "Any One" => 'Any', "Otehr" => 'Other'), $acc->ModeOfOperation);
 //            Documents to be submitted
             $i = 1;
@@ -1239,6 +1240,7 @@ class accounts_cont extends CI_Controller {
                             ->text("Opening Balance DR","name='initialAmountDR' class='input req-numeric tooltip' value='$acc->OpeningBalanceDr' title='Put the opening DR amount for account'")
                             ->lookupDB("Agent's Member ID", "name='Agents_Id' class='input' value='$acc->agents_id'  onblur='javascript:jQuery(\"#agentDetailsO\").load(\"index.php?option=com_xbank&task=accounts_cont.agentDetails&format=raw&aid=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.AgentMemberID&format=raw", array("a"=>"b"), array("id", "Name", "PanNo"), "id")
                             ->div("agentDetailsO", "", $defaultAgent)
+                            ->text("PAndLGroup", "name='PAndLGroup' value='$acc->PAndLGroup'")
                             ->select("Active Status", "name='ActiveStatus'", array("Active" => '1', "DeActive" => '0'), $acc->ActiveStatus);
             $i = 1;
             foreach ($documents as $d) {
@@ -1313,7 +1315,8 @@ class accounts_cont extends CI_Controller {
             if(inp('AccountNumber')){
                 $Ac->AccountNumber = inp('AccountNumber');
             }
-           $Ac->member_id = inp("UserID");
+            $Ac->PAndLGroup = inp('PAndLGroup');
+            $Ac->member_id = inp("UserID");
             $Ac->OpeningBalanceCr = (inp("initialAmountCR") ? inp("initialAmountCR") : 0);
             $Ac->OpeningBalanceDr = (inp("initialAmountDR") ? inp("initialAmountDR") : 0);
             $Ac->ActiveStatus = inp('ActiveStatus');

@@ -271,6 +271,32 @@ class report_cont extends CI_Controller {
         $this->jq->getHeader();
     }
 
+      function pandlFormNew() {
+        xDeveloperToolBars::onlyCancel("report_cont.dashboard", "cancel", "View PandL Reports");
+        //Staff::accessibleTo(USER);
+        //setInfo("PROFIT & LOSS ACCOUNT", "");
+        $this->load->library("form");
+        $form = $this->form->open("pandl", "index.php?option=com_xbank&task=balancesheet_cont.getPandLNew")
+                        ->setColumns(2)
+                        ->dateBox("P & L From", "name='fromDate' class='input'")
+                        ->dateBox("P & L till", "name='toDate' class='input'");
+                        // ->checkbox("Print To PDF", "name='printToPDF' value=1");
+        if (Branch::getCurrentBranch()->Code == "DFL") {
+            //                    $branchNames=$this->db->query("select Name from branch")->result();
+            $form = $form->select("Select Branch", "name='BranchId'", Branch::getAllBranchNames())
+                            ->_();
+        } else {
+            $b = Branch::getCurrentBranch()->id;
+            $form = $form->hidden("", "name='BranchId' value='$b'");
+        }
+        $form = $form->submit("Go");
+        $data['contents'] = $this->form->get();
+        //JRequest::setVar('layout','pandl');
+        $this->load->view('report.html', $data);
+        $this->jq->getHeader();
+    }
+
+
     /**
      * Actual Profit & Loss A/c is generated here
      *
