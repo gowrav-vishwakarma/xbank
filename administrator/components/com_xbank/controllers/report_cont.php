@@ -2457,7 +2457,10 @@ premiumcount >= 3 and premiumcount <= 4
         $a->where('ActiveStatus',1);
         $a->where_related('scheme','SchemeType like' ,'loan');
         $a->where_related('dealer',"DealerName like '%".inp('DealerName')."%'");
-        $a->where("branch_id",Branch::getCurrentBranch()->id);
+        
+        if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
+          $a->where("branch_id",Branch::getCurrentBranch()->id);
+
         $a->having("lastPremium >= '".getNow('Y-m-d')."'");
 
         $a->having("DuePremiumCount >= 3 AND DuePremiumCount <= 4 ");
@@ -2555,7 +2558,8 @@ premiumcount >= 3 and premiumcount <= 4
         $a->where("ActiveStatus",1);
         $a->having("lastPremium >= '".getNow('Y-m-d')."'");
         $a->having("DuePremiumCount >=",5);
-        $a->where("branch_id",Branch::getCurrentBranch()->id);
+        if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
+          $a->where("branch_id",Branch::getCurrentBranch()->id);
 
         $a->get();
         //echo $a->check_last_query();
