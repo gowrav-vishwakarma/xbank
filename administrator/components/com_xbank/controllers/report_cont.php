@@ -2266,7 +2266,10 @@ a.branch_id = $b
         $a->where_related('scheme','SchemeType like' ,'loan');
         $a->where_related('dealer',"DealerName like '%".inp('DealerName')."%'");
         $a->where("ActiveStatus",1);
-        $a->where("branch_id",Branch::getCurrentBranch()->id);
+    
+        if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
+            $a->where("branch_id",Branch::getCurrentBranch()->id);
+    
         $a->having("lastPremium >= '".getNow('Y-m-d')."'");
 
         $a->having("DuePremiumCount <= 2 and DuePremiumCount > 0");
