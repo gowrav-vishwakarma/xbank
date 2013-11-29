@@ -2266,7 +2266,10 @@ a.branch_id = $b
         $a->where_related('scheme','SchemeType like' ,'loan');
         $a->where_related('dealer',"DealerName like '%".inp('DealerName')."%'");
         $a->where("ActiveStatus",1);
-        $a->where("branch_id",Branch::getCurrentBranch()->id);
+    
+        if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
+            $a->where("branch_id",Branch::getCurrentBranch()->id);
+    
         $a->having("lastPremium >= '".getNow('Y-m-d')."'");
 
         $a->having("DuePremiumCount <= 2 and DuePremiumCount > 0");
@@ -2467,8 +2470,8 @@ premiumcount >= 3 and premiumcount <= 4
         $a->get();
 //        echo $a->check_last_query();
         $data['report'] =  getReporttable($a,             //model
-                array("Account Number",'Opnned On',"Scheme","Member Name","Father Name", "Phone Number","Address","Paid Premium Count",'Due Premium Count','EMI Amount',"Due Penalty","Legal/Conveyance/Insurance Charge","Total","Dealer Name","Guarantor Name","Guarantor Address","Guarantor Phone",'Documents'),       //heads
-                array('AccountNumber','~date("Y-m-d",strtotime("#created_at"))', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress',"PaidPremiumCount",'DuePremiumCount','Amount','PaneltyDUE','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)",'dealer_DealerName','Nominee','MinorNomineeParentName','RelationWithNominee','Documents'),       //fields
+                array("Account Number",'Opnned On',                             "Scheme",       "Member Name","Father Name",    "Phone Number",     "Address",             "Paid Premium Count",'Due Premium Count','EMI Amount',"Due Penalty","Legal/Conveyance/Insurance Charge","Total",                                                    "Dealer Name",      "Guarantor Name","Guarantor Address",     "Guarantor Phone",    'Documents'),       //heads
+                array('AccountNumber','~date("Y-m-d",strtotime("#created_at"))', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress',"PaidPremiumCount",  'DuePremiumCount',  'Amount',    'PaneltyDUE', 'OtherCharges',                     "~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)",'dealer_DealerName','Nominee',       'MinorNomineeParentName','RelationWithNominee','Documents'),       //fields
                 array('PaneltyDUE','DuePremiumCount','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)"),        //totals_array
                 array(),        //headers
                 array('sno'=>true),     //options
