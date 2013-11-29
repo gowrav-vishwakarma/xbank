@@ -321,6 +321,7 @@ class report_2_cont extends CI_Controller {
         $a->include_related('member','PhoneNos');
         $a->include_related('member','CurrentAddress');
         $a->include_related('scheme','Name');
+        $a->select('*, id as PaneltyDUE, id as OtherCharges');
 
         $a->where_related('scheme','SchemeType like' ,'loan');
         $a->where_related('dealer',"DealerName like '%".inp('DealerName')."%'");
@@ -333,8 +334,8 @@ class report_2_cont extends CI_Controller {
         $a->get();
         //echo $a->check_last_query();
         $data['report']= getReporttable($a,             //model
-                array("Account Openning Date",'Last Premium',"Account Number","Scheme","Member Name","Father Name", "Phone Number","Address","Paid Premium Count","Due Premium Count",'EMI Amount', 'Total',"Dealer Name","Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
-                array('~date("Y-m-d",strtotime("#created_at"))','~date("Y-m-d",strtotime("#lastPremium"))','AccountNumber', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress',"PaidPremiumCount","DuePremiumCount", 'Amount',"~(#OpeningBalanceDr + #TotalDrTransactions - #TotalCrTransactions)",'dealer_DealerName','Nominee','MinorNomineeParentName','RelationWithNominee'),       //fields
+                array("Account Openning Date",'Last Premium',"Account Number","Scheme","Member Name","Father Name", "Phone Number","Address","Paid Premium Count","Due Premium Count",'EMI Amount',"Due Penalty","Legal/Conveyance/Insurance Charge", 'Total',"Dealer Name","Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
+                array('~date("Y-m-d",strtotime("#created_at"))','~date("Y-m-d",strtotime("#lastPremium"))','AccountNumber', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress',"PaidPremiumCount","DuePremiumCount", 'Amount','PaneltyDUE', 'OtherCharges',"~(#OpeningBalanceDr + #TotalDrTransactions - #TotalCrTransactions)",'dealer_DealerName','Nominee','MinorNomineeParentName','RelationWithNominee'),       //fields
                 array('~(#OpeningBalanceDr + #TotalDrTransactions - #TotalCrTransactions)'),        //totals_array
                 array(),        //headers
                 array('sno'=>true),     //options
