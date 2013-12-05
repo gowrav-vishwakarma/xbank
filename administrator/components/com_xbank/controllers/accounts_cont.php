@@ -1536,8 +1536,10 @@ class accounts_cont extends CI_Controller {
             $query = "delete from jos_xaccounts where id = $ac->id";
             executeQuery($query);
 
+
             $this->db->trans_commit();
             echo "Done";
+            log::write( __FILE__ . " " . __FUNCTION__ . " $ac->AccountNumber with id $ac->id deleted by ".Staff::getCurrentStaff()->StaffID . " from " . $this->input->ip_address(),$ac->id);
         } catch (Exception $e) {
             $this->db->trans_rollback();
             echo $e->getMessage();
