@@ -2935,7 +2935,8 @@ premiumcount >= 3 and premiumcount <= 4
          $t->where_related('account/dealer','DealerName like "%'.inp('DealerName') . '%"');
          // $t->or_where_related('account/dealer','DealerName is null');
          // $t->group_end();
-         $t->where_related("account","branch_id",Branch::getCurrentBranch()->id);
+         if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
+             $t->where_related("account","branch_id",Branch::getCurrentBranch()->id);
          // $t->where_related('account/scheme','SchemeType','Loan');
          $t->where('transaction_type_id',18);//LoanAccountAmountDeposit
          // $t->limit(300,JRequest::getVar('page_start',0)*300);
