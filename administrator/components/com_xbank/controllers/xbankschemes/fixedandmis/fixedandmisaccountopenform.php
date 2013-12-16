@@ -32,6 +32,19 @@ else {
                 ->selectAjax("Operation Mode", "name='ModeOfOperation' class='not-req req-string' not-req-val='Select_Mode'", array("Select_Mode" => '-1', "Self" => 'Self', "Joint" => 'Joint', "Any One" => 'Any', "Otehr" => 'Other'), "Self")
                 //->lookupDB("Interest To Account number : $branchCode - ", "name='InterestTo' class='input'", "index.php?//ajax/lookupDBDQL", array("select" => "a.*, m.Name AS Name, m.PanNo AS Pan, s.Name as Scheme", "from" => "Accounts a", "leftJoin" => "a.Branch b, a.Member m, a.Schemes s", "where" => "a.AccountNumber Like '%\$term%'", "andWhere" => "b.id='$b->id'", "andWhere" => "s.SchemeType='" . ACCOUNT_TYPE_BANK . "'", "limit" => "10"), array("Name", "AccountNumber", "Scheme"), "AccountNumber")
                 ->lookupDB("Interest To Account number : $branchCode - ", "name='InterestTo' class='input'", "index.php?option=com_xbank&task=accounts_cont.InterestToAccountnumber&format=raw", array("a" => "b"), array("Name", "AccountNumber", "Scheme"), "AccountNumber")
+                                ->text("Account Name (IF Joint)","name='AccountDisplayName' class='input'")
+                ->_()
+                ->lookupDB("Member ID 2 (For Joint Accounts)", "name='UserID_2' class='input' onblur='javascript:jQuery(\"#memberDetailsS1\").load(\"index.php?option=com_xbank&format=raw&task=accounts_cont.memberDetails&id=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.MemberID&format=raw", array("a"=>"b"), array("id", "Name", "FatherName", "BranchName"), "id")
+                ->div("memberDetailsS1", "", $member)
+                ->lookupDB("Member ID 3 (For Joint Accounts)", "name='UserID_3' class='input' onblur='javascript:jQuery(\"#memberDetailsS2\").load(\"index.php?option=com_xbank&format=raw&task=accounts_cont.memberDetails&id=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.MemberID&format=raw", array("a"=>"b"), array("id", "Name", "FatherName", "BranchName"), "id")
+                ->div("memberDetailsS2", "", $member)
+                ->lookupDB("Member ID 4 (For Joint Accounts)", "name='UserID_4' class='input' onblur='javascript:jQuery(\"#memberDetailsS3\").load(\"index.php?option=com_xbank&format=raw&task=accounts_cont.memberDetails&id=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.MemberID&format=raw", array("a"=>"b"), array("id", "Name", "FatherName", "BranchName"), "id")
+                ->div("memberDetailsS3", "", $member)
+                ->lookupDB("Member ID 5 (For Joint Accounts)", "name='UserID_5' class='input' onblur='javascript:jQuery(\"#memberDetailsS4\").load(\"index.php?option=com_xbank&format=raw&task=accounts_cont.memberDetails&id=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.MemberID&format=raw", array("a"=>"b"), array("id", "Name", "FatherName", "BranchName"), "id")
+                ->div("memberDetailsS4", "", $member)
+                ->text('Nominee','name="Nominee" class="input "')
+                ->text('Nominee Age','name="NomineeAge" class="input "')
+                ->text('Relation Nominee','name="RelationWithNominee" class="input "')
                 ->hidden("", "name='CurrentScheme' value='$currentFolder'");
 
 $j = 1;

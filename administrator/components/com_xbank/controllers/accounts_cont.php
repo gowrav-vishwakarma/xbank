@@ -262,8 +262,9 @@ class accounts_cont extends CI_Controller {
             if(inp('ModeOfOperation') != 'Self'){
                     $Ac->addMember(inp('UserID_2'));
                     $Ac->addMember(inp('UserID_3'));
+                    $Ac->addMember(inp('UserID_4'));
+                    $Ac->addMember(inp('UserID_5'));
                     // throw new Exception("Error Processing Request", 1);
-                    
             }
 
 
@@ -980,6 +981,7 @@ class accounts_cont extends CI_Controller {
                             ->div("memberDetailsO","",$acc->member->Name)
                             // ->text("Member Name", "name='UserID' class='input req-string' value='" . $acc->member->Name . "' DISABLED")
                             ->text("Account Under", "name='AccountType' class='input req-string' value='" . $acc->scheme->Name . "' DISABLED")
+
                             ->text("Opening Balance CR","name='initialAmountCR' class='input req-numeric tooltip' value='$acc->OpeningBalanceCr' title='Put the opening CR amount for account'")
                             ->text("Opening Balance DR","name='initialAmountDR' class='input req-numeric tooltip' value='$acc->OpeningBalanceDr' title='Put the opening DR amount for account'")
                             ->lookupDB("Agent's Member ID", "name='Agents_Id' class='input' value='$acc->agents_id'  onblur='javascript:jQuery(\"#agentDetailsO\").load(\"index.php?option=com_xbank&task=accounts_cont.agentDetails&format=raw&aid=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.AgentMemberID&format=raw", array("a"=>"b"), array("id", "Name", "PanNo"), "id")
@@ -1233,9 +1235,10 @@ class accounts_cont extends CI_Controller {
                             ->lookupDB("Account number", "name='AccountNumber' class='input req-string' value='$acc->AccountNumber'", "index.php?option=com_xbank&task=accounts_cont.AccountNumber&format=raw", array("a"=>"b"), array("AccountNumber"), "")
                             ->text("Account Name","name='AccountDisplayName' value='".$acc->AccountDisplayName."'")
                             ->lookupDB("Member Name", "name='UserID' class='input req-string' value='" . $acc->member_id . "'  onblur='javascript:jQuery(\"#memberDetailsO\").load(\"index.php?option=com_xbank&task=accounts_cont.memberDetails&format=raw&id=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.MemberID&format=raw", array("a"=>"b"), array("id", "Name", "FatherName", "BranchName"), "id")
-                           ->div("memberDetailsO","",$acc->member->Name)
+                            ->div("memberDetailsO","",$acc->member->Name)
                             // ->text("Member Name", "name='UserID' class='input req-string' value='" . $acc->member->Name . "' DISABLED")
-                            ->text("Account Under", "name='AccountType' class='input req-string' value='" . $acc->scheme->Name . "' DISABLED")
+                            // ->text("Account Under", "name='AccountType' class='input req-string' value='" . $acc->scheme->Name . "' DISABLED")
+                            ->selectAjax("Account Under", "name='schemes_id' class='req-string not-req' not-req-val='Select_Account_Type'", Branch::getAllSchemesForCurrentBranchOfType(ACCOUNT_TYPE_DEFAULT),$acc->scheme->id)
                             ->text("Opening Balance CR","name='initialAmountCR' class='input req-numeric tooltip' value='$acc->OpeningBalanceCr' title='Put the opening CR amount for account'")
                             ->text("Opening Balance DR","name='initialAmountDR' class='input req-numeric tooltip' value='$acc->OpeningBalanceDr' title='Put the opening DR amount for account'")
                             ->lookupDB("Agent's Member ID", "name='Agents_Id' class='input' value='$acc->agents_id'  onblur='javascript:jQuery(\"#agentDetailsO\").load(\"index.php?option=com_xbank&task=accounts_cont.agentDetails&format=raw&aid=\"+this.value);'", "index.php?option=com_xbank&task=accounts_cont.AgentMemberID&format=raw", array("a"=>"b"), array("id", "Name", "PanNo"), "id")
@@ -1331,6 +1334,10 @@ class accounts_cont extends CI_Controller {
                 $Ac->AccountDisplayName = inp("AccountDisplayName");
             if (inp("Dealer") != "")
                 $Ac->dealer_id = inp('Dealer');
+
+            if(inp('schemes_id')){
+                $Ac->schemes_id = inp('schemes_id');
+            }
 
             $Ac->save();
             log::write( __FILE__ . " " . __FUNCTION__ . " $Ac->AccountNumber with id $Ac->id edited from " . $this->input->ip_address(),$Ac->id);
