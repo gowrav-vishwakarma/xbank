@@ -11,5 +11,9 @@ class page_stock_purchase extends Page{
 		$stock_purchase->addCondition('branch_id',$this->api->auth->model['branch_id']);
 		$crud=$this->add('CRUD',array('allow_edit'=>false,'allow_del'=>$allow_del));
 		$crud->setModel($stock_purchase);
+		if(!$crud->isEditing()){
+			$crud->grid->addPaginator(50);
+			$crud->grid->addQuickSearch(array('item', 'Quantity'));
+		}
 	}
 }

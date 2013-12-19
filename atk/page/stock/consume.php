@@ -19,8 +19,8 @@ class page_stock_consume extends Page{
 		$crud=$this->add('CRUD',array('allow_add'=>false,'allow_edit'=>false));
 		$crud->add('misc/Export');
 		if(!$crud->isEditing()){
-		$crud->grid->addQuickSearch(array('item','remarks'));
-		$crud->grid->addPaginator(50);
+			$crud->grid->addQuickSearch(array('item','remarks'));
+			$crud->grid->addPaginator(50);
 		}
 		$crud->setModel($stock_consume1);
 
