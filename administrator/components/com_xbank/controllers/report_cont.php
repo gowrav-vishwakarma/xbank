@@ -2336,7 +2336,8 @@ a.branch_id = $b
         $a->include_related('scheme','Name');
 
         $a->where('ActiveStatus',1);
-        $a->where('branch_id',Branch::getCurrentBranch()->id);
+        if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
+            $a->where('branch_id',Branch::getCurrentBranch()->id);
         $a->group_start();
         $a->where('AccountNumber like "'.Branch::getCurrentBranch()->Code.'PL%"');
         $a->or_where('AccountNumber like "'.Branch::getCurrentBranch()->Code.'SL%"');
@@ -2344,7 +2345,7 @@ a.branch_id = $b
         // $a->where("branch_id",Branch::getCurrentBranch()->id);
         $a->having("DuePremiumCount > 0");
         $a->get();
-       echo $a->check_last_query();
+       // echo $a->check_last_query();
         $data['report']= getReporttable($a,             //model
                 array("Account Number",'Openned ON',"Scheme","Member Name","Father Name", "Phone Number","Address",'Due Premium Count','EMI Amount',"Due Penalty","Legal/Conveyance/Insurance Charge",'Total',"Guarantor Name","Guarantor Address","Guarantor Phone"),       //heads
                 array('AccountNumber','~date("Y-m-d",strtotime("#created_at"))', 'scheme_Name','member_Name','member_FatherName','member_PhoneNos','member_CurrentAddress','DuePremiumCount','Amount','PaneltyDUE','OtherCharges',"~(#DuePremiumCount*#Amount + #PaneltyDUE + #OtherCharges)",'Nominee','MinorNomineeParentName','RelationWithNominee'),       //fields
@@ -2676,6 +2677,11 @@ premiumcount >= 3 and premiumcount <= 4
 
     function RDPremiumDueList(){
         xDeveloperToolBars::onlyCancel("report_cont.RDPremiumDueListForm", "cancel", "RD Premium Due List");
+        if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
+            $branch_cond = 'a.branch_id='.Branch::getCurrentBranch()->id.' AND';
+        else
+            $branch_cond ='';
+
         $q ="select a.AccountNumber,m.Name, m.PermanentAddress, m.FatherName, m.PhoneNos,p.Amount,a.agents_id,a.created_at,
 
             (select count(*) as cnt from jos_xpremiums where accounts_id = a.id and DueDate BETWEEN '".inp('fromDate')."' AND '".inp('toDate')."' AND PaidOn is NULL) as premiumcount,
@@ -2688,7 +2694,9 @@ premiumcount >= 3 and premiumcount <= 4
             s.SchemeType = 'recurring' AND
             p.DueDate BETWEEN '".inp('fromDate')."' AND '".nextDate('toDate')."' AND
             p.PaidOn is NULL AND
-            a.branch_id=".Branch::getCurrentBranch()->id." AND
+
+            $branch_cond
+            
             a.ActiveStatus = 1
             GROUP BY p.accounts_id
             HAVING premiumcount > 0 and LastEMIDate >= '".getNow('Y-m-d')."'
@@ -2831,7 +2839,8 @@ premiumcount >= 3 and premiumcount <= 4
          // $t->where_related('account/dealer','DealerName like "%'.inp('DealerName') . '%"');
          // $t->or_where_related('account/dealer','DealerName is null');
          // $t->group_end();
-         $t->where_related("account","branch_id",Branch::getCurrentBranch()->id);
+         if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
+             $t->where_related("account","branch_id",Branch::getCurrentBranch()->id);
          $t->where_related('account/scheme','SchemeType','Recurring');
          $t->where('transaction_type_id',10);//RecurringAccountAmountDeposit
          // $t->limit(300,JRequest::getVar('page_start',0)*300);
@@ -2882,7 +2891,8 @@ premiumcount >= 3 and premiumcount <= 4
          $t->include_related('account','AccountNumber');
          $t->include_related('account/agent/member','Name');
          $t->include_related('account/agent','id');
-         $t->where("branch_id",Branch::getCurrentBranch()->id);
+         if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
+             $t->where("branch_id",Branch::getCurrentBranch()->id);
          $t->where_related('account/scheme','SchemeType','DDS');
          $t->group_by('accounts_id');
          $t->get();
@@ -3002,10 +3012,15 @@ premiumcount >= 3 and premiumcount <= 4
          $t->include_related('account/dealer','DealerName');
          $t->include_related('account/member','FatherName');
          // $t->group_start();
-         $t->where_related('account','AccountNumber not like "'.Branch::getCurrentBranch()->Code.'vl%"');
+         if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
+             $t->where_related('account','AccountNumber not like "'.Branch::getCurrentBranch()->Code.'VL%"');
+         else
+             $t->where_related('account','AccountNumber not like "%VL%"');
          // $t->or_where_related('account/dealer','DealerName is null');
          // $t->group_end();
-         $t->where_related("account","branch_id",Branch::getCurrentBranch()->id);
+         if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
+             $t->where_related("account","branch_id",Branch::getCurrentBranch()->id);
+
          $t->where_related('account/scheme','SchemeType','Loan');
          $t->where('transaction_type_id',18);//LoanAccountAmountDeposit
          // $t->limit(300,JRequest::getVar('page_start',0)*300);
@@ -3082,7 +3097,8 @@ premiumcount >= 3 and premiumcount <= 4
 
          $a->where('created_at >=', inp('fromDate'));
          $a->where('created_at <=', inp('toDate'));
-         $a->where('branch_id',Branch::getCurrentBranch()->id);
+         if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
+             $a->where('branch_id',Branch::getCurrentBranch()->id);
          
          $a->where_related('account/member/asagent','id is not null');
          // $a->group_start();

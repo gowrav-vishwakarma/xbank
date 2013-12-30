@@ -265,7 +265,8 @@ class report_2_cont extends CI_Controller {
         $a=new Account();
         $a->include_related('member','Name');
         $a->where_related('scheme','SchemeType','Loan');
-        $a->where('branch_id',Branch::getCurrentBranch()->id);
+        if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
+            $a->where('branch_id',Branch::getCurrentBranch()->id);
         $a->where('ActiveStatus',0);
         $a->where('DefaultAC',0);
         $a->get();
@@ -392,7 +393,8 @@ class report_2_cont extends CI_Controller {
         if(inp('scheme_group') != "%"){
             $t->where_related('account/scheme','SchemeGroup',inp('scheme_group'));
         }
-        $t->where('branch_id',Branch::getCurrentBranch()->id);
+        if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
+            $t->where('branch_id',Branch::getCurrentBranch()->id);
         $t->group_by('accounts_id');
         $t->get();
         // echo $t->check_last_query();
