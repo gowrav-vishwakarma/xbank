@@ -630,8 +630,8 @@ class report_2_cont extends CI_Controller {
        // $a->check_last_query();
 
         $data['report'] = getReporttable($a,             //model
-                array("Account Number","Member Name","Father Name","Address", "Scheme","Phone Number","Amount Due","Due Date","Agent","Dealer",'ActiveStatus'),       //heads
-                array('AccountNumber','member_Name','member_FatherName','member_CurrentAddress', 'scheme_Name','member_PhoneNos','Amount','DueDate','agent_member_Name','dealer_DealerName','~(#actv)?"Activeted":"De-Active"'),       //fields
+                array("Account Number","Member Name","Father Name","Address", "Scheme","Phone Number","Amount Due","Due Date","Agent","Dealer",'ActiveStatus','Deposit Amount'),       //heads
+                array('AccountNumber','member_Name','member_FatherName','member_CurrentAddress', 'scheme_Name','member_PhoneNos','Amount','DueDate','agent_member_Name','dealer_DealerName','~(#actv)?"Activeted":"De-Active"','RdAmount'),       //fields
                 array('Amount'),        //totals_array
                 array(),        //headers
                 array('sno'=>true),     //options
