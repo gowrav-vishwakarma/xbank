@@ -2336,11 +2336,12 @@ a.branch_id = $b
         $a->include_related('scheme','Name');
 
         $a->where('ActiveStatus',1);
-        if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
+        if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin"){
             $a->where('branch_id',Branch::getCurrentBranch()->id);
+        }
         $a->group_start();
-        $a->where('AccountNumber like "'.Branch::getCurrentBranch()->Code.'PL%"');
-        $a->or_where('AccountNumber like "'.Branch::getCurrentBranch()->Code.'SL%"');
+        $a->where('AccountNumber like "%PL%"');
+        $a->or_where('AccountNumber like "%SL%"');
         $a->group_end();
         // $a->where("branch_id",Branch::getCurrentBranch()->id);
         $a->having("DuePremiumCount > 0");
