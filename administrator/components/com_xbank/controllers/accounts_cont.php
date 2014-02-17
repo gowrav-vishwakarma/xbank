@@ -1339,6 +1339,10 @@ class accounts_cont extends CI_Controller {
                 $Ac->schemes_id = inp('schemes_id');
             }
 
+            if(inp('LoanInsurranceDate')){
+                $Ac->LoanInsurranceDate = inp('LoanInsurranceDate');
+            }
+
             $Ac->save();
             log::write( __FILE__ . " " . __FUNCTION__ . " $Ac->AccountNumber with id $Ac->id edited from " . $this->input->ip_address(),$Ac->id);
             // save the documents submitted

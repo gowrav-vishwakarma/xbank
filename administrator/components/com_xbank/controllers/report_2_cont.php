@@ -265,7 +265,8 @@ class report_2_cont extends CI_Controller {
         $a=new Account();
         $a->include_related('member','Name');
         $a->where_related('scheme','SchemeType','Loan');
-        $a->where('branch_id',Branch::getCurrentBranch()->id);
+        if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
+            $a->where('branch_id',Branch::getCurrentBranch()->id);
         $a->where('ActiveStatus',0);
         $a->where('DefaultAC',0);
         $a->get();
@@ -392,7 +393,8 @@ class report_2_cont extends CI_Controller {
         if(inp('scheme_group') != "%"){
             $t->where_related('account/scheme','SchemeGroup',inp('scheme_group'));
         }
-        $t->where('branch_id',Branch::getCurrentBranch()->id);
+        if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
+            $t->where('branch_id',Branch::getCurrentBranch()->id);
         $t->group_by('accounts_id');
         $t->get();
         // echo $t->check_last_query();
@@ -579,6 +581,64 @@ class report_2_cont extends CI_Controller {
                 );
 
 
+        JRequest::setVar("layout","generalreport");
+        $this->load->view('report.html', $data);
+        $this->jq->getHeader();
+     }
+
+     function duesToGiveForm(){
+        xDeveloperToolBars::onlyCancel("report_cont.dashboard", "cancel", "Dues To Give DateWise");
+        $this->load->library("form");
+        $this->form->open("pSearch","index.php?option=com_xbank&task=report_2_cont.duesToGive")
+        ->dateBox("Select Date From","name='fromDate' class='input'")
+        ->dateBox("Select Date till","name='toDate' class='input'")
+        ->submit("Go");
+        $data['form']=$this->form->get();
+        $this->load->view("formonly.html",$data);
+        $this->jq->getHeader();
+     }
+
+
+     function duesToGive(){
+        xDeveloperToolBars::onlyCancel("report_2_cont.duesToGiveForm", "cancel", "Dues To Give DateWise");
+        $a= new Account();
+        $a->select('*,jos_xaccounts.AccountNumber as AccountNumber, jos_xaccounts.ActiveStatus as actv, round((CurrentBalanceCr - CurrentBalanceDr)) as Amount');
+        $a->select_func("DATE_ADD",'[date(jos_xaccounts.created_at),INTERVAL jos_xschemes.MaturityPeriod MONTH]','DueDate');
+        $a->include_related('member','Name');
+        $a->include_related('member','FatherName');
+        $a->include_related('member','PhoneNos');
+        $a->include_related('member','CurrentAddress');
+        $a->include_related('agent/member','Name');
+        $a->include_related('dealer','DealerName');
+        $a->include_related('scheme','Name');
+        $a->where('DefaultAC',0);
+        // $a->where('ActiveStatus',0);
+        $a->where('LockingStatus',0);
+        if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
+            $a->where('branch_id',Branch::getCurrentBranch()->id);
+//        $a->where_related('premiums',"DueDate ", getNow("Y-m-d"));
+        $a->group_start();
+            $a->where_related('scheme',"SchemeType",'recurring');
+            $a->or_where_related('scheme',"SchemeType",'FixedAndMis');
+            $a->or_where_related('scheme',"SchemeType",'DDS');
+        $a->group_end();
+        // $a->where_field_func('DATE_ADD(DATE(jos_xaccounts.created_at), INTERVAL jos_xschemes.MaturityPeriod MONTH) = ','',getNow("Y-m-d"));
+        $a->having('DueDate >= "'.inp('fromDate').'"');//.'\" and \"'.inp('toDate').'\"');
+        $a->having('DueDate <="'.inp('toDate').'"');//.'\" and \"'.inp('toDate').'\"');
+        $a->get();
+
+       // $a->check_last_query();
+
+        $data['report'] = getReporttable($a,             //model
+                array("Account Number","Member Name","Father Name","Address", "Scheme","Phone Number","Amount Due","Due Date","Agent","Dealer",'ActiveStatus','Deposit Amount','Credit Amount'),       //heads
+                array('AccountNumber','member_Name','member_FatherName','member_CurrentAddress', 'scheme_Name','member_PhoneNos','Amount','DueDate','agent_member_Name','dealer_DealerName','~(#actv)?"Activeted":"De-Active"','RdAmount','CurrentBalanceCr'),       //fields
+                array('Amount','RdAmount','CurrentBalanceCr'),        //totals_array
+                array(),        //headers
+                array('sno'=>true),     //options
+                "",     //headerTemplate
+                '',      //tableFooterTemplate
+                ""      //footerTemplate
+                );
         JRequest::setVar("layout","generalreport");
         $this->load->view('report.html', $data);
         $this->jq->getHeader();
