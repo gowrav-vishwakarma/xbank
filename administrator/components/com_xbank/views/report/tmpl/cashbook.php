@@ -42,8 +42,8 @@ foreach ($results as $rs) {
         <?php } 
         else{
         if($field =="Narration"){
-                $narration = trim($rs->$field,"10 (");
-                $narration = trim($narration,")");
+                $narration = str_replace("10 (",'',$rs->$field );
+                $narration = str_replace(")",'',$narration );
                 $member = new Member($narration);
                 echo "<td>".$rs->$field."  ".$member->Name."</td>";
             }
