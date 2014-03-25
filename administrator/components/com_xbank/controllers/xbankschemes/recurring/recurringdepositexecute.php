@@ -134,7 +134,7 @@ if ($premiumsSubmited > 0) {
 
 }
 if (!SET_COMMISSIONS_IN_MONTHLY) {
-    Premium::setCommissions($ac, $voucherNo, getNow("Y-m-d"));
+    Premium::setCommissions($ac, $voucherNo, getNow("Y-m-d H:i:s"));
 }
 // send sms to customer
 //             $mobile=substr($ac->Member->PhoneNos, 0, 10);
