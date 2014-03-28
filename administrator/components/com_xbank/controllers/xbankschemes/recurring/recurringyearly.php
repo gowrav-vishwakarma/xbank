@@ -17,6 +17,34 @@
 // echo $do_paid_fill;
 // $CI->db->query($do_paid_fill);
 
+
+/*
+SELECT
+    jos_xpremiums.accounts_id,
+    SUM((Paid * Amount) + interest ) AS toPost
+FROM
+    jos_xpremiums
+    JOIN
+    (
+        SELECT 
+            tt.accounts_id,
+            SUM(tt.amountCr)  interest
+        FROM
+            jos_xtransactions tt
+        WHERE
+            tt.transaction_type_id=17
+        GROUP BY tt.accounts_id
+    ) t on t.accounts_id = jos_xpremiums.accounts_id
+WHERE
+    Paid <> 0
+AND Skipped = 0
+AND PaidOn > '2013-03-31'
+AND DueDate < '2014-04-01'
+GROUP BY
+    jos_xpremiums.accounts_id
+
+*/
+
 $query = "UPDATE jos_xaccounts as a JOIN jos_xschemes as s on a.schemes_id=s.id join (SELECT accounts_id, SUM(Paid*Amount) AS toPost FROM jos_xpremiums WHERE Paid <> 0 AND Skipped =0 And PaidOn > '2013-03-31' AND DueDate < '" . getNow("Y-m-d") . "' GROUP BY accounts_id) as p on p.accounts_id=a.id SET a.CurrentInterest=(p.toPost * s.Interest)/1200 WHERE (s.SchemeType='" . ACCOUNT_TYPE_RECURRING . "') and a.ActiveStatus=1 and a.MaturedStatus=0 and a.created_at < '" . getNow("Y-m-d") . "' and a.branch_id=" . $b->id;
         executeQuery($query);
 
