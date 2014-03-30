@@ -21,10 +21,10 @@
 /*
 SELECT
     jos_xpremiums.accounts_id,
-    SUM((Paid * Amount) + interest ) AS toPost
+    SUM((Paid * Amount) + IFNULL(interest,0) ) AS toPost
 FROM
     jos_xpremiums
-    JOIN
+    LEFT JOIN
     (
         SELECT 
             tt.accounts_id,
@@ -34,7 +34,7 @@ FROM
         WHERE
             tt.transaction_type_id=17
         GROUP BY tt.accounts_id
-    ) t on t.accounts_id = jos_xpremiums.accounts_id
+    ) t on jos_xpremiums.accounts_id = t.accounts_id
 WHERE
     Paid <> 0
 AND Skipped = 0
@@ -53,10 +53,10 @@ $query = "UPDATE
                 (
                     SELECT 
                         jos_xpremiums.accounts_id,
-                        SUM((Paid * Amount) + interest ) AS toPost
+                        SUM((Paid * Amount) + IFNULL(interest,0) ) AS toPost
                     FROM 
                         jos_xpremiums 
-                        JOIN
+                        LEFT JOIN
                         (
                             SELECT 
                                 tt.accounts_id,
@@ -66,7 +66,7 @@ $query = "UPDATE
                             WHERE
                                 tt.transaction_type_id=17
                             GROUP BY tt.accounts_id
-                        ) t on t.accounts_id = jos_xpremiums.accounts_id
+                        ) t on jos_xpremiums.accounts_id = t.accounts_id 
                     WHERE 
                         Paid <> 0 
                         AND Skipped =0 
