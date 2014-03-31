@@ -52,12 +52,12 @@ class Transaction extends DataMapper {
         if(date("m", strtotime($created_at)) <= 3){
             $year = date("Y", strtotime($created_at)) - 1;
             $startDate = $year."-04-01";
-            $endDate = date("Y", strtotime($created_at))."-03-31";
+            $endDate = date("Y", strtotime($created_at))."-04-01";
         }
         if(date("m", strtotime($created_at)) > 3){
             $year = date("Y", strtotime($created_at)) + 1;
             $startDate = date("Y", strtotime($created_at))."-04-01";
-            $endDate = $year."-03-31";
+            $endDate = $year."-04-01";
         }
         $CI = & get_instance();
         $voucherNo = $CI->db->query("select MAX(t.display_voucher_no) AS maxDisplayVoucher from jos_xtransactions t where t.created_at >= '$startDate' and t.created_at <= '$endDate' and t.display_voucher_no is not null and t.display_voucher_no <> 0 and t.branch_id= " . $currentbranchid)->row()->maxDisplayVoucher;
