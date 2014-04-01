@@ -412,7 +412,7 @@ class report_2_cont extends CI_Controller {
         $t->group_by('accounts_id');
         $t->get();
         
-        $t->check_last_query();
+        // $t->check_last_query();
 
         $data['report']= getReporttable($t,             //model
                 array("Account Number",'Name',"Father/Husband Name",'Address','Phone Number',"Closing Balance",'SM Account'),       //heads
