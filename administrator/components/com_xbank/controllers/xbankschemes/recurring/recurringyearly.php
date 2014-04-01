@@ -43,6 +43,10 @@ AND DueDate < '2014-04-01'
 GROUP BY
     jos_xpremiums.accounts_id
 
+WOrking COde for all previous interests
+
+SELECT jos_xpremiums.accounts_id, Paid, Amount, t.interest FROM jos_xpremiums join ( SELECT tt.accounts_id , sum(tt.amountCr) interest from jos_xtransactions tt WHERE tt.accounts_id=2514 and tt.transaction_type_id=17  ) t on jos_xpremiums.accounts_id=t.accounts_id WHERE  Paid <> 0 AND Skipped =0 And PaidOn > '2013-03-31' AND DueDate < '2014-04-01' AND jos_xpremiums.accounts_id=2514 
+
 */
 
 $query = "UPDATE 
