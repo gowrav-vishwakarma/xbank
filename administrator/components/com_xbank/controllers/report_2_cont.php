@@ -405,13 +405,14 @@ class report_2_cont extends CI_Controller {
         // $p->where("DueDate between '".inp("fromDate")."' and '".inp("toDate")."'");
         // $p->where_related('member', 'id', 'account_member_id');
         $p->where('`jos_xaccounts`.`member_id` = account_member_id');
+        $p->limit(1);
 
         $t->select_subquery($p,'smac');
         
         $t->group_by('accounts_id');
         $t->get();
         
-        // $t->check_last_query();
+        $t->check_last_query();
 
         $data['report']= getReporttable($t,             //model
                 array("Account Number",'Name',"Father/Husband Name",'Address','Phone Number',"Closing Balance",'SM Account'),       //heads
