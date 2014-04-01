@@ -386,6 +386,7 @@ class report_2_cont extends CI_Controller {
         $t->include_related('account','OpeningBalanceCr');
         $t->include_related('account','OpeningBalanceDr');
         $t->include_related('account','AccountNumber');
+        $t->include_related('account/member','id');
         $t->include_related('account/member','Name');
         $t->include_related('account/member','FatherName');
         $t->include_related('account/member','PermanentAddress');
@@ -398,17 +399,19 @@ class report_2_cont extends CI_Controller {
         if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
             $t->where('branch_id',Branch::getCurrentBranch()->id);
         
-        $p = $t->account->member->accounts;
-        $p->select('AccountNumber smac');
+        $p = new Account();
+        $p->select('AccountNumber');
         $p->where("AccountNumber like 'SM%'");
         // $p->where("DueDate between '".inp("fromDate")."' and '".inp("toDate")."'");
-        $p->where_related('member', 'id', '${parent}.id');
+        // $p->where_related('member', 'id', 'account_member_id');
+        $p->where('`jos_xaccounts`.`member_id` = account_member_id');
 
         $t->select_subquery($p,'smac');
         
         $t->group_by('accounts_id');
         $t->get();
-        // echo $t->check_last_query();
+        
+        // $t->check_last_query();
 
         $data['report']= getReporttable($t,             //model
                 array("Account Number",'Name',"Father/Husband Name",'Address','Phone Number',"Closing Balance",'SM Account'),       //heads
