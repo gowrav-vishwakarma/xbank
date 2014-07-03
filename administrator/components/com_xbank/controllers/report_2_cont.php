@@ -386,23 +386,38 @@ class report_2_cont extends CI_Controller {
         $t->include_related('account','OpeningBalanceCr');
         $t->include_related('account','OpeningBalanceDr');
         $t->include_related('account','AccountNumber');
+        $t->include_related('account/member','id');
         $t->include_related('account/member','Name');
         $t->include_related('account/member','FatherName');
         $t->include_related('account/member','PermanentAddress');
         $t->include_related('account/member','PhoneNos');
+
+        
         if(inp('scheme_group') != "%"){
             $t->where_related('account/scheme','SchemeGroup',inp('scheme_group'));
         }
         if(JFactory::getUser()->username != "admin" && JFactory::getUser()->username != "xadmin")
             $t->where('branch_id',Branch::getCurrentBranch()->id);
+        
+        $p = new Account();
+        $p->select('AccountNumber');
+        $p->where("AccountNumber like 'SM%'");
+        // $p->where("DueDate between '".inp("fromDate")."' and '".inp("toDate")."'");
+        // $p->where_related('member', 'id', 'account_member_id');
+        $p->where('`jos_xaccounts`.`member_id` = account_member_id');
+        $p->limit(1);
+
+        $t->select_subquery($p,'smac');
+        
         $t->group_by('accounts_id');
         $t->get();
-        // echo $t->check_last_query();
+        
+        // $t->check_last_query();
 
         $data['report']= getReporttable($t,             //model
-                array("Account Number",'Name',"Father/Husband Name",'Address','Phone Number',"Closing Balance"),       //heads
+                array("Account Number",'Name',"Father/Husband Name",'Address','Phone Number',"Closing Balance",'SM Account'),       //heads
                 array('account_AccountNumber','account_member_Name','account_member_FatherName','account_member_PermanentAddress','account_member_PhoneNos',
-                    '~(abs((#account_OpeningBalanceCr - #account_OpeningBalanceDr) + #Amount))'
+                    '~(abs((#account_OpeningBalanceCr - #account_OpeningBalanceDr) + #Amount))','smac'
                 ),       //fields
                 array(),        //totals_array
                 array(),        //headers
