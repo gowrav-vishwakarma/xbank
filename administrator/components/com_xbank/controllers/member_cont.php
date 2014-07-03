@@ -583,7 +583,7 @@ class Member_cont extends CI_Controller {
             $uploadedFileNameParts = explode('.', $fileName);
             $uploadedFileExtension = strtoupper(array_pop($uploadedFileNameParts));
 
-            $validFileExts = explode(',', 'jpeg,jpg,png,gif');
+            $validFileExts = explode(',', 'jpg');
 //assume the extension is false until we know its ok
             $extOk = false;
 
