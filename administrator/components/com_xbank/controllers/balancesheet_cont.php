@@ -73,11 +73,11 @@ class balancesheet_cont extends CI_Controller {
                 $temp_data=array( 'Total'=>$clb, 'Detailed'=>$h->{$subFunction}( $toDate, $branch ) );
                 if ( ( $amt=( $clb->$subtract_from - $clb->$subtract_this ) ) >= 0 ) {
                     $data['balancesteet'][$h->positive_side][] = $temp_data;
-                    ${$h->positive_side."_SUM"} += abs( $amt );
+                    ${$h->positive_side."_SUM"} += abs( round($amt,2) );
                 }
                 else {
                     $data['balancesteet'][( $h->positive_side == 'LT' ? 'RT' : 'LT' )][] = $temp_data;
-                    ${( $h->positive_side == 'LT' ? 'RT' : 'LT' )."_SUM"} += abs( $amt );
+                    ${( $h->positive_side == 'LT' ? 'RT' : 'LT' )."_SUM"} += abs( round($amt,2) );
                 }
 
             }
@@ -85,10 +85,10 @@ class balancesheet_cont extends CI_Controller {
 
         if ( ( $PANDL->amountDr - $PANDL->amountCr ) < 0 ) {
             $data['balancesteet']['LT'][]=array( 'Total'=>$PANDL, 'Detailed'=>array() );
-            $LT_SUM += abs( $PANDL->amountDr - $PANDL->amountCr );
+            $LT_SUM += abs( round($PANDL->amountDr - $PANDL->amountCr,2) );
         }else {
             $data['balancesteet']['RT'][]=array( 'Total'=>$PANDL, 'Detailed'=>array() );
-            $RT_SUM += abs( $PANDL->amountDr - $PANDL->amountCr );
+            $RT_SUM += abs( round($PANDL->amountDr - $PANDL->amountCr,2) );
         }
 
         // Calculate and put runtime suspence
