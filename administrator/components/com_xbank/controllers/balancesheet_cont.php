@@ -71,7 +71,7 @@ class balancesheet_cont extends CI_Controller {
                 $subDetails = $h->show_sub;
                 $subFunction = "get".$subDetails."ViseClosingBalance";
                 $temp_data=array( 'Total'=>$clb, 'Detailed'=>$h->{$subFunction}( $toDate, $branch ) );
-                if ( ( $amt=( $clb->$subtract_from - $clb->$subtract_this ) ) >= 0 ) {
+                if ( ( $amt=( round($clb->$subtract_from - $clb->$subtract_this,2) ) ) >= 0 ) {
                     $data['balancesteet'][$h->positive_side][] = $temp_data;
                     ${$h->positive_side."_SUM"} += abs( round($amt,2) );
                 }
