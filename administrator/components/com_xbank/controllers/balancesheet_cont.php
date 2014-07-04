@@ -70,7 +70,7 @@ class balancesheet_cont extends CI_Controller {
                 $subtract_this = "amount".( $h->subtract_from == 'Dr' ? 'Cr': 'Dr' );
                 $subDetails = $h->show_sub;
                 $subFunction = "get".$subDetails."ViseClosingBalance";
-                $temp_data=array( 'Total'=>$clb, 'Detailed'=>$h->{$subFunction}( $toDate, $branch ) );
+                $temp_data=array( 'Total'=>round($clb,2), 'Detailed'=>$h->{$subFunction}( $toDate, $branch ) );
                 if ( ( $amt=( round($clb->$subtract_from - $clb->$subtract_this,2) ) ) >= 0 ) {
                     $data['balancesteet'][$h->positive_side][] = $temp_data;
                     ${$h->positive_side."_SUM"} += abs( round($amt,2) );
