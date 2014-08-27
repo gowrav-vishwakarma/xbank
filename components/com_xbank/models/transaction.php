@@ -148,6 +148,7 @@ class Transaction extends DataMapper {
 	$CRAmountTotal=0;
         foreach ($CRs as $account => $amount) {
             if ($amount > 0) {
+                echo "haha ".$account ;
             $CRAmountTotal += $amount;
                 $CRAccount = $CI->db->query("select a.id as aid,s.id as sid,s.SchemeType as SchemeType from jos_xaccounts a join jos_xschemes s on a.schemes_id=s.id where (a.AccountNumber='" . $account . "' or a.AccountNumber='" . Branch::getCurrentBranch()->Code . SP . $account . "') and a.branch_id = " . $currentbranchid)->row();
                 $accid = $CRAccount->aid;
