@@ -14,6 +14,9 @@ class BalanceSheet extends DataMapper {
         if($head==null) $head=$this->id;
         if($dateOn == null) $dateOn = getNow();
 
+        throw new Exception("Error Processing Request", 1);
+        
+
     	$dateOn = date("Y-m-d", strtotime(date("Y-m-d", strtotime($dateOn)) . " +1 DAY"));
         $t=new Transaction();
         $t->select("SUM(amountDr) as amountDr, SUM(amountCr) as amountCr");

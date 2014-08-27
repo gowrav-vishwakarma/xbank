@@ -206,6 +206,7 @@ class accounts_cont extends CI_Controller {
             echo $x->id;
             $Ac = new Account($x->id);
             echo $Ac->scheme->SchemeType;
+
             switch ($Ac->scheme->SchemeType) {
                 case ACCOUNT_TYPE_DEFAULT:
 
@@ -241,7 +242,7 @@ class accounts_cont extends CI_Controller {
                         $account->save();
                         $Ac->LoanAgainstAccount = $account->id;
                     }
-                    $Ac->save();
+                    $Ac->save();                    
                     break;
                 case ACCOUNT_TYPE_RECURRING:
                     $Ac->RdAmount = inp("rdamount");
@@ -573,7 +574,7 @@ class accounts_cont extends CI_Controller {
 
         $sc = Scheme::getScheme(inp("AccountType"));
         $schemeName = $sc->Name;
-
+        
         if (inp("initialAmount") != 0) {
             if ($sc->ProcessingFeesinPercent == 1) {
                 $processingfee = $sc->ProcessingFees * inp("initialAmount") / 100;
