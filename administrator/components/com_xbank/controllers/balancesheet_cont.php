@@ -184,15 +184,15 @@ class balancesheet_cont extends CI_Controller {
         if ( ( $LT_SUM - $RT_SUM ) < 0 ) {
             $loss_profit->Title = "Profit";
             $loss_profit->Profit = "Profit";
-            $loss_profit->amountCr = $RT_SUM > 0.001 ? : 0;
-            $loss_profit->amountDr = $LT_SUM > 0.001 ? : 0;
+            $loss_profit->amountCr = abs($RT_SUM) > 0.001 ? $RT_SUM : 0;
+            $loss_profit->amountDr = abs($LT_SUM) > 0.001 ? $LT_SUM : 0;
             $data['balancesteet']['LT'][]=array( 'Total'=>$loss_profit, 'Detailed'=>array() );
             $LT_SUM += abs( $LT_SUM - $RT_SUM );
         }else {
             $loss_profit->Title = "Loss";
             $loss_profit->Loss = "Loss";
-            $loss_profit->amountCr = $RT_SUM > 0.001 ? : 0;
-            $loss_profit->amountDr = $LT_SUM > 0.001 ? : 0;
+            $loss_profit->amountCr = abs($RT_SUM) > 0.001 ? $RT_SUM : 0;
+            $loss_profit->amountDr = abs($LT_SUM) > 0.001 ? $LT_SUM : 0;
             $data['balancesteet']['RT'][]=array( 'Total'=>$loss_profit, 'Detailed'=>array() );
             $RT_SUM += abs( $RT_SUM - $LT_SUM );
         }
