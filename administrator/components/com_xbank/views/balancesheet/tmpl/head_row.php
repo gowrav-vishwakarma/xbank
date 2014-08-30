@@ -4,7 +4,7 @@
 			<b><?php echo $Total->{$Total->Title}; ?></b>
 		</td>
 		<td width='70%'>
-			<?php echo abs($Total->amountDr - $Total->amountCr)> 0.001 ?:0; ?>
+			<?php echo (abs($Total->amountDr - $Total->amountCr) > 0.001 ?:0); ?>
 		</td>
 	</tr>
 	<tr>
