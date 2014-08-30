@@ -5,7 +5,7 @@
 		</td>
 		<td width='70%'>
 			<?php 
-			$amount =  (abs($Total->amountDr - $Total->amountCr) > 0.001 ?:0); 
+			$amount =  (abs($Total->amountDr - $Total->amountCr) > 0.001 ?abs($Total->amountDr - $Total->amountCr):0); 
 			echo $amount;
 			?>
 		</td>
