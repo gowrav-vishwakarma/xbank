@@ -187,7 +187,7 @@ class balancesheet_cont extends CI_Controller {
             $loss_profit->amountCr = abs($RT_SUM) > 0.01 ? $RT_SUM : 0;
             $loss_profit->amountDr = abs($LT_SUM) > 0.01 ? $LT_SUM : 0;
             $data['balancesteet']['LT'][]=array( 'Total'=>$loss_profit, 'Detailed'=>array() );
-            $LT_SUM += abs( $LT_SUM - $RT_SUM ) > 0.01 ? 0;
+            $LT_SUM += abs( $LT_SUM - $RT_SUM ) > 0.01 ? : 0;
         }else {
             $loss_profit->Title = "Loss";
             $loss_profit->Loss = "Loss";
