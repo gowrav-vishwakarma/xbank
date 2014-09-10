@@ -2974,8 +2974,8 @@ premiumcount >= 3 and premiumcount <= 4
         */
 
          $data['report'] = getReporttable($t,             //model
-                array("Account Number",       "Name", "Father Name", "Amount Deposited"),       //heads
-                array('account_AccountNumber','account_member_Name',"account_member_FatherName", "TAmount"),       //fields
+                array("Account Number",       "Name", "Father Name", "Amount Deposited",'Dealer Name'),       //heads
+                array('account_AccountNumber','account_member_Name',"account_member_FatherName", "TAmount",'account_dealer_DealerName'),       //fields
                 array("TAmount"),        //totals_array
                 array("Dealer Name" => "account_dealer_DealerName"),        //headers
                 array('sno'=>true,"sno_start"=>JRequest::getVar('page_start',0)*300,"page"=>false),     //options
