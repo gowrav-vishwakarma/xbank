@@ -4,7 +4,7 @@ class staff_cont extends CI_Controller {
 
     function dashboard() {
         xDeveloperToolBars::getStaffManagementToolBar();
-
+        Staff::accessibleTo(BRANCH_ADMIN);
         global $com_params;
 //        $start = JRequest::getVar("pagestart", 0);
 //        $count = JRequest::getVar("pagecount", $com_params->get('RowsInData'));
