@@ -295,7 +295,7 @@ class Member_cont extends CI_Controller {
                 $config['maintain_ratio'] = TRUE;
                 $config['width'] = 350;
                 $config['height'] = 350;
-                $this->load->library('image_lib', &$config);
+                $this->load->library('image_lib', $config);
                 $this->image_lib->resize();
             }
 
@@ -638,7 +638,7 @@ class Member_cont extends CI_Controller {
                 $config['maintain_ratio'] = TRUE;
                 $config['width'] = 350;
                 $config['height'] = 350;
-                $this->load->library('image_lib', &$config);
+                $this->load->library('image_lib', $config);
                 $this->image_lib->resize();
             }
 
