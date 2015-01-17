@@ -43,6 +43,7 @@ foreach ($accountcount as $st) {
             <th>Age</th>
             <th>Opened On</th>
             <th>Balance</th>
+            <th>InitialAmount</th>
             <th>Advisor or Dealer</th>
             <th>Advisor Account</th>
             <th>Branch Name</th>
@@ -91,6 +92,10 @@ else{
     echo abs($acc->CurrentBalanceCr - $acc->CurrentBalanceDr) ;
 }
 ?></td>
+    <td>
+        <?php echo $acc->RdAmount;?>
+
+    </td>
             <td><?php if($st->SchemeType == 'Loan')
             			echo $acc->DealerName;
             		else{

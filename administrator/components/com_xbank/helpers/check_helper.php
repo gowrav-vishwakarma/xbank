@@ -237,7 +237,7 @@ function getNow($format="Y-m-d H:i:00"){
 
             $newno = $nos + 1;
 //            if(!is_numeric($originalcode)){
-                $pr=substr($originalcode,'0',strlen($originalcode)- strlen($newno));
+                $pr=substr($originalcode,'0',abs(strlen($originalcode)- strlen($newno)));
                 $pr .= $newno;
 //            }
 //            else
