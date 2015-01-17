@@ -2935,7 +2935,9 @@ premiumcount >= 3 and premiumcount <= 4
      function vlEMIReceivedList(){
          xDeveloperToolBars::onlyCancel("report_cont.vlEMIReceivedListForm", "cancel", "VL EMI Received List");
          $t=new Transaction();
-         $t->select('SUM(amountCr) as TAmount');
+         $t->select('amountCr as TAmount');
+         $t->select('Narration');
+         $t->select('created_at as cdt');
          $t->where('created_at >=',inp('fromDate'));
          $t->where('created_at <=', nextDate('toDate'));
          $t->include_related('account/member','Name');
@@ -2951,7 +2953,7 @@ premiumcount >= 3 and premiumcount <= 4
          // $t->where_related('account/scheme','SchemeType','Loan');
          $t->where('transaction_type_id',18);//LoanAccountAmountDeposit
          // $t->limit(300,JRequest::getVar('page_start',0)*300);
-         $t->group_by('accounts_id');
+         // $t->group_by('accounts_id');
          $t->get();
          // $t->check_last_query();
 
@@ -2974,8 +2976,8 @@ premiumcount >= 3 and premiumcount <= 4
         */
 
          $data['report'] = getReporttable($t,             //model
-                array("Account Number",       "Name", "Father Name", "Amount Deposited",'Dealer Name'),       //heads
-                array('account_AccountNumber','account_member_Name',"account_member_FatherName", "TAmount",'account_dealer_DealerName'),       //fields
+                array("Account Number",       "Name", "Father Name", "Amount Deposited",'Dealer Name', 'Narration', 'Date'),       //heads
+                array('account_AccountNumber','account_member_Name',"account_member_FatherName", "TAmount",'account_dealer_DealerName','Narration','cdt'),       //fields
                 array("TAmount"),        //totals_array
                 array("Dealer Name" => "account_dealer_DealerName"),        //headers
                 array('sno'=>true,"sno_start"=>JRequest::getVar('page_start',0)*300,"page"=>false),     //options
