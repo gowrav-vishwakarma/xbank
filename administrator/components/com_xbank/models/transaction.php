@@ -295,7 +295,7 @@ class Transaction extends DataMapper {
                 }
             }
         }
-        if(abs($CRAmount - $DRAmountTotal) > 1.0) throw new Exception("Transactions are of mismached amount:: DRs " . serialize($DRs). " CRs " . serialize($CRs));
+        if(abs($CRAmount - $DRAmountTotal) > 1.0) throw new Exception("Transactions are of mismached amount :: [$DRAmountTotal] DRs " . serialize($DRs). " [$CRAmount] CRs " . serialize($CRs));
     }
 
 }
