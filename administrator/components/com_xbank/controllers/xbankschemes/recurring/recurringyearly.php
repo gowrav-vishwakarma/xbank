@@ -74,7 +74,7 @@ $query = "UPDATE
                     WHERE 
                         Paid <> 0 
                         AND Skipped =0 
-                        And PaidOn > '2013-03-31' 
+                        And PaidOn > '2014-03-31' 
                         AND DueDate < '" . getNow("Y-m-d") . "' 
                         GROUP BY accounts_id
                 ) as p on p.accounts_id=a.id 
