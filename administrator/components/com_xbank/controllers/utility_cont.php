@@ -375,4 +375,27 @@ class utility_cont extends CI_Controller{
         }
     }
 
+    function lockunlock(){
+        xDeveloperToolBars::getUtilityManagementToolBar();
+        $this->load->library('form');
+        $form = $this->form->open("lockunlock", 'index.php?option=com_xbank&task=utility_cont.dolockunlock')
+                        ->setColumns(2)
+                        ->lookupDB("Account number", "name='AccountNumber' class='input'", "index.php?option=com_xbank&task=utility_cont.getAccountNumber&format=raw", array("a" => "b"), array("id","AccountNumber","Name","EMI","Amount","created_at"), "id")
+                        ->submit("Lock/Unlock");
+        $data['contents'] = $this->form->get();
+        $this->load->view("utility.html",$data);
+        $this->jq->getHeader();
+    }
+
+    function dolockunlock(){
+        xDeveloperToolBars::getUtilityManagementToolBar();
+        $account = new Account(inp('AccountNumber'));
+        $account->LockingStatus = 0;
+        $account->save();
+        
+        $data['contents'] = $account->AccountNumber . " is now unlocked";  
+        $this->load->view("utility.html",$data);
+        $this->jq->getHeader();
+    }
+
 }

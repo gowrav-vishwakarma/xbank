@@ -224,6 +224,7 @@ class xDeveloperToolBars extends JObject {
         JToolBarHelper::addNewX('utility_cont.rdResetPremiumsPage', 'Reset RD Premiums');
         JToolBarHelper::addNewX('utility_cont.loanEmiChangeForm', 'Change Loan Account EMI');
         JToolBarHelper::addNew('utility_cont.errorReport', 'Bug Finder');
+        JToolBarHelper::addNew('utility_cont.lockunlock', 'Acc Lock Management');
         JToolBarHelper::cancel('com_xbank.index', 'cancel');
     }
     
