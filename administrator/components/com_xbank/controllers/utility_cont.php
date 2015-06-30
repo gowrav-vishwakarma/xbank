@@ -376,7 +376,12 @@ class utility_cont extends CI_Controller{
     }
 
     function lockunlock(){
+         $s = Staff::getCurrentStaff();
         xDeveloperToolBars::getUtilityManagementToolBar();
+        if($s->StaffID !="xadmin"){
+            echo "No Permission";
+            return;  
+        } 
         $this->load->library('form');
         $form = $this->form->open("lockunlock", 'index.php?option=com_xbank&task=utility_cont.dolockunlock')
                         ->setColumns(2)
