@@ -133,9 +133,19 @@ if ($premiumsSubmited > 0) {
     $result->reAdjustPaidValue();
 
 }
+
+
+// NOOOO  COMMISSSIONNNN   FROM 2015 1st April
+
+
 if (!SET_COMMISSIONS_IN_MONTHLY) {
-    Premium::setCommissions($ac, $voucherNo, getNow("Y-m-d H:i:s"));
+    // Premium::setCommissions($ac, $voucherNo, getNow("Y-m-d H:i:s"));
 }
+
+
+
+
+
 // send sms to customer
 //             $mobile=substr($ac->Member->PhoneNos, 0, 10);
 //            if(is_numeric($mobile) && strlen($mobile)==10){

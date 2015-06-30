@@ -203,9 +203,9 @@ class accounts_cont extends CI_Controller {
                 $Acc->AccountDisplayName = inp('AccountDisplayName');
             $Acc->save();
             $x = $Acc;
-            echo $x->id;
+            // echo $x->id;
             $Ac = new Account($x->id);
-            echo $Ac->scheme->SchemeType;
+            // echo $Ac->scheme->SchemeType;
 
             switch ($Ac->scheme->SchemeType) {
                 case ACCOUNT_TYPE_DEFAULT:
@@ -274,171 +274,177 @@ class accounts_cont extends CI_Controller {
             $voucherNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $Ac->id);
             $Ac = new Account($Ac->id);
 
+
+
+// NOOOO  COMMISSSIONNNN   FROM 2015 1st April
+
+
+
 //			Commission transfer		
-            if (($Ac->scheme->AccountOpenningCommission != "" OR $Ac->scheme->AccountOpenningCommission != null) AND ($Ac->agents_id != null OR $Ac->agents_id != 0)) {
-                switch ($Ac->scheme->SchemeType) {
-                    case ACCOUNT_TYPE_DEFAULT:
+//             if (($Ac->scheme->AccountOpenningCommission != "" OR $Ac->scheme->AccountOpenningCommission != null) AND ($Ac->agents_id != null OR $Ac->agents_id != 0)) {
+//                 switch ($Ac->scheme->SchemeType) {
+//                     case ACCOUNT_TYPE_DEFAULT:
 
-                        break;
-                    case ACCOUNT_TYPE_BANK:
+//                         break;
+//                     case ACCOUNT_TYPE_BANK:
 
-                        // GIVES TOTAL COMMISSION AMOUNT....THEREAFTER DISTRIBUTE IT TO ALL LEVELS
-//                        $commissionAmount = getComission($Ac->scheme->AccountOpenningCommission, OPENNING_COMMISSION);
-                        break;
-                    case ACCOUNT_TYPE_FIXED:
-                        $commissionAmount = getComission($Ac->scheme->AccountOpenningCommission, OPENNING_COMMISSION);
-                        $commissionAmount = $commissionAmount * inp("initialAmount") / 100.00;
-                        break;
-                    case ACCOUNT_TYPE_LOAN:
-                        $commissionAmount = getComission($Ac->scheme->AccountOpenningCommission, OPENNING_COMMISSION);
-                        break;
-                    case ACCOUNT_TYPE_RECURRING:
-                        $commissionAmount = getComission($Ac->scheme->AccountOpenningCommission, OPENNING_COMMISSION);
-                        $commissionAmount = $commissionAmount * inp("initialAmount") / 100.00;
-                        break;
-                    case ACCOUNT_TYPE_DDS:
-                        $commissionAmount = getComission($Ac->scheme->AccountOpenningCommission, OPENNING_COMMISSION);
-                        break;
+//                         // GIVES TOTAL COMMISSION AMOUNT....THEREAFTER DISTRIBUTE IT TO ALL LEVELS
+// //                        $commissionAmount = getComission($Ac->scheme->AccountOpenningCommission, OPENNING_COMMISSION);
+//                         break;
+//                     case ACCOUNT_TYPE_FIXED:
+//                         $commissionAmount = getComission($Ac->scheme->AccountOpenningCommission, OPENNING_COMMISSION);
+//                         $commissionAmount = $commissionAmount * inp("initialAmount") / 100.00;
+//                         break;
+//                     case ACCOUNT_TYPE_LOAN:
+//                         $commissionAmount = getComission($Ac->scheme->AccountOpenningCommission, OPENNING_COMMISSION);
+//                         break;
+//                     case ACCOUNT_TYPE_RECURRING:
+//                         $commissionAmount = getComission($Ac->scheme->AccountOpenningCommission, OPENNING_COMMISSION);
+//                         $commissionAmount = $commissionAmount * inp("initialAmount") / 100.00;
+//                         break;
+//                     case ACCOUNT_TYPE_DDS:
+//                         $commissionAmount = getComission($Ac->scheme->AccountOpenningCommission, OPENNING_COMMISSION);
+//                         break;
 
-                    case ACCOUNT_TYPE_DHANSANCHAYA:
-                        $commissionAmount = getComission($Ac->scheme->AccountOpenningCommission, OPENNING_COMMISSION);
-                        break;
+//                     case ACCOUNT_TYPE_DHANSANCHAYA:
+//                         $commissionAmount = getComission($Ac->scheme->AccountOpenningCommission, OPENNING_COMMISSION);
+//                         break;
 
-                    case ACCOUNT_TYPE_MONEYBACK:
-                        $commissionAmount = getComission($Ac->scheme->AccountOpenningCommission, OPENNING_COMMISSION);
-                        break;
-                }
-                $ag = new xConfig("agent");
+//                     case ACCOUNT_TYPE_MONEYBACK:
+//                         $commissionAmount = getComission($Ac->scheme->AccountOpenningCommission, OPENNING_COMMISSION);
+//                         break;
+//                 }
+//                 $ag = new xConfig("agent");
 
-                $Agent = new Agent($a);
-                $agentCount = $Agent->result_count();
-                if ($agentCount == 0) {
-                    $Agent = null; //Branch::getDefaultAgent();
-                } else {
+//                 $Agent = new Agent($a);
+//                 $agentCount = $Agent->result_count();
+//                 if ($agentCount == 0) {
+//                     $Agent = null; //Branch::getDefaultAgent();
+//                 } else {
 
-                    $levels = $ag->getKey("number_of_agent_levels");
+//                     $levels = $ag->getKey("number_of_agent_levels");
 
-                    if ($levels > 1 && !$ag->getKey("manually_promote_agent"))
-                        $Agent->updateAncestors();
-                    else {
-                        $agentAncestor = $Agent;
-                        while ($agentAncestor->id) {
-                            $agentAncestor->BusinessCreditPoints = $agentAncestor->BusinessCreditPoints + $Ac->scheme->SchemePoints / 100 * $Ac->RdAmount;
-                            $agentAncestor->CumulativeBusinessCreditPoints += $Ac->scheme->SchemePoints / 100 * $Ac->RdAmount;
-                            $agentAncestor->save();
-                            $agentAncestor = $agentAncestor->sponsor;
-                        }
-                    }
-                }
+//                     if ($levels > 1 && !$ag->getKey("manually_promote_agent"))
+//                         $Agent->updateAncestors();
+//                     else {
+//                         $agentAncestor = $Agent;
+//                         while ($agentAncestor->id) {
+//                             $agentAncestor->BusinessCreditPoints = $agentAncestor->BusinessCreditPoints + $Ac->scheme->SchemePoints / 100 * $Ac->RdAmount;
+//                             $agentAncestor->CumulativeBusinessCreditPoints += $Ac->scheme->SchemePoints / 100 * $Ac->RdAmount;
+//                             $agentAncestor->save();
+//                             $agentAncestor = $agentAncestor->sponsor;
+//                         }
+//                     }
+//                 }
 
-                $agentSponsorCommission = array();
-                if ($agentCount && $commissionAmount != 0) {
-                    $s = $Agent->AccountNumber;
-                    $agents = new Account();
-                    $agents->where('AccountNumber', $s)->get();
-                    // $agents = Doctrine::getTable("Accounts")->findOneByAccountNumber($Agent->AccountNumber);
+//                 $agentSponsorCommission = array();
+//                 if ($agentCount && $commissionAmount != 0) {
+//                     $s = $Agent->AccountNumber;
+//                     $agents = new Account();
+//                     $agents->where('AccountNumber', $s)->get();
+//                     // $agents = Doctrine::getTable("Accounts")->findOneByAccountNumber($Agent->AccountNumber);
 
-                    $totalCommission = $commissionAmount;
-                    $i = 0;
-                    do {
-                        $i = $i + 1;
-                        $agentSponsorCommission = json_decode($Ac->scheme->AgentSponsorCommission, true);
-                        if ($ag->getKey("number_of_agent_levels") > 0) {
-                            $commissionAmount = 0;
-                            for (; $i <= $Agent->Rank; $i++) {
-//                                    $agentSponsorCommission = $agentSponsorCommission[$i];
-                                $commissionAmount += ( getComission($agentSponsorCommission[$i], OPENNING_COMMISSION) / 100 * $totalCommission);
-                            }
-                            $i = $Agent->Rank;
-                        } else {
-                            $commissionAmount = $commissionAmount;
-                        }
-
-
+//                     $totalCommission = $commissionAmount;
+//                     $i = 0;
+//                     do {
+//                         $i = $i + 1;
+//                         $agentSponsorCommission = json_decode($Ac->scheme->AgentSponsorCommission, true);
+//                         if ($ag->getKey("number_of_agent_levels") > 0) {
+//                             $commissionAmount = 0;
+//                             for (; $i <= $Agent->Rank; $i++) {
+// //                                    $agentSponsorCommission = $agentSponsorCommission[$i];
+//                                 $commissionAmount += ( getComission($agentSponsorCommission[$i], OPENNING_COMMISSION) / 100 * $totalCommission);
+//                             }
+//                             $i = $Agent->Rank;
+//                         } else {
+//                             $commissionAmount = $commissionAmount;
+//                         }
 
 
 
-//                        if ($Agent->member->branch_id != Branch::getCurrentBranch()->id) {
-//                            $s = $Agent->member->branch_id;
-//                            $otherbranch = new Branch();
-//                            $otherbranch->where('id', $s)->get();
-			$agentAccBranch = new Account();
-                        $agentAccBranch->where("AccountNumber",$Agent->AccountNumber)->get();
-                        if ($agentAccBranch->branch_id != Branch::getCurrentBranch()->id) {
-                            $otherbranch = new Branch($agentAccBranch->branch_id);
 
 
-                            $vchNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $Ac->id);
-                            $debitAccount += array(
-                                Branch::getCurrentBranch()->Code . SP . COMMISSION_PAID_ON  . $Ac->scheme->Name => $commissionAmount,
-                            );
-                            $creditAccount += array(
-                                // get agents' account number
-                                //                                            Branch::getCurrentBranch()->Code."_Agent_SA_". $ac->Agents->member_id  => ($amount  - ($amount * 10 /100)),
-                                $otherbranch->Code . SP . BRANCH_AND_DIVISIONS . SP . "for" . SP . Branch::getCurrentBranch()->Code => ($commissionAmount - ($commissionAmount * TDS_PERCENTAGE / 100)),
-                                Account::getAccountForCurrentBranch(BRANCH_TDS_ACCOUNT)->AccountNumber => ($commissionAmount * TDS_PERCENTAGE / 100),
-                            );
-                            Transaction::doTransaction($debitAccount, $creditAccount, "Agent Account openning commision Transaction for account $Ac->AccountNumber", TRA_ACCOUNT_OPEN_AGENT_COMMISSION, $vchNo);
+// //                        if ($Agent->member->branch_id != Branch::getCurrentBranch()->id) {
+// //                            $s = $Agent->member->branch_id;
+// //                            $otherbranch = new Branch();
+// //                            $otherbranch->where('id', $s)->get();
+// 			$agentAccBranch = new Account();
+//                         $agentAccBranch->where("AccountNumber",$Agent->AccountNumber)->get();
+//                         if ($agentAccBranch->branch_id != Branch::getCurrentBranch()->id) {
+//                             $otherbranch = new Branch($agentAccBranch->branch_id);
+
+
+//                             $vchNo = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $Ac->id);
+//                             $debitAccount += array(
+//                                 Branch::getCurrentBranch()->Code . SP . COMMISSION_PAID_ON  . $Ac->scheme->Name => $commissionAmount,
+//                             );
+//                             $creditAccount += array(
+//                                 // get agents' account number
+//                                 //                                            Branch::getCurrentBranch()->Code."_Agent_SA_". $ac->Agents->member_id  => ($amount  - ($amount * 10 /100)),
+//                                 $otherbranch->Code . SP . BRANCH_AND_DIVISIONS . SP . "for" . SP . Branch::getCurrentBranch()->Code => ($commissionAmount - ($commissionAmount * TDS_PERCENTAGE / 100)),
+//                                 Account::getAccountForCurrentBranch(BRANCH_TDS_ACCOUNT)->AccountNumber => ($commissionAmount * TDS_PERCENTAGE / 100),
+//                             );
+//                             Transaction::doTransaction($debitAccount, $creditAccount, "Agent Account openning commision Transaction for account $Ac->AccountNumber", TRA_ACCOUNT_OPEN_AGENT_COMMISSION, $vchNo);
 
 
 
-                            $vchNo1 = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $Ac->id);
-                            $debitAccount = array(
-                                Branch::getCurrentBranch()->Code . SP . BRANCH_AND_DIVISIONS . SP . "for" . SP . $otherbranch->Code => ($commissionAmount - ($commissionAmount * TDS_PERCENTAGE / 100)),
-                            );
+//                             $vchNo1 = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $Ac->id);
+//                             $debitAccount = array(
+//                                 Branch::getCurrentBranch()->Code . SP . BRANCH_AND_DIVISIONS . SP . "for" . SP . $otherbranch->Code => ($commissionAmount - ($commissionAmount * TDS_PERCENTAGE / 100)),
+//                             );
 
-                            if ($ag->getKey("transfer_commission_to_agents_account")) {
-                                $creditAccount = array(
-                                    // get agents' account number
-                                    $Agent->AccountNumber => ($commissionAmount - ($commissionAmount * TDS_PERCENTAGE / 100)),
-                                );
-                            } else {
-                                $creditAccount = array(
-                                    // get agents' account number
-                                    Branch::getCurrentBranch()->Code . SP . COMMISSION_PAYABLE_ON . SP . $Ac->scheme->Name => ($commissionAmount - ($commissionAmount * TDS_PERCENTAGE / 100)),
-                                );
+//                             if ($ag->getKey("transfer_commission_to_agents_account")) {
+//                                 $creditAccount = array(
+//                                     // get agents' account number
+//                                     $Agent->AccountNumber => ($commissionAmount - ($commissionAmount * TDS_PERCENTAGE / 100)),
+//                                 );
+//                             } else {
+//                                 $creditAccount = array(
+//                                     // get agents' account number
+//                                     Branch::getCurrentBranch()->Code . SP . COMMISSION_PAYABLE_ON . SP . $Ac->scheme->Name => ($commissionAmount - ($commissionAmount * TDS_PERCENTAGE / 100)),
+//                                 );
 
-                                $agentReport = new Agentcommissionreport();
-                                $agentReport->agents_id = $Agent->id;
-                                $agentReport->accounts_id = $Ac->id;
-                                $agentReport->Commission = $commissionAmount;
-                                $agentReport->CommissionPayableDate = getNow("Y-m-d");
-                                $agentReport->Narration = "Agent Account opening commission payable for account $Ac->AccountNumber";
-                                $agentReport->save();
-                            }
-                            Transaction::doTransaction($debitAccount, $creditAccount, "Agent Account opening commission for account $Ac->AccountNumber", TRA_ACCOUNT_OPEN_AGENT_COMMISSION, $vchNo1, false, $otherbranch->id);
-                        } else {
-//                        TO TRANSFER COMMISSION IN LEVELS
-                            $debitAccount = array(Branch::getCurrentBranch()->Code . SP . COMMISSION_PAID_ON . $Ac->scheme->Name => $commissionAmount);
+//                                 $agentReport = new Agentcommissionreport();
+//                                 $agentReport->agents_id = $Agent->id;
+//                                 $agentReport->accounts_id = $Ac->id;
+//                                 $agentReport->Commission = $commissionAmount;
+//                                 $agentReport->CommissionPayableDate = getNow("Y-m-d");
+//                                 $agentReport->Narration = "Agent Account opening commission payable for account $Ac->AccountNumber";
+//                                 $agentReport->save();
+//                             }
+//                             Transaction::doTransaction($debitAccount, $creditAccount, "Agent Account opening commission for account $Ac->AccountNumber", TRA_ACCOUNT_OPEN_AGENT_COMMISSION, $vchNo1, false, $otherbranch->id);
+//                         } else {
+// //                        TO TRANSFER COMMISSION IN LEVELS
+//                             $debitAccount = array(Branch::getCurrentBranch()->Code . SP . COMMISSION_PAID_ON . $Ac->scheme->Name => $commissionAmount);
 
-                            if ($ag->getKey("transfer_commission_to_agents_account")) {
-                                $creditAccount = array(
-//                            TRANSFER COMMISSION TO AGENT ACCOUNT
-                                    $Agent->AccountNumber => ($commissionAmount - ($commissionAmount * TDS_PERCENTAGE / 100)),
-                                    Account::getAccountForCurrentBranch(BRANCH_TDS_ACCOUNT)->AccountNumber => ($commissionAmount * TDS_PERCENTAGE / 100),
-                                );
-                            } else {
-                                $creditAccount = array(
-//                            TRANSFER COMMISSION TO COMMISSION PAYABLE ACCOUNT
-                                    Branch::getCurrentBranch()->Code . SP . COMMISSION_PAYABLE_ON . SP . $Ac->scheme->Name => ($commissionAmount - ($commissionAmount * TDS_PERCENTAGE / 100)),
-                                    Branch::getCurrentBranch()->Code . SP . TDS_PAYABLE => ($commissionAmount * TDS_PERCENTAGE / 100),
-                                );
+//                             if ($ag->getKey("transfer_commission_to_agents_account")) {
+//                                 $creditAccount = array(
+// //                            TRANSFER COMMISSION TO AGENT ACCOUNT
+//                                     $Agent->AccountNumber => ($commissionAmount - ($commissionAmount * TDS_PERCENTAGE / 100)),
+//                                     Account::getAccountForCurrentBranch(BRANCH_TDS_ACCOUNT)->AccountNumber => ($commissionAmount * TDS_PERCENTAGE / 100),
+//                                 );
+//                             } else {
+//                                 $creditAccount = array(
+// //                            TRANSFER COMMISSION TO COMMISSION PAYABLE ACCOUNT
+//                                     Branch::getCurrentBranch()->Code . SP . COMMISSION_PAYABLE_ON . SP . $Ac->scheme->Name => ($commissionAmount - ($commissionAmount * TDS_PERCENTAGE / 100)),
+//                                     Branch::getCurrentBranch()->Code . SP . TDS_PAYABLE => ($commissionAmount * TDS_PERCENTAGE / 100),
+//                                 );
 
-                                $agentReport = new Agentcommissionreport();
-                                $agentReport->agents_id = $Agent->id;
-                                $agentReport->accounts_id = $Ac->id;
-                                $agentReport->Commission = $commissionAmount;
-                                $agentReport->CommissionPayableDate = getNow("Y-m-d");
-                                $agentReport->Narration = "Agent Account opening commission payable for account $Ac->AccountNumber";
-                                $agentReport->save();
-                            }
-                            $vchNo2 = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $Ac->id);
-                            Transaction::doTransaction($debitAccount, $creditAccount, "Agent Account openning commision for $Ac->AccountNumber", TRA_ACCOUNT_OPEN_AGENT_COMMISSION, $vchNo2);
-                        }
-                        $Agent = $Agent->sponsor;
-                    } while ($Agent->id);
-                }
-            }
+//                                 $agentReport = new Agentcommissionreport();
+//                                 $agentReport->agents_id = $Agent->id;
+//                                 $agentReport->accounts_id = $Ac->id;
+//                                 $agentReport->Commission = $commissionAmount;
+//                                 $agentReport->CommissionPayableDate = getNow("Y-m-d");
+//                                 $agentReport->Narration = "Agent Account opening commission payable for account $Ac->AccountNumber";
+//                                 $agentReport->save();
+//                             }
+//                             $vchNo2 = array('voucherNo' => Transaction::getNewVoucherNumber(), 'referanceAccount' => $Ac->id);
+//                             Transaction::doTransaction($debitAccount, $creditAccount, "Agent Account openning commision for $Ac->AccountNumber", TRA_ACCOUNT_OPEN_AGENT_COMMISSION, $vchNo2);
+//                         }
+//                         $Agent = $Agent->sponsor;
+//                     } while ($Agent->id);
+//                 }
+//             }
 
 
             switch ($Ac->scheme->SchemeType) {
@@ -1729,7 +1735,7 @@ class accounts_cont extends CI_Controller {
     function loanFromAccount() {
         $list = array();
         $b = Branch::getCurrentBranch();
-        $q = $this->db->query("select a.*,m.Name as MemberName, s.Name from jos_xaccounts a join jos_xmember m on a.member_id = m.id join jos_xschemes s on a.schemes_id = s.id join jos_xbranch b on a.branch_id = b.id where a.AccountNumber Like '%" . $this->input->post("term") . "%' AND (s.Name='Bank Accounts' OR s.Name='Cash Account' OR s.Name='Saving Account' OR s.Name = '" . BRANCH_AND_DIVISIONS . "' OR s.SchemeType = 'CC') AND b.id='$b->id' AND a.LockingStatus<>1 AND a.ActiveStatus<>0 limit 10")->result();
+        $q = $this->db->query("select a.*,m.Name as MemberName, s.Name from jos_xaccounts a join jos_xmember m on a.member_id = m.id join jos_xschemes s on a.schemes_id = s.id join jos_xbranch b on a.branch_id = b.id where a.AccountNumber Like '%" . $this->input->post("term") . "%' AND (s.Name='Bank Accounts' OR s.Name='Cash Account' OR s.Name='Saving Account' OR s.Name='Bank OD' OR s.Name = '" . BRANCH_AND_DIVISIONS . "' OR s.SchemeType = 'CC') AND b.id='$b->id' AND a.LockingStatus<>1 AND a.ActiveStatus<>0 limit 10")->result();
         foreach ($q as $dd) {
             $list[] = array('AccountNumber' => $dd->AccountNumber, 'MemberName' => $dd->MemberName);
         }
