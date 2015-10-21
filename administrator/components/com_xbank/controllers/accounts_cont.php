@@ -1735,7 +1735,8 @@ class accounts_cont extends CI_Controller {
     function loanFromAccount() {
         $list = array();
         $b = Branch::getCurrentBranch();
-        $q = $this->db->query("select a.*,m.Name as MemberName, s.Name from jos_xaccounts a join jos_xmember m on a.member_id = m.id join jos_xschemes s on a.schemes_id = s.id join jos_xbranch b on a.branch_id = b.id where a.AccountNumber Like '%" . $this->input->post("term") . "%' AND (s.Name='Bank Accounts' OR s.Name='Cash Account' OR s.Name='Saving Account' OR s.Name='Bank OD' OR s.Name = '" . BRANCH_AND_DIVISIONS . "' OR s.SchemeType = 'CC') AND b.id='$b->id' AND a.LockingStatus<>1 AND a.ActiveStatus<>0 limit 10")->result();
+        /*bussiness loan is added for some adjustments as said by devendra sir, WE are unaware the side effects of this code.*/
+        $q = $this->db->query("select a.*,m.Name as MemberName, s.Name from jos_xaccounts a join jos_xmember m on a.member_id = m.id join jos_xschemes s on a.schemes_id = s.id join jos_xbranch b on a.branch_id = b.id where a.AccountNumber Like '%" . $this->input->post("term") . "%' AND (s.Name='Bank Accounts' OR s.Name='Cash Account' OR s.Name='Saving Account' OR s.Name='Bank OD' OR s.Name = '" . BRANCH_AND_DIVISIONS . "' OR s.SchemeType = 'CC' OR (x.SchemeType='bussiness loan')) AND b.id='$b->id' AND a.LockingStatus<>1 AND a.ActiveStatus<>0 limit 10")->result();
         foreach ($q as $dd) {
             $list[] = array('AccountNumber' => $dd->AccountNumber, 'MemberName' => $dd->MemberName);
         }
